@@ -15,13 +15,15 @@ from src.visualizer import HuffmanVisualizer
 
 
 def run_pipeline():
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+
     print("=" * 75)
     print("  DISCRETE MATHEMATICS & GRAPH THEORY - EXPERIENTIAL LEARNING")
     print("  Topic 14: Optimal Prefix Codes & Data Compression (Huffman Coding)")
     print("=" * 75)
 
     # 1. Load dataset (must be >= 300 data points as per guidelines)
-    data_path = os.path.join("data", "sample_english.txt")
+    data_path = os.path.join(base_dir, "data", "sample_english.txt")
     if not os.path.exists(data_path):
         print(f"[-] Dataset file not found at {data_path}")
         return
@@ -91,7 +93,7 @@ def run_pipeline():
     sample_sub_text = "EXPERIENTIAL LEARNING IN GRAPH THEORY"
     vis_tree = HuffmanTree()
     vis_root = vis_tree.build_tree(sample_sub_text)
-    plot_path = os.path.join("experiments", "plots", "huffman_tree_visualization.png")
+    plot_path = os.path.join(base_dir, "experiments", "plots", "huffman_tree_visualization.png")
     HuffmanVisualizer.plot_tree(vis_root, title="Rooted Binary Prefix Code Tree (NetworkX Visualization)", save_path=plot_path)
 
     print("\n[OK] Full pipeline completed successfully without errors.")

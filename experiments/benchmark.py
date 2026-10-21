@@ -14,7 +14,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # Ensure root folder is in sys.path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+sys.path.append(PROJECT_ROOT)
 
 from src.huffman import HuffmanTree
 from src.shannon_fano import ShannonFanoTree
@@ -33,10 +34,10 @@ def run_experiment_1_data_types():
     print("=" * 70)
 
     datasets = {
-        "English Text": "data/sample_english.txt",
-        "Python Code": "data/sample_code.py",
-        "Genomic DNA": "data/sample_dna.fasta",
-        "Uniform Random": "data/sample_uniform.txt"
+        "English Text": os.path.join(PROJECT_ROOT, "data", "sample_english.txt"),
+        "Python Code": os.path.join(PROJECT_ROOT, "data", "sample_code.py"),
+        "Genomic DNA": os.path.join(PROJECT_ROOT, "data", "sample_dna.fasta"),
+        "Uniform Random": os.path.join(PROJECT_ROOT, "data", "sample_uniform.txt")
     }
 
     results = []
@@ -91,8 +92,9 @@ def run_experiment_1_data_types():
     print(df.to_string(index=False))
 
     # Save CSV
-    os.makedirs("experiments/plots", exist_ok=True)
-    df.to_csv("experiments/plots/experiment1_results.csv", index=False)
+    plots_dir = os.path.join(PROJECT_ROOT, "experiments", "plots")
+    os.makedirs(plots_dir, exist_ok=True)
+    df.to_csv(os.path.join(plots_dir, "experiment1_results.csv"), index=False)
 
     # Plot 1: Entropy vs Huffman Avg Length vs Shannon-Fano Avg Length
     plt.figure(figsize=(10, 6))
@@ -110,7 +112,7 @@ def run_experiment_1_data_types():
     plt.legend()
     plt.grid(axis="y", linestyle=":", alpha=0.7)
     plt.tight_layout()
-    plt.savefig("experiments/plots/exp1_entropy_vs_codelength.png", dpi=300)
+    plt.savefig(os.path.join(plots_dir, "exp1_entropy_vs_codelength.png"), dpi=300)
     plt.close()
     print("[OK] Plot saved: experiments/plots/exp1_entropy_vs_codelength.png")
 
@@ -128,7 +130,8 @@ def run_experiment_2_varying_size():
     print("=" * 70)
 
     # Read base English text and repeat to generate controlled sizes
-    with open("data/sample_english.txt", "r", encoding="utf-8") as f:
+    sample_text_path = os.path.join(PROJECT_ROOT, "data", "sample_english.txt")
+    with open(sample_text_path, "r", encoding="utf-8") as f:
         base_text = f.read()
 
     sizes = [300, 1000, 5000, 20000, 100000]
@@ -160,7 +163,8 @@ def run_experiment_2_varying_size():
 
     df = pd.DataFrame(results)
     print(df.to_string(index=False))
-    df.to_csv("experiments/plots/experiment2_results.csv", index=False)
+    plots_dir = os.path.join(PROJECT_ROOT, "experiments", "plots")
+    df.to_csv(os.path.join(plots_dir, "experiment2_results.csv"), index=False)
 
     # Plot 2: Runtime scaling
     plt.figure(figsize=(9, 5))
@@ -172,7 +176,7 @@ def run_experiment_2_varying_size():
     plt.legend()
     plt.grid(True, linestyle=":", alpha=0.7)
     plt.tight_layout()
-    plt.savefig("experiments/plots/exp2_runtime_scaling.png", dpi=300)
+    plt.savefig(os.path.join(plots_dir, "exp2_runtime_scaling.png"), dpi=300)
     plt.close()
     print("[OK] Plot saved: experiments/plots/exp2_runtime_scaling.png")
 

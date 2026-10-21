@@ -4,6 +4,12 @@ Module: tests/test_huffman.py
 Role: Piyush & Nikhil
 """
 
+import os
+import sys
+
+# Ensure project root is always in sys.path regardless of where pytest is run from
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
 import pytest
 import math
 from src.huffman import HuffmanTree, HuffmanNode

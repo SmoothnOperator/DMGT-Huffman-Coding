@@ -1,0 +1,101 @@
+\documentclass[conference]{IEEEtran}
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{hyperref}
+
+\begin{document}
+
+\title{Information-Theoretic Data Compression via Optimal Prefix Trees: An Empirical and Algorithmic Analysis of Huffman Coding}
+
+\author{\IEEEauthorblockN{Nikhil, Piyush, Sakshi, Arushi, Harsh, Khyathi}
+\IEEEauthorblockA{\textit{Department of Computer Science and Engineering -- Blockchain Technology} \\
+\textit{Discrete Mathematics and Graph Theory (DMGT) Experiential Learning}\\
+Institution: School of Computer Science and Engineering}}
+
+\maketitle
+
+\begin{abstract}
+Data compression is fundamentally governed by information theory and discrete mathematics, specifically the structural optimization of weighted, rooted binary trees. This research paper presents a rigorous theoretical formulation, computational implementation, and empirical evaluation of Huffman coding---a greedy algorithm that guarantees the construction of optimal prefix-free binary codes for discrete source alphabets. We model prefix codes as directed trees, prove strict adherence to the Kraft--McMillan inequality ($\sum 2^{-l_i} \le 1$), and examine convergence toward the theoretical lower bound established by Shannon's Source Coding Theorem ($H(X) \le L(C) < H(X) + 1$). Implemented in Python using a min-priority queue (min-heap) architecture, our compression engine is benchmarked against both fixed-length 8-bit ASCII representation and the top-down Shannon--Fano heuristic. The empirical evaluation encompasses four diverse datasets exceeding the prescribed 300 data points threshold: natural language text ($N = 2,001$), Python source code ($N = 1,432$), genomic DNA sequences in FASTA format ($N = 1,031$), and synthetically generated uniform random sequences ($N = 1,140$). Experimental results demonstrate that Huffman coding consistently achieves optimal redundancy ($R \le 0.1113$ bits/symbol), reaching a peak compression ratio of 3.37:1 with 70.37\% storage savings on genomic data due to low source entropy. Runtime scaling analyses across input sizes ranging from 300 to 100,000 symbols validate an $\mathcal{O}(|\Sigma| \log |\Sigma|)$ tree construction complexity and linear $\mathcal{O}(N)$ encoding throughput. Graph visualizations generated via NetworkX provide clear structural validation of prefix-free decision paths.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Huffman Coding, Optimal Prefix Codes, Rooted Binary Trees, Shannon Entropy, Lossless Data Compression.
+\end{IEEEkeywords}
+
+\section{Introduction}
+In contemporary computing architectures, data transmission and storage efficiency represent critical operational bottlenecks. Distributed networks and blockchain ledgers require low latency and minimized block sizes. Discrete Mathematics and Graph Theory (DMGT) provide the structural foundation for modern source coding. Rooted binary trees serve as the canonical representation for instantaneous variable-length prefix codes.
+
+In 1948, Claude E. Shannon proved that lossless compression is bounded by source entropy $H(X)$ \cite{shannon1948}. In 1952, David A. Huffman developed a bottom-up greedy algorithm guaranteeing minimum expected code length \cite{huffman1952}. This research implements and evaluates Huffman coding across diverse real-world corpora exceeding 300 records.
+
+\section{Methodology}
+\subsection{DMGT Theoretical Formulation}
+Let $\Sigma = \{s_1, \dots, s_n\}$ be an alphabet with probabilities $p_i = f_i / N$. A code $C$ maps $s_i \to c(s_i)$ with length $l_i$.
+
+\textbf{Definition 1 (Prefix-Free Code):} $\forall i \ne j, c(s_i) \not\sqsubseteq c(s_j)$.
+
+\textbf{Theorem 1 (Kraft--McMillan Inequality):}
+\begin{equation}
+\sum_{i=1}^{n} 2^{-l_i} \le 1
+\end{equation}
+
+\textbf{Theorem 2 (Shannon's Source Coding Theorem):}
+For entropy $H(X) = -\sum p_i \log_2 p_i$, expected length $L(C) = \sum p_i l_i$ satisfies:
+\begin{equation}
+H(X) \le L(C) < H(X) + 1
+\end{equation}
+Redundancy is $R = L(C) - H(X) \ge 0$.
+
+\subsection{Rooted Binary Tree Structure}
+A prefix code is modeled as a directed tree $T = (V, E)$. Leaves $v_i \in V_L$ hold symbol weights $f_i$ at depth $l_i$. Left branches are labeled '0' and right branches '1'. The weighted external path length is $W(T) = \sum f_i l_i = N \cdot L(C)$.
+
+\subsection{Datasets ($\ge$ 300 records)}
+Four datasets were curated:
+\begin{itemize}
+    \item Dataset A: English Text ($N = 2,001$, $H(X) = 4.3894$ bits/sym).
+    \item Dataset B: Python Code ($N = 1,432$, $H(X) = 4.3887$ bits/sym).
+    \item Dataset C: Genomic DNA ($N = 1,031$, $H(X) = 2.2593$ bits/sym).
+    \item Dataset D: Uniform Text ($N = 1,140$, $H(X) = 6.2479$ bits/sym).
+\end{itemize}
+
+\section{Results and Discussion}
+Table I summarizes the empirical compression efficiency.
+
+\begin{table*}[t]
+\caption{Compression and DMGT Metrics Across Data Domains}
+\centering
+\begin{tabular}{|l|c|c|c|c|c|c|c|c|}
+\hline
+\textbf{Dataset} & \textbf{Symbols $N$} & \textbf{$|\Sigma|$} & \textbf{Entropy $H(X)$} & \textbf{Huffman $L(C)$} & \textbf{Shannon--Fano $L$} & \textbf{Redundancy $R$} & \textbf{Comp. Ratio} & \textbf{Savings (\%)} \\
+\hline
+English Text & 2,001 & 56 & 4.3894 & \textbf{4.4173} & 4.4178 & 0.0279 & 1.81 : 1 & 44.78\% \\
+Python Code & 1,432 & 53 & 4.3887 & \textbf{4.4106} & 4.4232 & 0.0219 & 1.81 : 1 & 44.87\% \\
+Genomic DNA & 1,031 & 29 & 2.2593 & \textbf{2.3705} & 2.3725 & 0.1113 & \textbf{3.37 : 1} & \textbf{70.37\%} \\
+Uniform Random & 1,140 & 76 & 6.2479 & \textbf{6.3158} & 6.3158 & 0.0679 & 1.27 : 1 & 21.05\% \\
+\hline
+\end{tabular}
+\end{table*}
+
+\subsection{Key Observations}
+\begin{enumerate}
+    \item \textbf{Shannon Optimality:} Across all datasets, $H(X) \le L(C) < H(X) + 1$. In English text, redundancy $R = 0.0279$ bits/symbol ($< 0.63\%$ above the theoretical minimum).
+    \item \textbf{Genomic Compression:} DNA sequences achieved a 3.37:1 compression ratio (70.37\% storage reduction) due to low 2.26-bit entropy.
+    \item \textbf{Algorithmic Dominance:} Huffman coding strictly matches or outperforms Shannon--Fano coding ($L_{\text{Huffman}} \le L_{\text{Shannon--Fano}}$).
+    \item \textbf{Kraft Completeness:} $\sum 2^{-l_i} = 1.000000$, validating full binary trees.
+    \item \textbf{Lossless Verification:} $\mathcal{D}(\mathcal{E}(M)) == M$ holds true across all tests.
+\end{enumerate}
+
+\section{Conclusion}
+This study demonstrated that bottom-up greedy construction on rooted binary trees produces optimal prefix codes converging closely to Shannon entropy. Future work will investigate Adaptive Huffman coding and Arithmetic coding for blockchain payload optimization.
+
+\begin{thebibliography}{00}
+\bibitem{huffman1952} D. A. Huffman, ``A Method for the Construction of Minimum-Redundancy Codes,'' \textit{Proc. IRE}, vol. 40, no. 9, pp. 1098--1101, 1952.
+\bibitem{shannon1948} C. E. Shannon, ``A Mathematical Theory of Communication,'' \textit{Bell Syst. Tech. J.}, vol. 27, no. 3, pp. 379--423, 1948.
+\bibitem{rosen2019} K. H. Rosen, \textit{Discrete Mathematics and Its Applications}, 8th ed., McGraw-Hill, 2019.
+\bibitem{cover2006} T. M. Cover and J. A. Thomas, \textit{Elements of Information Theory}, 2nd ed., Wiley, 2006.
+\end{thebibliography}
+
+\end{document}

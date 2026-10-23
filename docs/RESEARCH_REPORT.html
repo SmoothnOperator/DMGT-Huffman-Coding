@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Information-Theoretic Data Compression via Optimal Prefix Trees - Technical Report</title>
+  <!-- KaTeX for High-Quality Mathematical Formula Rendering -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+  <style>
+    @page {
+      size: A4;
+      margin: 20mm 15mm 20mm 15mm;
+    }
+    body {
+      font-family: 'Times New Roman', Times, serif;
+      line-height: 1.5;
+      color: #111;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 25px;
+      background: #fff;
+    }
+    h1.title {
+      font-size: 20pt;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 5px;
+      line-height: 1.25;
+    }
+    .metadata {
+      text-align: center;
+      font-size: 10pt;
+      color: #333;
+      margin-bottom: 15px;
+    }
+    .authors {
+      text-align: center;
+      font-size: 11pt;
+      margin-bottom: 25px;
+      line-height: 1.4;
+    }
+    .author-name {
+      font-weight: bold;
+    }
+    .abstract-box {
+      border-top: 1px solid #000;
+      border-bottom: 1px solid #000;
+      padding: 12px 18px;
+      margin-bottom: 25px;
+      font-size: 10pt;
+      text-align: justify;
+    }
+    .abstract-box h3 {
+      font-size: 11pt;
+      margin-top: 0;
+      margin-bottom: 5px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .keywords {
+      margin-top: 8px;
+      font-size: 9.5pt;
+    }
+    .keywords strong {
+      font-size: 10pt;
+    }
+    h2 {
+      font-size: 13pt;
+      border-bottom: 1.5px solid #222;
+      padding-bottom: 3px;
+      margin-top: 25px;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+    }
+    h3 {
+      font-size: 11pt;
+      font-weight: bold;
+      margin-top: 18px;
+      margin-bottom: 6px;
+    }
+    h4 {
+      font-size: 10.5pt;
+      font-style: italic;
+      margin-top: 12px;
+      margin-bottom: 4px;
+    }
+    p {
+      text-align: justify;
+      margin-top: 0;
+      margin-bottom: 10px;
+      font-size: 10.5pt;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 15px 0;
+      font-size: 9.5pt;
+    }
+    th, td {
+      border: 1px solid #555;
+      padding: 6px 8px;
+      text-align: center;
+    }
+    th {
+      background-color: #f0f0f0;
+      font-weight: bold;
+    }
+    tr:nth-child(even) {
+      background-color: #fafafa;
+    }
+    .caption {
+      font-size: 9pt;
+      font-style: italic;
+      text-align: center;
+      margin-bottom: 12px;
+      margin-top: 4px;
+    }
+    .figure-container {
+      text-align: center;
+      margin: 20px 0;
+      page-break-inside: avoid;
+    }
+    .figure-container img {
+      max-width: 95%;
+      height: auto;
+      border: 1px solid #ccc;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    pre, code {
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 9pt;
+      background: #f7f7f7;
+    }
+    pre {
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-left: 3px solid #2b8cbe;
+      overflow-x: auto;
+      margin: 12px 0;
+      text-align: left;
+    }
+    .reflection-card {
+      background: #fcfcfc;
+      border-left: 3px solid #31a354;
+      padding: 8px 12px;
+      margin-bottom: 12px;
+      font-size: 10pt;
+    }
+    .reflection-card strong {
+      color: #1b5e20;
+    }
+    ol.references {
+      font-size: 9.5pt;
+      padding-left: 20px;
+      line-height: 1.45;
+    }
+    ol.references li {
+      margin-bottom: 6px;
+      text-align: justify;
+    }
+    @media print {
+      body {
+        padding: 0;
+        max-width: 100%;
+      }
+      .page-break {
+        page-break-before: always;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h1 class="title">Information-Theoretic Data Compression via Optimal Prefix Trees:<br>An Empirical and Algorithmic Analysis of Huffman Coding</h1>
+  
+  <div class="metadata">
+    <strong>Course:</strong> Discrete Mathematics and Graph Theory (DMGT) — Experiential Learning<br>
+    <strong>Programme:</strong> B.Tech. Computer Science & Engineering — Blockchain Technology (CSE-BCT)<br>
+    <strong>Project Topic:</strong> No. 14 — Optimal Prefix Codes and Data Compression Using Huffman Coding
+  </div>
+
+  <div class="authors">
+    <span class="author-name">Nikhil</span> (Project Lead) &bull;
+    <span class="author-name">Piyush</span> (Codec & Verification) &bull;
+    <span class="author-name">Sakshi</span> (Theory & Math)<br>
+    <span class="author-name">Arushi</span> (Datasets) &bull;
+    <span class="author-name">Harsh</span> (Experiments) &bull;
+    <span class="author-name">Khyathi</span> (Visualizations & Report)
+  </div>
+
+  <div class="abstract-box">
+    <h3>Abstract</h3>
+    <p>
+      Data compression is fundamentally governed by information theory and discrete mathematics, specifically the structural optimization of weighted, rooted binary trees. This research paper presents a rigorous theoretical formulation, computational implementation, and empirical evaluation of Huffman coding—a greedy algorithm that guarantees the construction of optimal prefix-free binary codes for discrete source alphabets. We model prefix codes as directed trees, prove strict adherence to the Kraft–McMillan inequality ($\sum 2^{-l_i} \le 1$), and examine convergence toward the theoretical lower bound established by Shannon's Source Coding Theorem ($H(X) \le L(C) < H(X) + 1$). Implemented in Python using a min-priority queue (min-heap) architecture, our compression engine is benchmarked against both fixed-length 8-bit ASCII representation and the top-down Shannon–Fano heuristic. The empirical evaluation encompasses four diverse datasets exceeding the prescribed 300 data points threshold: natural language text ($N = 2,001$), Python source code ($N = 1,432$), genomic DNA sequences in FASTA format ($N = 1,031$), and synthetically generated uniform random sequences ($N = 1,140$). Experimental results demonstrate that Huffman coding consistently achieves optimal redundancy ($R \le 0.1113$ bits/symbol), reaching a peak compression ratio of 3.37:1 with 70.37% storage savings on genomic data due to low source entropy. Runtime scaling analyses across input sizes ranging from 300 to 100,000 symbols validate an $\mathcal{O}(|\Sigma| \log |\Sigma|)$ tree construction complexity and linear $\mathcal{O}(N)$ encoding throughput. Graph visualizations generated via NetworkX provide clear structural validation of prefix-free decision paths.
+    </p>
+    <div class="keywords">
+      <strong>Keywords:</strong> Huffman Coding, Optimal Prefix Codes, Rooted Binary Trees, Shannon Entropy, Lossless Data Compression.
+    </div>
+  </div>
+
+  <h2>1. Introduction</h2>
+  <p>
+    In modern computing systems and distributed architectures, data representation efficiency represents a paramount operational challenge. In decentralized blockchain ledgers and peer-to-peer networks, transactions must propagate rapidly across geographically distributed nodes. Uncompressed payload sizes increase propagation delays, elevate storage requirements, and limit transaction throughput. Lossless data compression techniques provide mathematically guaranteed space reduction while ensuring perfect data recovery upon decompression.
+  </p>
+  <p>
+    Discrete Mathematics and Graph Theory (DMGT) provide the structural foundation of data compression. Discrete abstractions model bitstreams through finite alphabets, symbol frequencies, and rooted tree topologies. In 1948, Claude E. Shannon proved that the fundamental limit of compression for any memoryless source $X$ is bounded by its information entropy $H(X)$. In 1952, David A. Huffman developed an elegant bottom-up greedy algorithm that constructs prefix-free binary trees proven to achieve the minimal expected codeword length.
+  </p>
+  <p>
+    This project formulates source coding through directed, weighted binary trees, implements an end-to-end Python pipeline using min-priority queues, rigorously tests mathematical idempotency $\mathcal{D}(\mathcal{E}(M)) = M$, and conducts comparative experiments across real-world datasets exceeding the mandatory 300 data points.
+  </p>
+
+  <h2>2. Methodology</h2>
+  <h3>2.1 DMGT Theoretical Foundation</h3>
+  <p>
+    Let $\Sigma = \{s_1, s_2, \dots, s_n\}$ be a finite alphabet with empirical probabilities $p_i = \frac{f_i}{N}$ such that $\sum_{i=1}^n p_i = 1$. A code $C$ maps each $s_i$ to a binary codeword $c(s_i)$ of length $l_i$.
+  </p>
+  <p>
+    <strong>Definition 1 (Prefix-Free Code):</strong> A code $C$ is prefix-free if no codeword is a prefix of any other: $\forall i \ne j, \; c(s_i) \not\sqsubseteq c(s_j)$. This ensures instantaneous decoding without delimiters.
+  </p>
+  <p>
+    <strong>Theorem 1 (Kraft–McMillan Inequality):</strong> Any uniquely decodable binary code satisfies:
+    $$\sum_{i=1}^{n} 2^{-l_i} \le 1$$
+    Equality holds strictly when the associated binary tree is full (every internal vertex has degree 2).
+  </p>
+  <p>
+    <strong>Theorem 2 (Shannon's Source Coding Theorem):</strong> For a source with entropy $H(X) = -\sum p_i \log_2(p_i)$, the expected codeword length $L(C) = \sum p_i l_i$ satisfies:
+    $$H(X) \le L(C) < H(X) + 1$$
+    Redundancy is defined as $R = L(C) - H(X) \ge 0$.
+  </p>
+  <p>
+    <strong>Graph Representation:</strong> The prefix tree $T = (V, E)$ has leaves $V_L$ representing symbols with weights $w(v) = f_i$ at depth $l_i$. Directed left edges carry label `'0'`, while right edges carry `'1'`. The Weighted External Path Length is $W(T) = \sum f_i l_i = N \cdot L(C)$. Minimizing $L(C)$ is equivalent to finding a binary tree with minimum $W(T)$.
+  </p>
+
+  <h3>2.2 Algorithmic Implementation</h3>
+  <pre>
+Algorithm 1: Huffman Optimal Tree Construction
+Input : Alphabet Sigma with frequencies {f_1, f_2, ..., f_n}
+Output: Root vertex of optimal binary tree T
+
+1. Q &lt;- MinPriorityQueue()
+2. for each symbol s in Sigma do
+3.     Q.Insert(CreateNode(symbol=s, freq=f[s]))
+4. while Q.Size() &gt; 1 do
+5.     left_child  &lt;- Q.ExtractMin()
+6.     right_child &lt;- Q.ExtractMin()
+7.     parent &lt;- CreateNode(symbol=null, freq=left.freq + right.freq)
+8.     parent.left &lt;- left_child; parent.right &lt;- right_child
+9.     Q.Insert(parent)
+10. return Q.ExtractMin()
+  </pre>
+  <p>
+    <strong>Complexity:</strong> Priority queue operations on $|\Sigma|$ elements run in $\mathcal{O}(|\Sigma| \log |\Sigma|)$. Encoding and decoding text of length $N$ scale linearly as $\mathcal{O}(N)$, giving an overall time complexity of $\mathcal{O}(N + |\Sigma| \log |\Sigma|)$.
+  </p>
+
+  <h3>2.3 Benchmark Datasets (&ge; 300 Records)</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Dataset</th>
+        <th>Description / Domain</th>
+        <th>Records ($N$)</th>
+        <th>Alphabet ($|\Sigma|$)</th>
+        <th>Entropy $H(X)$</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>Dataset A</strong></td><td>English Text (Academic prose on discrete math)</td><td>2,001</td><td>56</td><td>4.3894 bits/sym</td></tr>
+      <tr><td><strong>Dataset B</strong></td><td>Python Source Code (Data processing module)</td><td>1,432</td><td>53</td><td>4.3887 bits/sym</td></tr>
+      <tr><td><strong>Dataset C</strong></td><td>Genomic DNA (Bacteriophage nucleotide FASTA)</td><td>1,031</td><td>29</td><td>2.2593 bits/sym</td></tr>
+      <tr><td><strong>Dataset D</strong></td><td>Uniform Random Text (Synthesized ASCII symbols)</td><td>1,140</td><td>76</td><td>6.2479 bits/sym</td></tr>
+    </tbody>
+  </table>
+
+  <h2>3. Results and Discussion</h2>
+  <h3>3.1 Experiment 1: Compression Efficiency Across Diverse Domains</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Metric</th>
+        <th>Dataset A (English)</th>
+        <th>Dataset B (Python Code)</th>
+        <th>Dataset C (Genomic DNA)</th>
+        <th>Dataset D (Uniform Text)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>Symbols ($N$)</strong></td><td>2,001</td><td>1,432</td><td>1,031</td><td>1,140</td></tr>
+      <tr><td><strong>Alphabet Size ($|\Sigma|$)</strong></td><td>56</td><td>53</td><td>29</td><td>76</td></tr>
+      <tr><td><strong>Shannon Entropy $H(X)$</strong></td><td>4.3894</td><td>4.3887</td><td>2.2593</td><td>6.2479</td></tr>
+      <tr><td><strong>Huffman Avg Length $L(C)$</strong></td><td><strong>4.4173</strong></td><td><strong>4.4106</strong></td><td><strong>2.3705</strong></td><td><strong>6.3158</strong></td></tr>
+      <tr><td><strong>Shannon–Fano Length</strong></td><td>4.4178</td><td>4.4232</td><td>2.3725</td><td>6.3158</td></tr>
+      <tr><td><strong>Fixed 8-Bit ASCII</strong></td><td>8.0000</td><td>8.0000</td><td>8.0000</td><td>8.0000</td></tr>
+      <tr><td><strong>Redundancy $R$</strong></td><td>0.0279</td><td>0.0219</td><td>0.1113</td><td>0.0679</td></tr>
+      <tr><td><strong>Compression Ratio</strong></td><td><strong>1.81 : 1</strong></td><td><strong>1.81 : 1</strong></td><td><strong>3.37 : 1</strong></td><td><strong>1.27 : 1</strong></td></tr>
+      <tr><td><strong>Space Savings (%)</strong></td><td><strong>44.78%</strong></td><td><strong>44.87%</strong></td><td><strong>70.37%</strong></td><td><strong>21.05%</strong></td></tr>
+      <tr><td><strong>Kraft Sum ($\sum 2^{-l_i}$)</strong></td><td>1.000000</td><td>1.000000</td><td>1.000000</td><td>1.000000</td></tr>
+      <tr><td><strong>Lossless Verification</strong></td><td><strong>PASSED</strong></td><td><strong>PASSED</strong></td><td><strong>PASSED</strong></td><td><strong>PASSED</strong></td></tr>
+      <tr><td><strong>Runtime (ms)</strong></td><td>0.445</td><td>0.300</td><td>0.160</td><td>0.372</td></tr>
+    </tbody>
+  </table>
+
+  <div class="figure-container">
+    <img src="../experiments/plots/exp1_entropy_vs_codelength.png" alt="Experiment 1: Entropy vs Code Lengths">
+    <div class="caption">Figure 1: Comparative analysis of Shannon Entropy H(X) vs. Huffman Average Code Length L(C) vs. Shannon–Fano across domains.</div>
+  </div>
+
+  <div class="figure-container">
+    <img src="../experiments/plots/huffman_tree_visualization.png" alt="Huffman Tree Graph Visualization">
+    <div class="caption">Figure 2: NetworkX visualization of the generated rooted binary prefix tree with weights and labeled decision edges ('0' and '1').</div>
+  </div>
+
+  <h3>3.2 Experiment 2: Algorithmic Runtime Scaling</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Input Size ($N$)</th>
+        <th>Huffman Runtime (ms)</th>
+        <th>Shannon–Fano Runtime (ms)</th>
+        <th>Huffman Expected Length $L(C)$</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>300 symbols</strong></td><td>0.177 ms</td><td>0.086 ms</td><td>4.1600 bits/symbol</td></tr>
+      <tr><td><strong>1,000 symbols</strong></td><td>0.199 ms</td><td>0.127 ms</td><td>4.2880 bits/symbol</td></tr>
+      <tr><td><strong>5,000 symbols</strong></td><td>0.407 ms</td><td>0.297 ms</td><td>4.4002 bits/symbol</td></tr>
+      <tr><td><strong>20,000 symbols</strong></td><td>0.897 ms</td><td>1.237 ms</td><td>4.4166 bits/symbol</td></tr>
+      <tr><td><strong>100,000 symbols</strong></td><td>3.633 ms</td><td>3.604 ms</td><td>4.4171 bits/symbol</td></tr>
+    </tbody>
+  </table>
+
+  <div class="figure-container">
+    <img src="../experiments/plots/exp2_runtime_scaling.png" alt="Experiment 2: Runtime Scaling">
+    <div class="caption">Figure 3: Computational execution time scaling as input size scales from 300 to 100,000 symbols.</div>
+  </div>
+
+  <h2>4. Conclusion and Future Scope</h2>
+  <p>
+    This research empirically and mathematically proved that Huffman coding produces optimal prefix codes closely matching Shannon's theoretical entropy limit. By formulating prefix codes as rooted binary trees, bottom-up greedy construction guarantees minimal weighted path length. On skewed genomic DNA sequences, Huffman coding delivered a <strong>3.37:1 compression ratio (70.37% storage savings)</strong>, consistently matching or outperforming Shannon–Fano coding.
+  </p>
+  <p>
+    <strong>Future Scope:</strong> Extending the architecture to <em>Adaptive Dynamic Huffman Coding</em> (Vitter/FGK algorithm) will eliminate codebook header overhead on streaming data, while exploring <em>Arithmetic Coding</em> will overcome the integer bit-length restriction for fractional information allocations.
+  </p>
+
+  <h2>Individual Contributions and Learning Reflections</h2>
+  <div class="reflection-card">
+    <strong>1. Nikhil (Project Lead & Core Implementation):</strong><br>
+    <em>Contribution:</em> Designed project architecture, implemented min-heap Huffman tree builder and DFS code generator (<code>src/huffman.py</code>), Shannon–Fano baseline (<code>src/shannon_fano.py</code>), pipeline integration (<code>main.py</code>), and managed GitHub repo.<br>
+    <em>Reflection:</em> Translating abstract graph theory into concrete Python priority queues reinforced how greedy local merges mathematically enforce global path length optimality.
+  </div>
+
+  <div class="reflection-card">
+    <strong>2. Piyush (Encoder/Decoder & Verification):</strong><br>
+    <em>Contribution:</em> Developed bit-level packing, byte conversion, tree-walk decoder (<code>src/codec.py</code>), and unit test suite (<code>tests/test_huffman.py</code>).<br>
+    <em>Reflection:</em> Learned low-level bit manipulation and byte padding, verifying that the prefix-free property enables instantaneous deterministic decoding without delimiters.
+  </div>
+
+  <div class="reflection-card">
+    <strong>3. Sakshi (Mathematical Formulation & Theory):</strong><br>
+    <em>Contribution:</em> Formulated DMGT mathematical models, Kraft–McMillan inequality proofs, Shannon entropy bounds, and algorithmic pseudocode.<br>
+    <em>Reflection:</em> Deepened understanding of information theory, proving that our empirical Kraft sum strictly equaled 1.000000, confirming tree completeness.
+  </div>
+
+  <div class="reflection-card">
+    <strong>4. Arushi (Dataset Collection & Preprocessing):</strong><br>
+    <em>Contribution:</em> Curated and preprocessed four diverse datasets (&ge; 300 records each in <code>data/</code>), computed frequency tables, and analyzed source entropy distributions.<br>
+    <em>Reflection:</em> Understood how statistical skewness governs compressibility, observing how genomic DNA compresses by over 70% due to low source entropy.
+  </div>
+
+  <div class="reflection-card">
+    <strong>5. Harsh (Experimental Design & Benchmarking):</strong><br>
+    <em>Contribution:</em> Executed Experiments 1 & 2 (<code>experiments/benchmark.py</code>), measured runtime scaling, computed compression ratios, and generated Matplotlib charts.<br>
+    <em>Reflection:</em> Gained practical skills in empirical benchmarking, demonstrating that Huffman coding delivers high compression throughput (&gt;27,000 symbols/ms).
+  </div>
+
+  <div class="reflection-card">
+    <strong>6. Khyathi (Visualization, Documentation & Presentation):</strong><br>
+    <em>Contribution:</em> Developed NetworkX tree visualizer (<code>src/visualizer.py</code>), generated publication plots, compiled research report, and created presentation slides.<br>
+    <em>Reflection:</em> Visualizing recursive tree graphs with labeled decision edges made the mathematical concept of prefix paths intuitive and clear for technical presentation.
+  </div>
+
+  <h2>References</h2>
+  <ol class="references">
+    <li><strong>Huffman, D. A.</strong> (1952). <em>A Method for the Construction of Minimum-Redundancy Codes</em>. Proceedings of the IRE, 40(9), 1098–1101.</li>
+    <li><strong>Shannon, C. E.</strong> (1948). <em>A Mathematical Theory of Communication</em>. Bell System Technical Journal, 27(3), 379–423.</li>
+    <li><strong>Rosen, K. H.</strong> (2019). <em>Discrete Mathematics and Its Applications</em> (8th ed.). McGraw-Hill Education. (Chapter 11: Trees and Rooted Trees).</li>
+    <li><strong>Cover, T. M., & Thomas, J. A.</strong> (2006). <em>Elements of Information Theory</em> (2nd ed.). John Wiley & Sons. (Chapter 5: Kraft Inequality).</li>
+    <li><strong>Cormen, T. H., Leiserson, C. E., Rivest, R. L., & Stein, C.</strong> (2022). <em>Introduction to Algorithms</em> (4th ed.). MIT Press. (Chapter 15: Greedy Algorithms).</li>
+  </ol>
+
+</body>
+</html>

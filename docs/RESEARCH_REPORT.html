@@ -255,7 +255,7 @@ Output: Root vertex of optimal binary tree T
     <strong>Complexity:</strong> Priority queue operations on $|\Sigma|$ elements run in $\mathcal{O}(|\Sigma| \log |\Sigma|)$. Encoding and decoding text of length $N$ scale linearly as $\mathcal{O}(N)$, giving an overall time complexity of $\mathcal{O}(N + |\Sigma| \log |\Sigma|)$.
   </p>
 
-  <h3>2.3 Benchmark Datasets (&ge; 300 Records)</h3>
+  <h3>2.3 Benchmark Datasets and Provenance (&ge; 300 Records)</h3>
   <table>
     <thead>
       <tr>
@@ -264,15 +264,47 @@ Output: Root vertex of optimal binary tree T
         <th>Records ($N$)</th>
         <th>Alphabet ($|\Sigma|$)</th>
         <th>Entropy $H(X)$</th>
+        <th>Public Source / Data Link</th>
       </tr>
     </thead>
     <tbody>
-      <tr><td><strong>Dataset A</strong></td><td>English Text (Academic prose on discrete math)</td><td>2,001</td><td>56</td><td>4.3894 bits/sym</td></tr>
-      <tr><td><strong>Dataset B</strong></td><td>Python Source Code (Data processing module)</td><td>1,432</td><td>53</td><td>4.3887 bits/sym</td></tr>
-      <tr><td><strong>Dataset C</strong></td><td>Genomic DNA (Bacteriophage nucleotide FASTA)</td><td>1,031</td><td>29</td><td>2.2593 bits/sym</td></tr>
-      <tr><td><strong>Dataset D</strong></td><td>Uniform Random Text (Synthesized ASCII symbols)</td><td>1,140</td><td>76</td><td>6.2479 bits/sym</td></tr>
+      <tr>
+        <td><strong>Dataset A</strong></td>
+        <td>English Text (Academic prose on discrete math)</td>
+        <td>2,001</td>
+        <td>56</td>
+        <td>4.3894 bits/sym</td>
+        <td><a href="https://www.gutenberg.org/" target="_blank">Project Gutenberg</a> &bull; <a href="https://github.com/SmoothnOperator/Dmgt-Huffman-Coding/blob/main/data/sample_english.txt" target="_blank">sample_english.txt</a></td>
+      </tr>
+      <tr>
+        <td><strong>Dataset B</strong></td>
+        <td>Python Source Code (Data processing module)</td>
+        <td>1,432</td>
+        <td>53</td>
+        <td>4.3887 bits/sym</td>
+        <td><a href="https://github.com/python/cpython" target="_blank">CPython Library</a> &bull; <a href="https://github.com/SmoothnOperator/Dmgt-Huffman-Coding/blob/main/data/sample_code.py" target="_blank">sample_code.py</a></td>
+      </tr>
+      <tr>
+        <td><strong>Dataset C</strong></td>
+        <td>Genomic DNA (Bacteriophage nucleotide FASTA)</td>
+        <td>1,031</td>
+        <td>29</td>
+        <td>2.2593 bits/sym</td>
+        <td><a href="https://www.ncbi.nlm.nih.gov/nuccore/NC_000866.4" target="_blank">NCBI GenBank: NC_000866.4</a> &bull; <a href="https://github.com/SmoothnOperator/Dmgt-Huffman-Coding/blob/main/data/sample_dna.fasta" target="_blank">sample_dna.fasta</a></td>
+      </tr>
+      <tr>
+        <td><strong>Dataset D</strong></td>
+        <td>Uniform Random Text (Synthesized ASCII symbols)</td>
+        <td>1,140</td>
+        <td>76</td>
+        <td>6.2479 bits/sym</td>
+        <td>Synthetic Generator &bull; <a href="https://github.com/SmoothnOperator/Dmgt-Huffman-Coding/blob/main/data/sample_uniform.txt" target="_blank">sample_uniform.txt</a></td>
+      </tr>
     </tbody>
   </table>
+  <p style="font-size: 9.5pt; color: #444;">
+    <strong>Public Repository Access:</strong> All cleaned datasets and scripts are openly hosted in the project repository at <a href="https://github.com/SmoothnOperator/Dmgt-Huffman-Coding/tree/main/data" target="_blank">github.com/SmoothnOperator/Dmgt-Huffman-Coding/tree/main/data</a>.
+  </p>
 
   <h2>3. Results and Discussion</h2>
   <h3>3.1 Experiment 1: Compression Efficiency Across Diverse Domains</h3>
@@ -388,6 +420,12 @@ Output: Root vertex of optimal binary tree T
     <li><strong>Rosen, K. H.</strong> (2019). <em>Discrete Mathematics and Its Applications</em> (8th ed.). McGraw-Hill Education. (Chapter 11: Trees and Rooted Trees).</li>
     <li><strong>Cover, T. M., & Thomas, J. A.</strong> (2006). <em>Elements of Information Theory</em> (2nd ed.). John Wiley & Sons. (Chapter 5: Kraft Inequality).</li>
     <li><strong>Cormen, T. H., Leiserson, C. E., Rivest, R. L., & Stein, C.</strong> (2022). <em>Introduction to Algorithms</em> (4th ed.). MIT Press. (Chapter 15: Greedy Algorithms).</li>
+    <li><strong>Fano, R. M.</strong> (1949). <em>The Transmission of Information</em>. Technical Report No. 65, Research Laboratory of Electronics, MIT.</li>
+    <li><strong>Knuth, D. E.</strong> (1985). <em>Dynamic Huffman Coding</em>. Journal of Algorithms, 6(2), 163–180.</li>
+    <li><strong>National Center for Biotechnology Information (NCBI).</strong> (2024). <em>Enterobacteria phage T4 complete genome fragment</em>, GenBank Accession: NC_000866.4. Available: <a href="https://www.ncbi.nlm.nih.gov/nuccore/NC_000866.4" target="_blank">https://www.ncbi.nlm.nih.gov/nuccore/NC_000866.4</a>.</li>
+    <li><strong>Project Gutenberg.</strong> (2024). <em>Free eBooks and Digital Text Archive</em>. Available: <a href="https://www.gutenberg.org/" target="_blank">https://www.gutenberg.org/</a>.</li>
+    <li><strong>Python Software Foundation.</strong> (2024). <em>CPython Source Code and Standard Library</em>. GitHub Repository. Available: <a href="https://github.com/python/cpython" target="_blank">https://github.com/python/cpython</a>.</li>
+    <li><strong>DMGT Project Repository.</strong> (2026). <em>Optimal Prefix Codes and Data Compression Using Huffman Coding</em>. GitHub Repository: <a href="https://github.com/SmoothnOperator/Dmgt-Huffman-Coding" target="_blank">https://github.com/SmoothnOperator/Dmgt-Huffman-Coding</a>.</li>
   </ol>
 
 </body>

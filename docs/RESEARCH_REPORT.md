@@ -1,17 +1,57 @@
 # Information-Theoretic Data Compression via Optimal Prefix Trees: An Empirical and Algorithmic Analysis of Huffman Coding
 
-**Programme:** Bachelor of Technology in Computer Science & Engineering — Blockchain Technology (CSE-BCT)  
+![Jain University Logo](jain_logo.png)
+
+**Faculty of Engineering and Technology**  
+**School of Computer Science and Engineering**  
+**JAIN (Deemed-to-be University)**  
+
 **Course:** Discrete Mathematics and Graph Theory (DMGT) — Experiential Learning  
 **Project Topic 14:** Optimal Prefix Codes and Data Compression Using Huffman Coding  
-**Institution:** School of Computer Science & Engineering  
+**Branch & Section:** CSE - BLOCKCHAIN  
+**Date of Submission:** 10-11-2026  
 
-**Authors & Group Members:**  
-1. **Nikhil** (Project Lead & Core Implementation) — *Lead Developer*  
-2. **Piyush** (Encoder/Decoder & Verification) — *Systems & Testing Engineer*  
-3. **Sakshi** (Mathematical Formulation & Theory) — *Theoretical Mathematician*  
-4. **Arushi** (Dataset Collection & Preprocessing) — *Data Engineer*  
-5. **Harsh** (Experimental Design & Benchmarking) — *Performance Analyst*  
-6. **Khyathi** (Visualization, Documentation & Presentation) — *Visual & Technical Communicator*  
+---
+
+### Submitted to:
+**Dr. Priya Satish**  
+Assistant Professor, Department of Mathematics  
+Faculty of Engineering & Technology, JAIN (Deemed-to-be University)  
+
+### Submitted by:
+
+| USN | Student Name | Project Role & Contribution |
+| :--- | :--- | :--- |
+| **25BTRBT026** | **Nikhil Kumar** | Project Lead & Core Implementation |
+| **25BTRBT030** | **Piyush Kumar** | Encoder/Decoder & Lossless Verification |
+| **25BTRC0045** | **Sakshi Kumari** | Mathematical Formulation & Theory |
+| **25BTRBT008** | **Arushi Pramanik** | Dataset Collection & Preprocessing |
+| **25BTRBT017** | **Harsh R Rao** | Experimental Design & Benchmarking |
+| **25BTRBT021** | **Khyathi Jain** | Visualization, Documentation & Presentation |
+
+---
+
+### Evaluation and Marks Record:
+
+| Component | Max Marks | Marks Awarded | Remarks / Evaluator Feedback |
+| :--- | :---: | :---: | :--- |
+| **Total Experiential Learning Marks** | **100** | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | &nbsp; |
+
+---
+
+### Table of Contents
+
+| Serial No. | Section Title | Page / Anchor |
+| :---: | :--- | :---: |
+| 1 | Abstract & Keywords | [Abstract](#abstract) |
+| 2 | Introduction and Problem Identification | [Section 1](#1-introduction-and-problem-identification) |
+| 3 | Methodology & Mathematical Formulation | [Section 2](#2-methodology) |
+| 4 | Results and Discussion (Experiments 1 & 2) | [Section 3](#3-results-and-discussion) |
+| 5 | Conclusion & Future Scope | [Section 4](#4-conclusion-and-future-scope) |
+| 6 | Individual Contributions & Learning Reflections | [Section 5](#individual-contributions-and-learning-reflections) |
+| 7 | Experiential Learning 8-Stage Compliance Matrix | [Section 6](#6-experiential-learning-8-stage-curriculum-compliance-matrix) |
+| 8 | References | [Section 7](#references) |
+| 9 | Team Group Photo | [Section 8](#8-team-group-photo) |
 
 ---
 
@@ -365,3 +405,36 @@ The empirical findings confirm:
 9. **Project Gutenberg.** (2024). *Free eBooks and Digital Text Archive*. Available: [https://www.gutenberg.org/](https://www.gutenberg.org/).
 10. **Python Software Foundation.** (2024). *CPython Source Code and Standard Library*. GitHub Repository. Available: [https://github.com/python/cpython](https://github.com/python/cpython).
 11. **DMGT Project Repository.** (2026). *Optimal Prefix Codes and Data Compression Using Huffman Coding*. GitHub Repository: [https://github.com/SmoothnOperator/Dmgt-Huffman-Coding](https://github.com/SmoothnOperator/Dmgt-Huffman-Coding).
+
+---
+
+## 6. Experiential Learning 8-Stage Curriculum Compliance Matrix
+
+| Curriculum Stage | Prescribed Syllabus Activity | Project Implementation & Compliance |
+| :--- | :--- | :--- |
+| **Stage 1: Problem Identification** | Define relevant real-world engineering or data problem and explain its significance. | **Section 1.1:** Formulated the payload bloat and transmission bottleneck in decentralized blockchain P2P networks and genomic data repositories. |
+| **Stage 2: Mathematical Formulation** | Represent problem using discrete structures: sets, relations, trees, graph algorithms. | **Section 2.1:** Modeled codes as directed rooted binary trees $T=(V,E)$, proved Kraft–McMillan inequality $\sum 2^{-l_i} \le 1$ and Shannon entropy bounds. |
+| **Stage 3: Algorithm/Model Development** | Select appropriate DMGT technique; provide pseudocode/flowchart. | **Section 2.2:** Formulated the bottom-up greedy min-heap tree construction algorithm and DFS prefix code extraction. |
+| **Stage 4: Implementation** | Implement proposed method using Python and standard computational tools. | **Section 2.2:** Implemented modular Python engine (`src/huffman.py`, `src/codec.py`, `src/visualizer.py`) with zero external compression libraries. |
+| **Stage 5: Experimental Analysis** | Conduct at least two meaningful experiments varying data size/structure. | **Section 3.1 & 3.3:** Executed Experiment 1 (4 distinct data domains) and Experiment 2 (runtime scaling from $N=300$ to $100,000$ symbols). |
+| **Stage 6: Results and Interpretation** | Present results using suitable tables, graphs, and visualizations. | **Section 3:** Delivered Tables 2 & 3, Figure 1 (Bar chart), Figure 2 (NetworkX rooted tree graph), and Figure 3 (Runtime scaling curve). |
+| **Stage 7: Comparison and Discussion** | Compare two algorithms/methods and discuss observed behavior. | **Section 3.1:** Compared Huffman vs. Fixed 8-bit ASCII vs. Shannon–Fano coding, mathematically verifying $L_{\text{Huffman}} \le L_{\text{Shannon–Fano}}$. |
+| **Stage 8: Conclusion and Future Scope** | Summarize findings, explain DMGT contribution, identify limitations. | **Section 4:** Confirmed Shannon entropy convergence, identified small-file header overhead, and proposed dynamic adaptive coding. |
+
+---
+
+## 8. Team Group Photo
+
+```
++-----------------------------------------------------------------------------------+
+|                           [ TEAM GROUP PHOTO PLACEMENT ]                          |
+|                                                                                   |
+|  Group Members (L-R):                                                             |
+|  Nikhil Kumar (25BTRBT026), Piyush Kumar (25BTRBT030), Sakshi Kumari (25BTRC0045), |
+|  Arushi Pramanik (25BTRBT008), Harsh R Rao (25BTRBT017), Khyathi Jain (25BTRBT021) |
+|                                                                                   |
+|  Faculty Evaluator: Dr. Priya Satish, Assistant Professor, Department of Math     |
+|  School of Computer Science & Engineering, JAIN (Deemed-to-be University)         |
++-----------------------------------------------------------------------------------+
+```
+

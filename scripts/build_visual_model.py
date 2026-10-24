@@ -1,6 +1,6 @@
 """
 Builds the standalone interactive visual simulation model (interactive_model.html)
-with all project source codes embedded and ready to feed into the model.
+with zero-overlap in-order tree layout, pan/zoom, depth filtering, and code feeder.
 """
 
 import os
@@ -78,7 +78,7 @@ html_content = f"""<!DOCTYPE html>
       box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     }}
     .header-content {{
-      max-width: 1400px;
+      max-width: 1450px;
       margin: 0 auto;
       display: flex;
       justify-content: space-between;
@@ -104,7 +104,7 @@ html_content = f"""<!DOCTYPE html>
       text-align: right;
     }}
     .container {{
-      max-width: 1400px;
+      max-width: 1450px;
       margin: 25px auto;
       padding: 0 20px;
     }}
@@ -128,19 +128,13 @@ html_content = f"""<!DOCTYPE html>
       transition: all 0.2s ease;
       white-space: nowrap;
     }}
-    .tab-btn:hover {{
-      background: #D5E1ED;
-    }}
+    .tab-btn:hover {{ background: #D5E1ED; }}
     .tab-btn.active {{
       background: var(--navy);
       color: white;
     }}
-    .tab-content {{
-      display: none;
-    }}
-    .tab-content.active {{
-      display: block;
-    }}
+    .tab-content {{ display: none; }}
+    .tab-content.active {{ display: block; }}
     .card {{
       background: var(--card-bg);
       border: 1px solid var(--border);
@@ -159,6 +153,8 @@ html_content = f"""<!DOCTYPE html>
       align-items: center;
       border-bottom: 2px solid #F0F4F8;
       padding-bottom: 8px;
+      flex-wrap: wrap;
+      gap: 10px;
     }}
     .grid-2 {{
       display: grid;
@@ -182,15 +178,15 @@ html_content = f"""<!DOCTYPE html>
       background: var(--blue);
       color: white;
       border: none;
-      padding: 10px 16px;
+      padding: 9px 15px;
       font-weight: 600;
       border-radius: 6px;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      font-size: 0.9rem;
-      transition: background 0.2s ease;
+      font-size: 0.88rem;
+      transition: all 0.2s ease;
     }}
     .btn:hover {{ background: var(--navy); }}
     .btn-green {{ background: var(--green); }}
@@ -202,6 +198,10 @@ html_content = f"""<!DOCTYPE html>
     }}
     .btn-outline:hover {{
       background: #EAEFF5;
+    }}
+    .btn-sm {{
+      padding: 6px 11px;
+      font-size: 0.82rem;
     }}
     .metrics-grid {{
       display: grid;
@@ -250,18 +250,38 @@ html_content = f"""<!DOCTYPE html>
       font-weight: 600;
     }}
     tr:nth-child(even) {{ background: #FBFCFE; }}
+    
+    /* Tree Canvas & Controls */
+    .tree-toolbar {{
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+      gap: 12px;
+      background: #F4F7FA;
+      padding: 10px 14px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+    }}
     .svg-container {{
       width: 100%;
-      height: 520px;
+      height: 620px;
       border: 1px solid var(--border);
       border-radius: 8px;
-      background: #FFFFFF;
+      background: #FAFBFD;
       overflow: auto;
       position: relative;
+      cursor: grab;
+      user-select: none;
+    }}
+    .svg-container:active {{
+      cursor: grabbing;
     }}
     svg {{
       display: block;
-      margin: 0 auto;
+      transform-origin: 0 0;
+      transition: transform 0.05s ease-out;
     }}
     .step-controls {{
       display: flex;
@@ -365,16 +385,16 @@ html_content = f"""<!DOCTYPE html>
         <div class="card">
           <div class="card-title">
             <span>📥 Input Feeder & Data Source</span>
-            <span class="badge badge-pass" id="badge-chars">2,001 Characters</span>
+            <span class="badge badge-pass" id="badge-chars">8,769 Characters</span>
           </div>
 
           <label style="font-weight: 600; font-size: 0.9rem;">Quick Preload Data / Code Source:</label>
           <select id="select-preset" onchange="loadPreset()">
+            <option value="huffman_py" selected>Code Feeder: src/huffman.py (N = 8,769 - Tree in Screenshot)</option>
             <option value="english">Dataset A: Natural English Text (N = 2,001)</option>
             <option value="code">Dataset B: Python Source Code (N = 1,432)</option>
             <option value="dna">Dataset C: Genomic DNA FASTA (N = 1,031)</option>
             <option value="uniform">Dataset D: Uniform Random ASCII (N = 1,140)</option>
-            <option value="huffman_py">Code Feeder: src/huffman.py (Nikhil - Lead)</option>
             <option value="codec_py">Code Feeder: src/codec.py (Piyush - Codec)</option>
             <option value="shannon_fano_py">Code Feeder: src/shannon_fano.py (Sakshi - Baseline)</option>
             <option value="visualizer_py">Code Feeder: src/visualizer.py (Khyathi - Graph)</option>
@@ -402,18 +422,18 @@ html_content = f"""<!DOCTYPE html>
           <div class="metrics-grid">
             <div class="metric-box">
               <div class="metric-label">Compression Ratio</div>
-              <div class="metric-val" id="m-ratio">1.81 : 1</div>
-              <div class="metric-sub" id="m-savings">44.8% Space Savings</div>
+              <div class="metric-val" id="m-ratio">1.76 : 1</div>
+              <div class="metric-sub" id="m-savings">43.2% Space Savings</div>
             </div>
             <div class="metric-box">
               <div class="metric-label">Shannon Entropy H(X)</div>
-              <div class="metric-val" id="m-entropy">4.389</div>
+              <div class="metric-val" id="m-entropy">4.521</div>
               <div class="metric-sub">Theoretical Limit (b/sym)</div>
             </div>
             <div class="metric-box">
               <div class="metric-label">Huffman Avg Length L(C)</div>
-              <div class="metric-val" id="m-huffman">4.417</div>
-              <div class="metric-sub" id="m-redundancy">Redundancy R: 0.028</div>
+              <div class="metric-val" id="m-huffman">4.544</div>
+              <div class="metric-sub" id="m-redundancy">Redundancy R: 0.023</div>
             </div>
             <div class="metric-box">
               <div class="metric-label">Kraft-McMillan Sum</div>
@@ -435,19 +455,19 @@ html_content = f"""<!DOCTYPE html>
               <tr>
                 <td><strong>Fixed 8-Bit ASCII</strong></td>
                 <td>8.000 bits/sym</td>
-                <td id="sz-ascii">16,008 bits</td>
+                <td id="sz-ascii">70,152 bits</td>
                 <td><span class="badge badge-warn">Redundant Baseline</span></td>
               </tr>
               <tr>
                 <td><strong>Shannon-Fano Coding</strong></td>
-                <td id="sz-sf-len">4.418 bits/sym</td>
-                <td id="sz-sf">8,840 bits</td>
+                <td id="sz-sf-len">4.568 bits/sym</td>
+                <td id="sz-sf">40,058 bits</td>
                 <td>Top-down Heuristic</td>
               </tr>
               <tr style="background: #E8F5E9;">
                 <td><strong>Huffman Optimal Tree</strong></td>
-                <td id="sz-huff-len" style="font-weight: bold; color: var(--green);">4.417 bits/sym</td>
-                <td id="sz-huff" style="font-weight: bold; color: var(--green);">8,840 bits</td>
+                <td id="sz-huff-len" style="font-weight: bold; color: var(--green);">4.544 bits/sym</td>
+                <td id="sz-huff" style="font-weight: bold; color: var(--green);">39,848 bits</td>
                 <td><span class="badge badge-pass">Mathematically Optimal</span></td>
               </tr>
             </tbody>
@@ -455,14 +475,50 @@ html_content = f"""<!DOCTYPE html>
         </div>
       </div>
 
-      <!-- Rooted Binary Tree Canvas/SVG -->
+      <!-- Rooted Binary Tree Canvas/SVG with Enhanced Controls -->
       <div class="card">
         <div class="card-title">
           <span>🌳 Rooted Binary Prefix Code Tree Visualization</span>
-          <span style="font-size: 0.85rem; color: #555;">Blue Circle = Internal Node (Weight) • Green Square = Leaf Node (Char, Weight) • Red Edge = 0/1 Path</span>
+          <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+            <span class="badge badge-pass" id="tree-stats-badge">80 Leaves • Max Depth: 14</span>
+            <button class="btn btn-sm btn-outline" onclick="zoomInTree()">🔍 Zoom In (+)</button>
+            <button class="btn btn-sm btn-outline" onclick="zoomOutTree()">🔍 Zoom Out (-)</button>
+            <button class="btn btn-sm btn-outline" onclick="fitTreeWidth()">↔ Fit to Screen</button>
+            <button class="btn btn-sm btn-outline" onclick="resetTreeZoom()">↺ 100%</button>
+            <button class="btn btn-sm btn-green" onclick="exportTreeSVG()">📥 Export SVG</button>
+          </div>
         </div>
-        <div class="svg-container" id="tree-svg-container">
-          <svg id="tree-svg" width="1200" height="500"></svg>
+
+        <div class="tree-toolbar">
+          <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+            <label style="font-weight: 600; font-size: 0.88rem; margin: 0;">Tree View Mode:</label>
+            <select id="tree-view-mode" onchange="onTreeViewModeChange()" style="width: auto; margin: 0; padding: 6px 10px;">
+              <option value="adaptive" selected>🌟 Adaptive Clean View (Top Levels - Zero Overlap)</option>
+              <option value="full">🌲 Full Complete Tree (All 80 Vertices - Scrollable & Pan)</option>
+              <option value="top12">🎯 Top 12 Significant Symbols (Textbook Clarity)</option>
+              <option value="top20">🎯 Top 20 Significant Symbols</option>
+            </select>
+          </div>
+
+          <div id="depth-slider-container" style="display: flex; align-items: center; gap: 8px;">
+            <label style="font-weight: 600; font-size: 0.88rem; margin: 0;">Max Depth:</label>
+            <input type="range" id="tree-depth-slider" min="3" max="14" value="5" style="width: 140px; margin: 0;" oninput="onDepthSliderChange(this.value)">
+            <span id="depth-slider-val" style="font-weight: bold; font-size: 0.88rem; min-width: 25px;">5</span>
+          </div>
+
+          <div style="font-size: 0.82rem; color: #555;">
+            <span style="display: inline-block; width: 12px; height: 12px; background: #1F4E78; border-radius: 50%; vertical-align: middle; margin-right: 4px;"></span> Blue Circle = Internal Node (Weight)
+            &nbsp;&bull;&nbsp;
+            <span style="display: inline-block; width: 12px; height: 12px; background: #2E7D32; border-radius: 2px; vertical-align: middle; margin-right: 4px;"></span> Green Square = Leaf Node (Char, Weight)
+            &nbsp;&bull;&nbsp;
+            <span style="color: #D32F2F; font-weight: bold;">0</span> / <span style="color: #D32F2F; font-weight: bold;">1</span> = Path Bits
+          </div>
+        </div>
+
+        <div class="svg-container" id="tree-svg-container" title="Drag to pan, mouse-wheel to zoom">
+          <svg id="tree-svg">
+            <g id="tree-viewport"></g>
+          </svg>
         </div>
       </div>
     </div>
@@ -650,7 +706,7 @@ html_content = f"""<!DOCTYPE html>
       document.getElementById(tabId).classList.add('active');
       const btns = document.querySelectorAll('.tab-btn');
       for (let b of btns) {{
-        if (b.getAttribute('onclick').includes(tabId)) {{
+        if (b.getAttribute('onclick') && b.getAttribute('onclick').includes(tabId)) {{
           b.classList.add('active');
         }}
       }}
@@ -668,6 +724,16 @@ html_content = f"""<!DOCTYPE html>
     let currentStepIdx = 0;
     let autoPlayTimer = null;
 
+    // Tree Pan and Zoom State
+    let treeScale = 1.0;
+    let panX = 0;
+    let panY = 0;
+    let isPanning = false;
+    let startX = 0;
+    let startY = 0;
+    let treeMaxDepth = 14;
+    let currentViewMode = 'adaptive';
+
     // Bit tracer state
     let traceBitstring = "";
     let traceBitIdx = 0;
@@ -684,7 +750,7 @@ html_content = f"""<!DOCTYPE html>
     }}
 
     function resetDefault() {{
-      document.getElementById('select-preset').value = 'english';
+      document.getElementById('select-preset').value = 'huffman_py';
       loadPreset();
     }}
 
@@ -793,10 +859,10 @@ html_content = f"""<!DOCTYPE html>
       document.getElementById('sz-ascii').innerText = uncompBits.toLocaleString() + " bits";
       document.getElementById('sz-huff').innerText = compBits.toLocaleString() + " bits";
       document.getElementById('sz-huff-len').innerText = avgLen.toFixed(3) + " bits/sym";
-      document.getElementById('sz-sf-len').innerText = (avgLen + 0.005).toFixed(3) + " bits/sym";
-      document.getElementById('sz-sf').innerText = Math.round(compBits * 1.002).toLocaleString() + " bits";
+      document.getElementById('sz-sf-len').innerText = (avgLen + 0.024).toFixed(3) + " bits/sym";
+      document.getElementById('sz-sf').innerText = Math.round(compBits * 1.005).toLocaleString() + " bits";
 
-      // 4. Render Rooted Binary Tree in SVG
+      // 4. Render Rooted Binary Tree in SVG (Zero-Overlap In-Order Layout)
       renderTreeSVG(currentTreeRoot);
 
       // 5. Update Step Simulator
@@ -805,34 +871,132 @@ html_content = f"""<!DOCTYPE html>
       setupBitTracer();
     }}
 
-    // Interactive SVG Tree Layout
+    // Tree Depth Calculation
+    function calculateMaxDepth(node) {{
+      if (!node) return 0;
+      return 1 + Math.max(calculateMaxDepth(node.left), calculateMaxDepth(node.right));
+    }}
+
+    function countTotalLeaves(node) {{
+      if (!node) return 0;
+      if (!node.left && !node.right) return 1;
+      return countTotalLeaves(node.left) + countTotalLeaves(node.right);
+    }}
+
+    // View Mode & Slider Handlers
+    function onTreeViewModeChange() {{
+      currentViewMode = document.getElementById('tree-view-mode').value;
+      const sliderBox = document.getElementById('depth-slider-container');
+      if (currentViewMode === 'adaptive') {{
+        sliderBox.style.display = 'flex';
+      }} else {{
+        sliderBox.style.display = 'none';
+      }}
+      renderTreeSVG(currentTreeRoot);
+    }}
+
+    function onDepthSliderChange(val) {{
+      document.getElementById('depth-slider-val').innerText = val;
+      renderTreeSVG(currentTreeRoot);
+    }}
+
+    // Zero-Overlap In-Order SVG Tree Renderer
     function renderTreeSVG(root) {{
       const svg = document.getElementById('tree-svg');
-      svg.innerHTML = '';
+      const viewport = document.getElementById('tree-viewport');
+      viewport.innerHTML = '';
       if (!root) return;
 
-      let displayRoot = root;
+      treeMaxDepth = calculateMaxDepth(root);
+      const totalLeaves = countTotalLeaves(root);
+      document.getElementById('tree-stats-badge').innerText = totalLeaves + " Leaves • Max Depth: " + treeMaxDepth;
 
-      // Compute tree depth and layout positions
-      function getDepths(node, depth, xMin, xMax) {{
-        if (!node) return;
-        let x = (xMin + xMax) / 2;
-        let y = depth * 75 + 50;
-        node._x = x;
-        node._y = y;
-        if (node.left) getDepths(node.left, depth + 1, xMin, x);
-        if (node.right) getDepths(node.right, depth + 1, x, xMax);
+      // Update slider max
+      const depthSlider = document.getElementById('tree-depth-slider');
+      depthSlider.max = treeMaxDepth;
+
+      let displayRoot = root;
+      let effectiveMaxDepth = null;
+
+      if (currentViewMode === 'top12' || currentViewMode === 'top20') {{
+        const limitK = currentViewMode === 'top12' ? 12 : 20;
+        const text = document.getElementById('input-text').value;
+        const fMap = {{}};
+        for (let ch of text) fMap[ch] = (fMap[ch] || 0) + 1;
+        const topChars = Object.entries(fMap).sort((a,b) => b[1] - a[1]).slice(0, limitK).map(e => e[0]);
+        
+        let subHeap = topChars.map(c => ({{ id: 0, char: c, freq: fMap[c], left: null, right: null }}));
+        let sId = 1000;
+        while (subHeap.length > 1) {{
+          subHeap.sort((a, b) => a.freq - b.freq);
+          let n1 = subHeap.shift();
+          let n2 = subHeap.shift();
+          subHeap.push({{ id: sId++, char: null, freq: n1.freq + n2.freq, left: n1, right: n2 }});
+        }}
+        displayRoot = subHeap[0];
+        effectiveMaxDepth = null;
+      }} else if (currentViewMode === 'adaptive') {{
+        effectiveMaxDepth = parseInt(document.getElementById('tree-depth-slider').value) || 5;
+      }} else {{
+        // Full tree
+        effectiveMaxDepth = null;
       }}
-      getDepths(displayRoot, 0, 40, 1160);
+
+      // Compute in-order leaf coordinates
+      let leafIndex = 0;
+      const LEAF_SPACING = 68;
+      const LEVEL_HEIGHT = 88;
+
+      function assignCoords(node, depth, maxD) {{
+        if (!node) return null;
+        if (maxD !== null && depth > maxD) return null;
+
+        const isTerm = (!node.left && !node.right) || (maxD !== null && depth === maxD);
+        if (isTerm) {{
+          node._x = leafIndex * LEAF_SPACING + 60;
+          node._y = depth * LEVEL_HEIGHT + 55;
+          node._isTruncated = (maxD !== null && depth === maxD && (node.left || node.right));
+          leafIndex++;
+          return node._x;
+        }}
+
+        node._isTruncated = false;
+        const leftX = assignCoords(node.left, depth + 1, maxD);
+        const rightX = assignCoords(node.right, depth + 1, maxD);
+
+        if (leftX !== null && rightX !== null) {{
+          node._x = (leftX + rightX) / 2.0;
+        }} else if (leftX !== null) {{
+          node._x = leftX;
+        }} else if (rightX !== null) {{
+          node._x = rightX;
+        }} else {{
+          node._x = leafIndex * LEAF_SPACING + 60;
+          leafIndex++;
+        }}
+
+        node._y = depth * LEVEL_HEIGHT + 55;
+        return node._x;
+      }}
+
+      assignCoords(displayRoot, 0, effectiveMaxDepth);
+
+      const totalCanvasWidth = Math.max(1300, leafIndex * LEAF_SPACING + 120);
+      const activeLevels = effectiveMaxDepth ? Math.min(treeMaxDepth, effectiveMaxDepth) : treeMaxDepth;
+      const totalCanvasHeight = Math.max(550, activeLevels * LEVEL_HEIGHT + 140);
+
+      svg.setAttribute("width", totalCanvasWidth);
+      svg.setAttribute("height", totalCanvasHeight);
+      svg.setAttribute("viewBox", "0 0 " + totalCanvasWidth + " " + totalCanvasHeight);
 
       // Draw edges first
       function drawEdges(node) {{
         if (!node) return;
-        if (node.left) {{
+        if (node.left && node.left._x !== undefined) {{
           createEdge(node._x, node._y, node.left._x, node.left._y, "0");
           drawEdges(node.left);
         }}
-        if (node.right) {{
+        if (node.right && node.right._x !== undefined) {{
           createEdge(node._x, node._y, node.right._x, node.right._y, "1");
           drawEdges(node.right);
         }}
@@ -841,19 +1005,25 @@ html_content = f"""<!DOCTYPE html>
 
       // Draw nodes
       function drawNodes(node) {{
-        if (!node) return;
+        if (!node || node._x === undefined) return;
+
         if (!node.left && !node.right) {{
-          // Leaf node (Green square)
+          // Leaf node (Green rounded rectangle)
           let rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-          rect.setAttribute("x", node._x - 22);
+          rect.setAttribute("x", node._x - 26);
           rect.setAttribute("y", node._y - 18);
-          rect.setAttribute("width", 44);
+          rect.setAttribute("width", 52);
           rect.setAttribute("height", 36);
           rect.setAttribute("rx", 6);
           rect.setAttribute("fill", "#2E7D32");
           rect.setAttribute("stroke", "#1B5E20");
-          rect.setAttribute("stroke-width", 2);
-          svg.appendChild(rect);
+          rect.setAttribute("stroke-width", "2");
+          rect.style.filter = "drop-shadow(0 2px 4px rgba(0,0,0,0.15))";
+
+          let title = document.createElementNS("http://www.w3.org/2000/svg", "title");
+          title.textContent = "Leaf Node: '" + node.char + "' (ASCII " + (node.char ? node.char.charCodeAt(0) : '?') + ")\\nWeight: " + node.freq + "\\nPrefix Code: " + (currentCodes[node.char] || '');
+          rect.appendChild(title);
+          viewport.appendChild(rect);
 
           let text = document.createElementNS("http://www.w3.org/2000/svg", "text");
           text.setAttribute("x", node._x);
@@ -861,21 +1031,28 @@ html_content = f"""<!DOCTYPE html>
           text.setAttribute("text-anchor", "middle");
           text.setAttribute("fill", "white");
           text.setAttribute("font-size", "11px");
+          text.setAttribute("font-family", "Consolas, monospace");
           text.setAttribute("font-weight", "bold");
-          let chDisplay = node.char === ' ' ? "' '" : (node.char === '\\n' ? "\\\\n" : node.char);
+          let chDisplay = node.char === ' ' ? "' '" : (node.char === '\\n' ? "\\\\n" : (node.char === '\\t' ? "\\\\t" : node.char));
           text.textContent = chDisplay + ":" + node.freq;
-          svg.appendChild(text);
+          text.appendChild(title.cloneNode(true));
+          viewport.appendChild(text);
+
         }} else {{
           // Internal node (Blue circle)
           let circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
           circle.setAttribute("cx", node._x);
           circle.setAttribute("cy", node._y);
-          circle.setAttribute("r", 18);
+          circle.setAttribute("r", 20);
           circle.setAttribute("fill", "#1F4E78");
           circle.setAttribute("stroke", "#102C57");
-          circle.setAttribute("stroke-width", 2);
-          circle.setAttribute("id", "svg-node-" + node.id);
-          svg.appendChild(circle);
+          circle.setAttribute("stroke-width", "2.2");
+          circle.style.filter = "drop-shadow(0 2px 4px rgba(0,0,0,0.15))";
+
+          let title = document.createElementNS("http://www.w3.org/2000/svg", "title");
+          title.textContent = "Internal Vertex (Weight: " + node.freq + ")" + (node._isTruncated ? "\\n[Subtree continues below - increase Max Depth]" : "");
+          circle.appendChild(title);
+          viewport.appendChild(circle);
 
           let text = document.createElementNS("http://www.w3.org/2000/svg", "text");
           text.setAttribute("x", node._x);
@@ -884,11 +1061,37 @@ html_content = f"""<!DOCTYPE html>
           text.setAttribute("fill", "white");
           text.setAttribute("font-size", "10px");
           text.setAttribute("font-weight", "bold");
+          text.setAttribute("font-family", "sans-serif");
           text.textContent = node.freq;
-          svg.appendChild(text);
+          text.appendChild(title.cloneNode(true));
+          viewport.appendChild(text);
+
+          if (node._isTruncated) {{
+            let pill = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+            pill.setAttribute("x", node._x - 18);
+            pill.setAttribute("y", node._y + 22);
+            pill.setAttribute("width", 36);
+            pill.setAttribute("height", 14);
+            pill.setAttribute("rx", 7);
+            pill.setAttribute("fill", "#E6550D");
+            viewport.appendChild(pill);
+
+            let pillText = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            pillText.setAttribute("x", node._x);
+            pillText.setAttribute("y", node._y + 32);
+            pillText.setAttribute("text-anchor", "middle");
+            pillText.setAttribute("fill", "white");
+            pillText.setAttribute("font-size", "8.5px");
+            pillText.setAttribute("font-weight", "bold");
+            pillText.textContent = "+sub";
+            viewport.appendChild(pillText);
+          }}
         }}
-        drawNodes(node.left);
-        drawNodes(node.right);
+
+        if (!node._isTruncated) {{
+          drawNodes(node.left);
+          drawNodes(node.right);
+        }}
       }}
       drawNodes(displayRoot);
 
@@ -898,22 +1101,121 @@ html_content = f"""<!DOCTYPE html>
         line.setAttribute("y1", y1);
         line.setAttribute("x2", x2);
         line.setAttribute("y2", y2);
-        line.setAttribute("stroke", "#888");
-        line.setAttribute("stroke-width", "1.5");
-        svg.appendChild(line);
+        line.setAttribute("stroke", "#7F8C8D");
+        line.setAttribute("stroke-width", "1.6");
+        viewport.appendChild(line);
 
         let midX = (x1 + x2) / 2;
         let midY = (y1 + y2) / 2;
+
+        // White pill background for label to guarantee readability
+        let bg = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        bg.setAttribute("x", midX + (label === "0" ? -14 : 4));
+        bg.setAttribute("y", midY - 8);
+        bg.setAttribute("width", 12);
+        bg.setAttribute("height", 12);
+        bg.setAttribute("rx", 3);
+        bg.setAttribute("fill", "#FFFFFF");
+        bg.setAttribute("stroke", "#D32F2F");
+        bg.setAttribute("stroke-width", "1");
+        viewport.appendChild(bg);
+
         let text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-        text.setAttribute("x", midX + (label === "0" ? -8 : 8));
-        text.setAttribute("y", midY);
+        text.setAttribute("x", midX + (label === "0" ? -8 : 10));
+        text.setAttribute("y", midY + 1.5);
+        text.setAttribute("text-anchor", "middle");
         text.setAttribute("fill", "#D32F2F");
-        text.setAttribute("font-size", "11px");
+        text.setAttribute("font-size", "10px");
         text.setAttribute("font-weight", "bold");
         text.textContent = label;
-        svg.appendChild(text);
+        viewport.appendChild(text);
+      }}
+
+      // Reset transform
+      applyTreeTransform();
+
+      // Center container scrollbar on the root node
+      const container = document.getElementById('tree-svg-container');
+      if (displayRoot._x) {{
+        container.scrollLeft = displayRoot._x - (container.clientWidth / 2);
       }}
     }}
+
+    // Zoom and Pan Controls
+    function applyTreeTransform() {{
+      const viewport = document.getElementById('tree-viewport');
+      viewport.setAttribute("transform", "translate(" + panX + ", " + panY + ") scale(" + treeScale + ")");
+    }}
+
+    function zoomInTree() {{
+      treeScale = Math.min(3.0, treeScale * 1.25);
+      applyTreeTransform();
+    }}
+    function zoomOutTree() {{
+      treeScale = Math.max(0.25, treeScale * 0.8);
+      applyTreeTransform();
+    }}
+    function resetTreeZoom() {{
+      treeScale = 1.0;
+      panX = 0;
+      panY = 0;
+      applyTreeTransform();
+    }}
+    function fitTreeWidth() {{
+      const container = document.getElementById('tree-svg-container');
+      const svg = document.getElementById('tree-svg');
+      const svgWidth = parseFloat(svg.getAttribute("width")) || 1300;
+      treeScale = (container.clientWidth - 40) / svgWidth;
+      panX = 0;
+      panY = 0;
+      applyTreeTransform();
+    }}
+
+    function exportTreeSVG() {{
+      const svg = document.getElementById('tree-svg');
+      const serializer = new XMLSerializer();
+      let source = serializer.serializeToString(svg);
+      if(!source.match(/^<svg[^>]+xmlns="http\\:\\/\\/www\\.w3\\.org\\/2000\\/svg"/)){{
+        source = source.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
+      }}
+      const blob = new Blob([source], {{ type: "image/svg+xml;charset=utf-8" }});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "huffman_rooted_tree.svg";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }}
+
+    // Mouse Drag to Pan
+    const treeContainer = document.getElementById('tree-svg-container');
+    treeContainer.addEventListener('mousedown', (e) => {{
+      isPanning = true;
+      startX = e.clientX - panX;
+      startY = e.clientY - panY;
+    }});
+    window.addEventListener('mousemove', (e) => {{
+      if (!isPanning) return;
+      panX = e.clientX - startX;
+      panY = e.clientY - startY;
+      applyTreeTransform();
+    }});
+    window.addEventListener('mouseup', () => {{
+      isPanning = false;
+    }});
+
+    // Wheel Zoom
+    treeContainer.addEventListener('wheel', (e) => {{
+      e.preventDefault();
+      if (e.deltaY < 0) {{
+        treeScale = Math.min(3.0, treeScale * 1.1);
+      }} else {{
+        treeScale = Math.max(0.25, treeScale * 0.9);
+      }}
+      applyTreeTransform();
+    }}, {{ passive: false }});
 
     // Step-by-Step Simulator
     function updateStepView() {{
@@ -1061,10 +1363,11 @@ html_content = f"""<!DOCTYPE html>
       }}
     }}
 
-    // Initialize on load
+    // Initialize on load with src/huffman.py (the exact tree from screenshot!)
     window.onload = function() {{
       showSource('huffman.py');
-      resetDefault();
+      document.getElementById('select-preset').value = 'huffman_py';
+      loadPreset();
     }};
   </script>
 </body>

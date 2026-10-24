@@ -473,14 +473,26 @@ with tab_tree:
     Edge labels **0** (left branch) and **1** (right branch) dictate prefix bitpaths.
     """)
 
-    top_n = st.slider("Select Number of Top Frequent Characters to Render in Tree Graph:", 4, min(24, len(huffman.frequencies)), 12)
-    top_chars = [char for char, _ in sorted(huffman.frequencies.items(), key=lambda x: x[1], reverse=True)[:top_n]]
-    filtered_text = "".join(c for c in raw_text if c in top_chars)
-    vis_tree = HuffmanTree()
-    vis_root = vis_tree.build_tree(filtered_text)
+    view_type = st.radio(
+        "Graph Rendering Strategy:",
+        ["Depth-Limited Tree (Top Levels - Matches Screenshot)", "Top Frequent Characters Subtree"],
+        horizontal=True
+    )
 
-    fig, ax = plt.subplots(figsize=(13, 7))
-    graph, pos, labels, edge_labels = HuffmanVisualizer.build_networkx_graph(vis_root)
+    if view_type.startswith("Depth-Limited"):
+        max_d = st.slider("Select Maximum Tree Depth to Display:", 2, 7, 5)
+        fig_w = max(14, int(max_d * 2.8))
+        fig, ax = plt.subplots(figsize=(fig_w, 8))
+        graph, pos, labels, edge_labels = HuffmanVisualizer.build_networkx_graph(root, max_depth=max_d)
+    else:
+        top_n = st.slider("Select Number of Top Frequent Characters to Render:", 4, min(24, len(huffman.frequencies)), 12)
+        top_chars = [char for char, _ in sorted(huffman.frequencies.items(), key=lambda x: x[1], reverse=True)[:top_n]]
+        filtered_text = "".join(c for c in raw_text if c in top_chars)
+        vis_tree = HuffmanTree()
+        vis_root = vis_tree.build_tree(filtered_text)
+        fig_w = max(13, int(top_n * 0.9))
+        fig, ax = plt.subplots(figsize=(fig_w, 7))
+        graph, pos, labels, edge_labels = HuffmanVisualizer.build_networkx_graph(vis_root)
 
     internal_nodes = [n for n, attr in graph.nodes(data=True) if attr['type'] == 'internal']
     leaf_nodes = [n for n, attr in graph.nodes(data=True) if attr['type'] == 'leaf']
@@ -488,7 +500,7 @@ with tab_tree:
     nx.draw_networkx_nodes(graph, pos, nodelist=internal_nodes, node_color="#6baed6", node_size=1500, node_shape="o", ax=ax)
     nx.draw_networkx_nodes(graph, pos, nodelist=leaf_nodes, node_color="#74c476", node_size=1700, node_shape="s", ax=ax)
     nx.draw_networkx_edges(graph, pos, arrows=False, edge_color="#636363", width=1.5, ax=ax)
-    nx.draw_networkx_labels(graph, pos, labels=labels, font_size=9, font_family="sans-serif", ax=ax)
+    nx.draw_networkx_labels(graph, pos, labels=labels, font_size=8.5, font_family="sans-serif", ax=ax)
     nx.draw_networkx_edge_labels(graph, pos, edge_labels=edge_labels, font_size=10, font_color="#cb181d", ax=ax)
 
     plt.axis("off")

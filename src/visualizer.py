@@ -6,7 +6,7 @@ Discrete Mathematics & Graph Theory - Experiential Learning Project
 """
 
 import os
-from typing import Optional
+from typing import Optional, Tuple, Dict
 import networkx as nx
 import matplotlib.pyplot as plt
 from src.huffman import HuffmanNode
@@ -15,58 +15,73 @@ from src.huffman import HuffmanNode
 class HuffmanVisualizer:
     """
     Renders rooted binary trees with edge labels ('0' and '1') and node weights.
+    Uses in-order leaf positioning to guarantee zero overlapping vertices.
     """
 
     @classmethod
     def build_networkx_graph(
         cls,
         root: HuffmanNode,
-        graph: Optional[nx.DiGraph] = None,
-        pos: Optional[dict] = None,
-        x: float = 0.0,
-        y: float = 0.0,
-        layer: float = 1.0,
-        parent_id: Optional[int] = None,
-        edge_label: str = ""
+        max_depth: Optional[int] = None
     ) -> Tuple[nx.DiGraph, dict, dict, dict]:
         """
-        Recursively converts a binary tree into a directed NetworkX graph with hierarchical layout.
+        Recursively converts a binary tree into a directed NetworkX graph with hierarchical in-order layout.
+        Guarantees no horizontal vertex overlapping.
         """
-        if graph is None:
-            graph = nx.DiGraph()
-            pos = {}
+        graph = nx.DiGraph()
+        pos: Dict[int, Tuple[float, float]] = {}
+        leaf_counter = [0]
 
-        node_id = root.node_id
-        pos[node_id] = (x, y)
+        def assign_positions(node: Optional[HuffmanNode], depth: int) -> Optional[float]:
+            if node is None:
+                return None
+            if max_depth is not None and depth > max_depth:
+                return None
 
-        if root.is_leaf():
-            display_char = repr(root.char) if root.char in ('\n', ' ', '\t') else root.char
-            label = f"{display_char}\n(w={root.freq})"
-            node_type = "leaf"
-        else:
-            label = f"w={root.freq}"
-            node_type = "internal"
+            is_terminal = node.is_leaf() or (max_depth is not None and depth == max_depth)
+            node_id = node.node_id
 
-        graph.add_node(node_id, label=label, type=node_type)
+            if node.is_leaf():
+                display_char = repr(node.char) if node.char in ('\n', ' ', '\t') else node.char
+                label = f"{display_char}\n(w={node.freq})"
+                node_type = "leaf"
+            else:
+                label = f"w={node.freq}"
+                node_type = "internal"
 
-        if parent_id is not None:
-            graph.add_edge(parent_id, node_id, label=edge_label)
+            graph.add_node(node_id, label=label, type=node_type, weight=node.freq)
 
-        # Recursively layout children
-        dx = 1.0 / (2 ** layer)
-        if root.left:
-            cls.build_networkx_graph(
-                root.left, graph, pos,
-                x=x - dx, y=y - 1.0, layer=layer + 1.0,
-                parent_id=node_id, edge_label="0"
-            )
-        if root.right:
-            cls.build_networkx_graph(
-                root.right, graph, pos,
-                x=x + dx, y=y - 1.0, layer=layer + 1.0,
-                parent_id=node_id, edge_label="1"
-            )
+            if is_terminal:
+                x = float(leaf_counter[0])
+                leaf_counter[0] += 1
+                y = -float(depth) * 1.5
+                pos[node_id] = (x, y)
+                return x
 
+            # Traverse left and right children
+            left_x = assign_positions(node.left, depth + 1)
+            right_x = assign_positions(node.right, depth + 1)
+
+            if node.left and left_x is not None:
+                graph.add_edge(node_id, node.left.node_id, label="0")
+            if node.right and right_x is not None:
+                graph.add_edge(node_id, node.right.node_id, label="1")
+
+            if left_x is not None and right_x is not None:
+                x = (left_x + right_x) / 2.0
+            elif left_x is not None:
+                x = left_x
+            elif right_x is not None:
+                x = right_x
+            else:
+                x = float(leaf_counter[0])
+                leaf_counter[0] += 1
+
+            y = -float(depth) * 1.5
+            pos[node_id] = (x, y)
+            return x
+
+        assign_positions(root, 0)
         labels = nx.get_node_attributes(graph, 'label')
         edge_labels = nx.get_edge_attributes(graph, 'label')
         return graph, pos, labels, edge_labels
@@ -76,12 +91,16 @@ class HuffmanVisualizer:
         cls,
         root: HuffmanNode,
         title: str = "Huffman Optimal Prefix Code Tree",
-        save_path: Optional[str] = None
+        save_path: Optional[str] = None,
+        max_depth: Optional[int] = 5
     ):
-        """Plots the tree with color-coded leaf and internal nodes."""
-        graph, pos, labels, edge_labels = cls.build_networkx_graph(root)
+        """Plots the tree with color-coded leaf and internal nodes without overlapping."""
+        graph, pos, labels, edge_labels = cls.build_networkx_graph(root, max_depth=max_depth)
 
-        plt.figure(figsize=(14, 8))
+        # Scale figure width to match number of nodes
+        num_nodes = len(pos)
+        fig_w = max(13, int(num_nodes * 0.75))
+        plt.figure(figsize=(fig_w, 8))
         plt.title(title, fontsize=14, fontweight="bold", pad=20)
 
         # Classify nodes for visual styling
@@ -91,17 +110,17 @@ class HuffmanVisualizer:
         # Draw internal nodes (blue circular)
         nx.draw_networkx_nodes(
             graph, pos, nodelist=internal_nodes,
-            node_color="#6baed6", node_size=1600, node_shape="o"
+            node_color="#6baed6", node_size=1500, node_shape="o"
         )
         # Draw leaf nodes (green squares)
         nx.draw_networkx_nodes(
             graph, pos, nodelist=leaf_nodes,
-            node_color="#74c476", node_size=1800, node_shape="s"
+            node_color="#74c476", node_size=1700, node_shape="s"
         )
 
         # Draw edges and labels
         nx.draw_networkx_edges(graph, pos, arrows=False, edge_color="#636363", width=1.5)
-        nx.draw_networkx_labels(graph, pos, labels=labels, font_size=9, font_family="sans-serif")
+        nx.draw_networkx_labels(graph, pos, labels=labels, font_size=8.5, font_family="sans-serif")
         nx.draw_networkx_edge_labels(graph, pos, edge_labels=edge_labels, font_size=10, font_color="#cb181d")
 
         plt.axis("off")

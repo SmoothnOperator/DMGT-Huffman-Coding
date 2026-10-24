@@ -103,6 +103,73 @@ class HuffmanTree:
         self._generate_codes_dfs(self.root, "")
         return self.root
 
+    def build_tree_with_history(self, text: str) -> Tuple[HuffmanNode, List[dict]]:
+        """
+        Builds the Huffman tree while capturing every step of the min-heap
+        merging process for visual step-by-step explanation.
+        """
+        self.compute_frequencies(text)
+        history: List[dict] = []
+
+        if len(self.frequencies) == 1:
+            char = next(iter(self.frequencies))
+            self.root = HuffmanNode(None, self.frequencies[char])
+            self.root.left = HuffmanNode(char, self.frequencies[char])
+            self.codes = {char: "0"}
+            self.reverse_mapping = {"0": char}
+            history.append({
+                "step": 0,
+                "action": "Single Unique Character Edge Case",
+                "extracted": [],
+                "merged": (char, self.frequencies[char]),
+                "heap": [(char, self.frequencies[char])]
+            })
+            return self.root, history
+
+        # Initialize heap
+        heap: List[HuffmanNode] = [
+            HuffmanNode(char, freq) for char, freq in self.frequencies.items()
+        ]
+        heapq.heapify(heap)
+
+        step_num = 0
+        history.append({
+            "step": step_num,
+            "action": f"Initial Min-Priority Queue with {len(heap)} leaf vertices",
+            "extracted": [],
+            "merged": None,
+            "heap": [(n.char if n.char is not None else f"Internal(w={n.freq})", n.freq) for n in sorted(heap)]
+        })
+
+        while len(heap) > 1:
+            step_num += 1
+            node_left = heapq.heappop(heap)
+            node_right = heapq.heappop(heap)
+
+            merged_weight = node_left.freq + node_right.freq
+            parent = HuffmanNode(None, merged_weight)
+            parent.left = node_left
+            parent.right = node_right
+
+            heapq.heappush(heap, parent)
+
+            left_desc = f"'{node_left.char}' (w={node_left.freq})" if node_left.is_leaf() else f"Internal (w={node_left.freq})"
+            right_desc = f"'{node_right.char}' (w={node_right.freq})" if node_right.is_leaf() else f"Internal (w={node_right.freq})"
+
+            history.append({
+                "step": step_num,
+                "action": f"Extract-Min {left_desc} and {right_desc} -> Merge into Parent (w={merged_weight})",
+                "extracted": [left_desc, right_desc],
+                "merged": f"Internal Node (w={merged_weight})",
+                "heap": [(n.char if n.char is not None else f"Internal(w={n.freq})", n.freq) for n in sorted(heap)]
+            })
+
+        self.root = heapq.heappop(heap)
+        self.codes = {}
+        self.reverse_mapping = {}
+        self._generate_codes_dfs(self.root, "")
+        return self.root, history
+
     def _generate_codes_dfs(self, node: Optional[HuffmanNode], current_code: str):
         """Depth-First Search recursive walk to extract prefix-free binary paths."""
         if node is None:

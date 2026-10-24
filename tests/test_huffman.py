@@ -94,3 +94,30 @@ def test_shannon_fano_vs_huffman_optimality():
 
     # Huffman is proven mathematically optimal: L_huff <= L_sf
     assert huff_len <= sf_len + 1e-9
+
+
+def test_tree_with_history():
+    text = "EXPERIENTIAL LEARNING"
+    tree = HuffmanTree()
+    root, history = tree.build_tree_with_history(text)
+    
+    assert root is not None
+    assert len(history) > 0
+    # Step 0 is the initial heap state
+    assert history[0]["step"] == 0
+    assert "leaf" in history[0]["action"].lower()
+    
+    # Check that subsequent steps record extractions and merges
+    for step in history[1:]:
+        assert "step" in step
+        assert "action" in step
+        assert len(step["extracted"]) == 2
+        assert "Internal" in step["merged"]
+        assert isinstance(step["heap"], list)
+    
+    # Codes generated should match regular build_tree
+    codes_history = tree.get_codes()
+    regular_tree = HuffmanTree()
+    regular_tree.build_tree(text)
+    assert len(codes_history) == len(regular_tree.get_codes())
+

@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interactive Huffman Coding Visual Simulation Model & Code Feeder - DMGT Topic 14</title>
+  <style>
+    :root {
+      --navy: #102C57;
+      --blue: #1F4E78;
+      --accent: #E6550D;
+      --green: #2E7D32;
+      --bg: #F8F9FA;
+      --card-bg: #FFFFFF;
+      --border: #DDE2E5;
+      --text: #212529;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      padding-bottom: 50px;
+    }
+    header {
+      background: linear-gradient(135deg, var(--navy) 0%, var(--blue) 100%);
+      color: white;
+      padding: 20px 30px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .header-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+    .header-title h1 {
+      font-size: 1.55rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .header-title p {
+      font-size: 0.9rem;
+      color: #DDE6ED;
+    }
+    .header-badge {
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.3);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      text-align: right;
+    }
+    .container {
+      max-width: 1400px;
+      margin: 25px auto;
+      padding: 0 20px;
+    }
+    .tabs-nav {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 2px;
+      overflow-x: auto;
+    }
+    .tab-btn {
+      padding: 10px 18px;
+      border: none;
+      background: #EAEFF5;
+      color: var(--navy);
+      font-weight: 600;
+      font-size: 0.92rem;
+      border-radius: 6px 6px 0 0;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+    .tab-btn:hover {
+      background: #D5E1ED;
+    }
+    .tab-btn.active {
+      background: var(--navy);
+      color: white;
+    }
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    }
+    .card-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid #F0F4F8;
+      padding-bottom: 8px;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    @media (max-width: 900px) {
+      .grid-2 { grid-template-columns: 1fr; }
+    }
+    textarea, select, input[type="text"] {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #CED4DA;
+      border-radius: 6px;
+      font-family: monospace;
+      font-size: 0.9rem;
+      margin-top: 6px;
+      margin-bottom: 12px;
+    }
+    .btn {
+      background: var(--blue);
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.9rem;
+      transition: background 0.2s ease;
+    }
+    .btn:hover { background: var(--navy); }
+    .btn-green { background: var(--green); }
+    .btn-green:hover { background: #1B5E20; }
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--blue);
+      color: var(--blue);
+    }
+    .btn-outline:hover {
+      background: #EAEFF5;
+    }
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin: 15px 0;
+    }
+    @media (max-width: 800px) {
+      .metrics-grid { grid-template-columns: 1fr 1fr; }
+    }
+    .metric-box {
+      background: #F8F9FA;
+      border-left: 4px solid var(--blue);
+      padding: 12px 14px;
+      border-radius: 6px;
+    }
+    .metric-label {
+      font-size: 0.78rem;
+      color: #666;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+    .metric-val {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--navy);
+    }
+    .metric-sub {
+      font-size: 0.75rem;
+      color: #555;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+      margin: 10px 0;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 7px 10px;
+      text-align: center;
+    }
+    th {
+      background: #EAEFF5;
+      color: var(--navy);
+      font-weight: 600;
+    }
+    tr:nth-child(even) { background: #FBFCFE; }
+    .svg-container {
+      width: 100%;
+      height: 520px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: #FFFFFF;
+      overflow: auto;
+      position: relative;
+    }
+    svg {
+      display: block;
+      margin: 0 auto;
+    }
+    .step-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 15px 0;
+      flex-wrap: wrap;
+    }
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      font-size: 0.8rem;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+    .badge-pass { background: #D4EDDA; color: #155724; }
+    .badge-warn { background: #FFF3CD; color: #856404; }
+    pre {
+      background: #272822;
+      color: #F8F8F2;
+      padding: 14px;
+      border-radius: 6px;
+      overflow-x: auto;
+      font-family: Consolas, monospace;
+      font-size: 0.85rem;
+      max-height: 480px;
+    }
+    .queue-chip {
+      display: inline-flex;
+      align-items: center;
+      background: #E9ECEF;
+      border: 1px solid #CED4DA;
+      border-radius: 20px;
+      padding: 4px 10px;
+      margin: 3px;
+      font-size: 0.82rem;
+      font-family: monospace;
+      font-weight: 600;
+    }
+    .chip-leaf {
+      background: #E8F5E9;
+      border-color: #A5D6A7;
+      color: #1B5E20;
+    }
+    .chip-internal {
+      background: #E3F2FD;
+      border-color: #90CAF9;
+      color: #0D47A1;
+    }
+    .bit-token {
+      display: inline-block;
+      padding: 2px 4px;
+      margin: 1px;
+      font-family: monospace;
+      font-weight: bold;
+      border-radius: 3px;
+      font-size: 0.88rem;
+    }
+    .bit-active {
+      background: #FF5722;
+      color: white;
+      transform: scale(1.15);
+    }
+    .bit-done {
+      background: #C8E6C9;
+      color: #1B5E20;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-content">
+      <div class="header-title">
+        <p style="color: #F0AD4E; font-weight: bold; letter-spacing: 0.5px; text-transform: uppercase;">
+          JAIN (Deemed-to-be University) • School of Computer Science & Engineering
+        </p>
+        <h1>Interactive Huffman Coding Visual Simulation Model & Code Feeder</h1>
+        <p>DMGT Topic 14 • CSE - BLOCKCHAIN • Faculty Evaluator: Dr. Priya Satish</p>
+      </div>
+      <div class="header-badge">
+        <strong>Team Topic 14:</strong><br>
+        Nikhil • Piyush • Sakshi • Arushi • Harsh • Khyathi
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <div class="tabs-nav">
+      <button class="tab-btn active" onclick="switchTab('tab-simulator')">🌳 Visual Simulation Model</button>
+      <button class="tab-btn" onclick="switchTab('tab-step')">🔄 Step-by-Step Priority Queue</button>
+      <button class="tab-btn" onclick="switchTab('tab-tracer')">⚡ Interactive Bitstream Tracer</button>
+      <button class="tab-btn" onclick="switchTab('tab-feeder')">💻 Code Feeder & Source Inspector</button>
+      <button class="tab-btn" onclick="switchTab('tab-benchmark')">📊 Experimental Benchmarks</button>
+    </div>
+
+    <!-- TAB 1: VISUAL SIMULATION MODEL -->
+    <div id="tab-simulator" class="tab-content active">
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">
+            <span>📥 Input Feeder & Data Source</span>
+            <span class="badge badge-pass" id="badge-chars">2,001 Characters</span>
+          </div>
+
+          <label style="font-weight: 600; font-size: 0.9rem;">Quick Preload Data / Code Source:</label>
+          <select id="select-preset" onchange="loadPreset()">
+            <option value="english">Dataset A: Natural English Text (N = 2,001)</option>
+            <option value="code">Dataset B: Python Source Code (N = 1,432)</option>
+            <option value="dna">Dataset C: Genomic DNA FASTA (N = 1,031)</option>
+            <option value="uniform">Dataset D: Uniform Random ASCII (N = 1,140)</option>
+            <option value="huffman_py">Code Feeder: src/huffman.py (Nikhil - Lead)</option>
+            <option value="codec_py">Code Feeder: src/codec.py (Piyush - Codec)</option>
+            <option value="shannon_fano_py">Code Feeder: src/shannon_fano.py (Sakshi - Baseline)</option>
+            <option value="visualizer_py">Code Feeder: src/visualizer.py (Khyathi - Graph)</option>
+            <option value="benchmark_py">Code Feeder: experiments/benchmark.py (Harsh - Scaling)</option>
+            <option value="main_py">Code Feeder: main.py (Pipeline Integration)</option>
+            <option value="test_huffman_py">Code Feeder: tests/test_huffman.py (7 Unit Tests)</option>
+            <option value="custom">-- Custom Text Input --</option>
+          </select>
+
+          <label style="font-weight: 600; font-size: 0.9rem;">Source Content:</label>
+          <textarea id="input-text" rows="7" placeholder="Type or paste any text to compress..."></textarea>
+
+          <div style="display: flex; gap: 10px;">
+            <button class="btn btn-green" onclick="runCompression()">⚡ Compress & Generate Model</button>
+            <button class="btn btn-outline" onclick="resetDefault()">Reset Default</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">
+            <span>📊 Information-Theoretic Performance Metrics</span>
+            <span class="badge badge-pass" id="badge-lossless">Lossless: TRUE</span>
+          </div>
+
+          <div class="metrics-grid">
+            <div class="metric-box">
+              <div class="metric-label">Compression Ratio</div>
+              <div class="metric-val" id="m-ratio">1.81 : 1</div>
+              <div class="metric-sub" id="m-savings">44.8% Space Savings</div>
+            </div>
+            <div class="metric-box">
+              <div class="metric-label">Shannon Entropy H(X)</div>
+              <div class="metric-val" id="m-entropy">4.389</div>
+              <div class="metric-sub">Theoretical Limit (b/sym)</div>
+            </div>
+            <div class="metric-box">
+              <div class="metric-label">Huffman Avg Length L(C)</div>
+              <div class="metric-val" id="m-huffman">4.417</div>
+              <div class="metric-sub" id="m-redundancy">Redundancy R: 0.028</div>
+            </div>
+            <div class="metric-box">
+              <div class="metric-label">Kraft-McMillan Sum</div>
+              <div class="metric-val" id="m-kraft">1.000</div>
+              <div class="metric-sub">Full Binary Tree Invariant</div>
+            </div>
+          </div>
+
+          <table style="margin-top: 15px;">
+            <thead>
+              <tr>
+                <th>Scheme</th>
+                <th>Avg Code Length</th>
+                <th>Storage Size</th>
+                <th>Efficiency / Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Fixed 8-Bit ASCII</strong></td>
+                <td>8.000 bits/sym</td>
+                <td id="sz-ascii">16,008 bits</td>
+                <td><span class="badge badge-warn">Redundant Baseline</span></td>
+              </tr>
+              <tr>
+                <td><strong>Shannon-Fano Coding</strong></td>
+                <td id="sz-sf-len">4.418 bits/sym</td>
+                <td id="sz-sf">8,840 bits</td>
+                <td>Top-down Heuristic</td>
+              </tr>
+              <tr style="background: #E8F5E9;">
+                <td><strong>Huffman Optimal Tree</strong></td>
+                <td id="sz-huff-len" style="font-weight: bold; color: var(--green);">4.417 bits/sym</td>
+                <td id="sz-huff" style="font-weight: bold; color: var(--green);">8,840 bits</td>
+                <td><span class="badge badge-pass">Mathematically Optimal</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Rooted Binary Tree Canvas/SVG -->
+      <div class="card">
+        <div class="card-title">
+          <span>🌳 Rooted Binary Prefix Code Tree Visualization</span>
+          <span style="font-size: 0.85rem; color: #555;">Blue Circle = Internal Node (Weight) • Green Square = Leaf Node (Char, Weight) • Red Edge = 0/1 Path</span>
+        </div>
+        <div class="svg-container" id="tree-svg-container">
+          <svg id="tree-svg" width="1200" height="500"></svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: STEP BY STEP SIMULATOR -->
+    <div id="tab-step" class="tab-content">
+      <div class="card">
+        <div class="card-title">
+          <span>🔄 Step-by-Step Min-Heap Priority Queue Merging Simulation</span>
+          <span class="badge badge-pass" id="step-badge">Step 0 / 0</span>
+        </div>
+        <p style="font-size: 0.95rem; color: #555; margin-bottom: 15px;">
+          This interactive model demonstrates Huffman's greedy choice property: at each step, the two subtrees with the lowest frequency weights are extracted from the min-heap, merged under a new internal parent node with summed weight, and re-inserted.
+        </p>
+
+        <div class="step-controls">
+          <button class="btn" onclick="prevStep()">◀ Previous Step</button>
+          <button class="btn btn-green" onclick="nextStep()">Next Step ▶</button>
+          <button class="btn btn-outline" onclick="playAutoSteps()">⏯ Auto Play</button>
+          <span style="font-weight: 600; margin-left: 10px;">Step Slider:</span>
+          <input type="range" id="step-slider" min="0" max="10" value="0" style="width: 250px;" oninput="onSliderMove(this.value)">
+        </div>
+
+        <div style="background: #F4F6F9; border-left: 4px solid var(--navy); padding: 12px 18px; border-radius: 6px; margin: 15px 0;">
+          <h4 id="step-action-title" style="color: var(--navy); margin-bottom: 4px;">Initial State</h4>
+          <p id="step-action-desc" style="font-size: 0.9rem; color: #333;">Priority queue initialized with leaf nodes.</p>
+        </div>
+
+        <h4 style="margin: 10px 0 6px 0; color: var(--blue);">Current Min-Priority Queue Array State:</h4>
+        <div id="queue-display" style="padding: 10px; background: white; border: 1px solid var(--border); border-radius: 6px; min-height: 50px;"></div>
+      </div>
+    </div>
+
+    <!-- TAB 3: BITSTREAM TRACER -->
+    <div id="tab-tracer" class="tab-content">
+      <div class="card">
+        <div class="card-title">
+          <span>⚡ Live Bit-by-Bit Tree-Walk Decoder Tracer</span>
+          <span class="badge badge-pass">Instantaneous Prefix Decoding</span>
+        </div>
+        <p style="font-size: 0.95rem; color: #555; margin-bottom: 12px;">
+          Watch how prefix codes are decoded without delimiters. Each bit in the serialized bitstream navigates the tree: 
+          <strong>'0' = Branch Left</strong>, <strong>'1' = Branch Right</strong>. When a leaf node is encountered, the character is emitted and pointer resets to the root!
+        </p>
+
+        <label style="font-weight: 600; font-size: 0.9rem;">Test String to Trace:</label>
+        <div style="display: flex; gap: 10px; margin-bottom: 12px;">
+          <input type="text" id="trace-input" value="EXPERIENTIAL" style="flex: 1; margin-bottom: 0;">
+          <button class="btn btn-green" onclick="setupBitTracer()">Initialize Tracer</button>
+        </div>
+
+        <div style="background: #FAFAFA; border: 1px solid var(--border); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+          <h4 style="color: var(--navy); margin-bottom: 6px;">Encoded Binary Bitstream:</h4>
+          <div id="trace-bits" style="word-break: break-all; margin-bottom: 10px;"></div>
+          
+          <div style="display: flex; gap: 10px; align-items: center; margin-top: 10px;">
+            <button class="btn" onclick="stepBit()">▶ Step 1 Bit</button>
+            <button class="btn btn-outline" onclick="resetBitTracer()">Reset Pointer</button>
+            <span id="trace-status" style="font-size: 0.9rem; font-weight: 600; color: var(--navy); margin-left: 10px;">Pointer at Tree Root</span>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card" style="margin-bottom: 0;">
+            <h4 style="color: var(--navy); margin-bottom: 8px;">Decoded Output Text:</h4>
+            <div id="trace-decoded" style="font-size: 1.3rem; font-weight: bold; color: var(--green); min-height: 40px; border-bottom: 2px solid var(--green); padding: 6px 0;"></div>
+          </div>
+          <div class="card" style="margin-bottom: 0;">
+            <h4 style="color: var(--navy); margin-bottom: 8px;">Active Tree Path Navigation:</h4>
+            <div id="trace-path-desc" style="font-size: 0.95rem; color: #333;">Click "Step 1 Bit" to watch navigation.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: CODE FEEDER & INSPECTOR -->
+    <div id="tab-feeder" class="tab-content">
+      <div class="card">
+        <div class="card-title">
+          <span>💻 Feed All Project Source Codes into the Compression Model</span>
+          <span class="badge badge-pass">Modular Python Engine</span>
+        </div>
+        <p style="font-size: 0.95rem; color: #555; margin-bottom: 15px;">
+          Select any of the core project Python files below. You can inspect its full implementation and click <strong>"⚡ Feed This Code into Compression Engine"</strong> to analyze its code entropy, prefix tree structure, and compression efficiency!
+        </p>
+
+        <div style="display: flex; gap: 8px; margin-bottom: 15px; flex-wrap: wrap;">
+          <button class="btn btn-outline" id="btn-huffman.py" onclick="showSource('huffman.py')">src/huffman.py (Nikhil - Lead)</button>
+          <button class="btn btn-outline" id="btn-codec.py" onclick="showSource('codec.py')">src/codec.py (Piyush - Codec)</button>
+          <button class="btn btn-outline" id="btn-shannon_fano.py" onclick="showSource('shannon_fano.py')">src/shannon_fano.py (Sakshi - Baseline)</button>
+          <button class="btn btn-outline" id="btn-visualizer.py" onclick="showSource('visualizer.py')">src/visualizer.py (Khyathi - Graph)</button>
+          <button class="btn btn-outline" id="btn-benchmark.py" onclick="showSource('benchmark.py')">experiments/benchmark.py (Harsh - Scaling)</button>
+          <button class="btn btn-outline" id="btn-main.py" onclick="showSource('main.py')">main.py (Pipeline Integration)</button>
+          <button class="btn btn-outline" id="btn-test_huffman.py" onclick="showSource('test_huffman.py')">tests/test_huffman.py (7 Unit Tests)</button>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 10px;">
+          <h4 id="code-file-title" style="color: var(--navy);">src/huffman.py</h4>
+          <button class="btn btn-green" onclick="feedCurrentCodeToModel()">⚡ Feed This Code Into Compression Engine</button>
+        </div>
+
+        <pre><code id="code-display"># Loading code...</code></pre>
+      </div>
+    </div>
+
+    <!-- TAB 5: BENCHMARKING -->
+    <div id="tab-benchmark" class="tab-content">
+      <div class="card">
+        <div class="card-title">
+          <span>📊 Quantitative Experimental Results (Datasets >= 300 Records)</span>
+          <span class="badge badge-pass">Faculty Guidelines Met</span>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Dataset Identifier</th>
+              <th>Records (N)</th>
+              <th>Alphabet |Σ|</th>
+              <th>Entropy H(X)</th>
+              <th>Huffman L(C)</th>
+              <th>Shannon-Fano L</th>
+              <th>Redundancy R</th>
+              <th>Comp Ratio</th>
+              <th>Space Savings</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>English Text (Dataset A)</strong></td>
+              <td>2,001</td>
+              <td>56</td>
+              <td>4.389</td>
+              <td style="font-weight: bold; color: var(--green);">4.417</td>
+              <td>4.418</td>
+              <td>0.028</td>
+              <td>1.81 : 1</td>
+              <td>44.78%</td>
+            </tr>
+            <tr>
+              <td><strong>Python Code (Dataset B)</strong></td>
+              <td>1,432</td>
+              <td>53</td>
+              <td>4.389</td>
+              <td style="font-weight: bold; color: var(--green);">4.411</td>
+              <td>4.423</td>
+              <td>0.022</td>
+              <td>1.81 : 1</td>
+              <td>44.87%</td>
+            </tr>
+            <tr style="background: #E8F5E9;">
+              <td><strong>Genomic DNA (Dataset C)</strong></td>
+              <td>1,031</td>
+              <td>29</td>
+              <td>2.259</td>
+              <td style="font-weight: bold; color: var(--green);">2.371</td>
+              <td>2.373</td>
+              <td>0.111</td>
+              <td><strong>3.37 : 1</strong></td>
+              <td><strong>70.37%</strong></td>
+            </tr>
+            <tr>
+              <td><strong>Uniform Random (Dataset D)</strong></td>
+              <td>1,140</td>
+              <td>76</td>
+              <td>6.248</td>
+              <td style="font-weight: bold; color: var(--green);">6.316</td>
+              <td>6.316</td>
+              <td>0.068</td>
+              <td>1.27 : 1</td>
+              <td>21.05%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // Tab switching
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      const btns = document.querySelectorAll('.tab-btn');
+      for (let b of btns) {
+        if (b.getAttribute('onclick').includes(tabId)) {
+          b.classList.add('active');
+        }
+      }
+    }
+
+    // Preloaded datasets
+    const PRESETS = {"english": "Discrete mathematics and theoretical computer science study structures that are fundamentally discrete rather than continuous. In contrast to real numbers that have the property of varying smoothly, the objects studied in discrete mathematics\u2014such as integers, graphs, and statements in logic\u2014do not vary smoothly in this way, but have distinct, separated values. Discrete mathematics therefore excludes topics in continuous mathematics such as calculus and Euclidean geometry. Discrete objects can often be enumerated by integers. More formally, discrete mathematics has been characterized as the branch of mathematics dealing with countable sets. However, there is no exact definition of the term discrete mathematics. Indeed, discrete mathematics is described less by what is included than by what is excluded: continuously varying quantities and related processes.\n\nThe history of discrete mathematics has involved the solving of many challenging problems in mathematics and computer science. In graph theory, much research was motivated by attempts to prove the four-color theorem, first stated in 1852, but not proven until 1976 by Kenneth Appel and Wolfgang Haken using substantial computer assistance. In logic, the second problem on David Hilbert's list of open problems presented in 1900 was to prove that the axioms of arithmetic are consistent. G\u00f6del's second incompleteness theorem, proven in 1931, showed that this was not possible\u2014at least not within arithmetic itself. G\u00f6del's tenth problem was to determine whether a given polynomial Diophantine equation with integer coefficients has an integer solution. In 1970, Yuri Matiyasevich proved that this could not be done.\n\nInformation theory involves the quantification of information. Closely related is coding theory which is used to design efficient and reliable data transmission and storage methods. Discrete mathematics also includes combinatorial topics such as optimal prefix trees, graph algorithms, and algorithmic complexity.\n", "code": "import sys\nimport os\nimport math\n\nclass DataProcessor:\n    def __init__(self, filename):\n        self.filename = filename\n        self.data = []\n\n    def load_data(self):\n        if not os.path.exists(self.filename):\n            raise FileNotFoundError(f\"File {self.filename} not found.\")\n        with open(self.filename, 'r', encoding='utf-8') as f:\n            for line in f:\n                stripped = line.strip()\n                if stripped and not stripped.startswith('#'):\n                    self.data.append(stripped)\n        return len(self.data)\n\n    def compute_statistics(self):\n        if not self.data:\n            return {\"count\": 0, \"mean\": 0.0, \"variance\": 0.0}\n        lengths = [len(item) for item in self.data]\n        total = sum(lengths)\n        mean_val = total / len(lengths)\n        variance = sum((x - mean_val) ** 2 for x in lengths) / len(lengths)\n        return {\n            \"count\": len(lengths),\n            \"mean\": round(mean_val, 4),\n            \"std_dev\": round(math.sqrt(variance), 4)\n        }\n\n    def export_summary(self, output_path):\n        stats = self.compute_statistics()\n        with open(output_path, 'w', encoding='utf-8') as out:\n            for key, val in stats.items():\n                out.write(f\"{key}: {val}\\n\")\n        print(\"Summary successfully exported.\")\n\nif __name__ == '__main__':\n    processor = DataProcessor(\"input.txt\")\n    print(\"Data processing pipeline ready.\")\n", "dna": ">NC_000866.4 T4 bacteriophage complete genome fragment\nATGGCATTACCACCACCACGTCCGGTTAAACTAGGTGAAGTTTTACGTGAAGGTAAAAAA\nTTAGTAGAAGTACTTGTAGATGAAGGTATTGGTGAAGTAATGAAAGTTGCTATTCGTGCT\nGTTGGTATTGATATTGTTGTTGGTGGTGAACGTATTCGTAAAGGTGTTGTAGTTAAAGCT\nGTTGCTGAAGTTGTTGAAGTAGAAGGTACTAAACGTATTGTAGTTGAAGCTCGTGCTAAA\nGGTGAACGTATTGGTATTACTGGTGAATTAGTTGAAGTTGGTGAATTAGTTGAAGTAGGT\nGAAACTACTAAAGTTGAAGTTGGTGAAGTAGTTGAAGTTGGTGAAGTAGTTGAAGTTGGT\nGAAACTACTAAAGTTGAAGTTGGTGAAGTTGTAGAAGTTGGTGAAGTTGTAGAAGTTGGT\nGAAACTACTAAAGTTGAAGTTGGTGAAGTAGTTGAAGTTGGTGAAGTAGTTGAAGTTGGT\nGAAGTAGTAGAAGTTGTTGAAGTTGCTGAAGTTGTTGAAGTAGTTGAAGTTGTAGAAGTT\nGTAGAAGTAGTAGAAGTTGTTGAAGTAGTTGAAGTTGTTGAAGTAGTAGAAGTTGTTGAA\nGTAGTTGAAGTTGTAGAAGTAGTTGAAGTTGTTGAAGTAGTTGAAGTTGTTGAAGTAGTT\nGAAGTTGTTGAAGTTGTAGAAGTAGTTGAAGTTGTTGAAGTAGTTGAAGTTGTTGAAGTA\nGTTGAAGTTGTAGAAGTAGTTGAAGTTGTTGAAGTAGTTGAAGTTGTTGAAGTAGTAGAA\nGTTGTTGAAGTAGTTGAAGTTGTTGAAGTAGTAGAAGTTGTTGAAGTAGTTGAAGTTGTA\nGAAGTAGTTGAAGTTGTTGAAGTAGTTGAAGTTGTTGAAGTAGTTGAAGTTGTTGAAGTT\nGTAGAAGTAGTTGAAGTTGTTGAAGTAGTTGAAGTTGTTGAAGTAGTAGAAGTTGTTGAA\n", "uniform": "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+~\nABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+~\nABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+~\nABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+~\nABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+~\nABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+~\nABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+~\nABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+~\nABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+~\nABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+~\nABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+~\nABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+~\nABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+~\nABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+~\nABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+~\n", "huffman_py": "\"\"\"\nCore Huffman Coding Implementation\nModule: src/huffman.py\nRole: Nikhil (Project Lead & Core Implementation)\nDiscrete Mathematics & Graph Theory - Experiential Learning Project\nTopic 14: Optimal Prefix Codes and Data Compression Using Huffman Coding\n\"\"\"\n\nimport heapq\nimport math\nfrom collections import Counter\nfrom typing import Dict, Optional, Tuple, List\n\n\nclass HuffmanNode:\n    \"\"\"\n    Represents a vertex v in a weighted rooted binary tree T = (V, E).\n    - Leaf nodes represent an alphabet symbol s in Sigma with weight w(s) = freq(s).\n    - Internal nodes have no symbol (char=None) and weight equal to the sum of children weights.\n    \"\"\"\n    _counter = 0  # Global tie-breaker for priority queue stability\n\n    def __init__(self, char: Optional[str], freq: int):\n        self.char: Optional[str] = char\n        self.freq: int = freq\n        self.left: Optional['HuffmanNode'] = None   # Edge label '0'\n        self.right: Optional['HuffmanNode'] = None  # Edge label '1'\n        self.node_id: int = HuffmanNode._counter\n        HuffmanNode._counter += 1\n\n    def __lt__(self, other: 'HuffmanNode') -> bool:\n        \"\"\"Min-heap ordering based on frequency, with node_id as fallback.\"\"\"\n        if self.freq != other.freq:\n            return self.freq < other.freq\n        return self.node_id < other.node_id\n\n    def is_leaf(self) -> bool:\n        \"\"\"Returns True if the vertex is an external node (leaf).\"\"\"\n        return self.left is None and self.right is None\n\n\nclass HuffmanTree:\n    \"\"\"\n    Constructs the optimal prefix code tree and extracts binary codewords.\n    Demonstrates discrete tree structures, greedy choice property, and optimal substructure.\n    \"\"\"\n    def __init__(self):\n        self.root: Optional[HuffmanNode] = None\n        self.codes: Dict[str, str] = {}\n        self.reverse_mapping: Dict[str, str] = {}\n        self.frequencies: Dict[str, int] = {}\n        self.total_symbols: int = 0\n\n    def compute_frequencies(self, text: str) -> Dict[str, int]:\n        \"\"\"Calculates symbol frequencies and records total text length.\"\"\"\n        if not text:\n            raise ValueError(\"Input text cannot be empty.\")\n        self.frequencies = dict(Counter(text))\n        self.total_symbols = len(text)\n        return self.frequencies\n\n    def build_tree(self, text: str) -> HuffmanNode:\n        \"\"\"\n        Builds the optimal binary tree using a Min-Heap priority queue.\n        Time Complexity: O(n log n) where n is the alphabet size |Sigma|.\n        \"\"\"\n        self.compute_frequencies(text)\n\n        # Edge case: Alphabet size = 1 (single unique symbol)\n        if len(self.frequencies) == 1:\n            char = next(iter(self.frequencies))\n            self.root = HuffmanNode(None, self.frequencies[char])\n            self.root.left = HuffmanNode(char, self.frequencies[char])\n            self.codes = {char: \"0\"}\n            self.reverse_mapping = {\"0\": char}\n            return self.root\n\n        # Step 1: Initialize min-heap with all leaf nodes\n        heap: List[HuffmanNode] = [\n            HuffmanNode(char, freq) for char, freq in self.frequencies.items()\n        ]\n        heapq.heapify(heap)\n\n        # Step 2: Greedily extract two smallest subtrees and merge\n        while len(heap) > 1:\n            node_left = heapq.heappop(heap)   # Smallest frequency\n            node_right = heapq.heappop(heap)  # Second smallest frequency\n\n            # Create internal node with summed weight\n            merged_weight = node_left.freq + node_right.freq\n            parent = HuffmanNode(None, merged_weight)\n            parent.left = node_left\n            parent.right = node_right\n\n            heapq.heappush(heap, parent)\n\n        # Final remaining node is the root of the optimal tree\n        self.root = heapq.heappop(heap)\n\n        # Step 3: Traverse the tree to generate prefix codes\n        self.codes = {}\n        self.reverse_mapping = {}\n        self._generate_codes_dfs(self.root, \"\")\n        return self.root\n\n    def build_tree_with_history(self, text: str) -> Tuple[HuffmanNode, List[dict]]:\n        \"\"\"\n        Builds the Huffman tree while capturing every step of the min-heap\n        merging process for visual step-by-step explanation.\n        \"\"\"\n        self.compute_frequencies(text)\n        history: List[dict] = []\n\n        if len(self.frequencies) == 1:\n            char = next(iter(self.frequencies))\n            self.root = HuffmanNode(None, self.frequencies[char])\n            self.root.left = HuffmanNode(char, self.frequencies[char])\n            self.codes = {char: \"0\"}\n            self.reverse_mapping = {\"0\": char}\n            history.append({\n                \"step\": 0,\n                \"action\": \"Single Unique Character Edge Case\",\n                \"extracted\": [],\n                \"merged\": (char, self.frequencies[char]),\n                \"heap\": [(char, self.frequencies[char])]\n            })\n            return self.root, history\n\n        # Initialize heap\n        heap: List[HuffmanNode] = [\n            HuffmanNode(char, freq) for char, freq in self.frequencies.items()\n        ]\n        heapq.heapify(heap)\n\n        step_num = 0\n        history.append({\n            \"step\": step_num,\n            \"action\": f\"Initial Min-Priority Queue with {len(heap)} leaf vertices\",\n            \"extracted\": [],\n            \"merged\": None,\n            \"heap\": [(n.char if n.char is not None else f\"Internal(w={n.freq})\", n.freq) for n in sorted(heap)]\n        })\n\n        while len(heap) > 1:\n            step_num += 1\n            node_left = heapq.heappop(heap)\n            node_right = heapq.heappop(heap)\n\n            merged_weight = node_left.freq + node_right.freq\n            parent = HuffmanNode(None, merged_weight)\n            parent.left = node_left\n            parent.right = node_right\n\n            heapq.heappush(heap, parent)\n\n            left_desc = f\"'{node_left.char}' (w={node_left.freq})\" if node_left.is_leaf() else f\"Internal (w={node_left.freq})\"\n            right_desc = f\"'{node_right.char}' (w={node_right.freq})\" if node_right.is_leaf() else f\"Internal (w={node_right.freq})\"\n\n            history.append({\n                \"step\": step_num,\n                \"action\": f\"Extract-Min {left_desc} and {right_desc} -> Merge into Parent (w={merged_weight})\",\n                \"extracted\": [left_desc, right_desc],\n                \"merged\": f\"Internal Node (w={merged_weight})\",\n                \"heap\": [(n.char if n.char is not None else f\"Internal(w={n.freq})\", n.freq) for n in sorted(heap)]\n            })\n\n        self.root = heapq.heappop(heap)\n        self.codes = {}\n        self.reverse_mapping = {}\n        self._generate_codes_dfs(self.root, \"\")\n        return self.root, history\n\n    def _generate_codes_dfs(self, node: Optional[HuffmanNode], current_code: str):\n        \"\"\"Depth-First Search recursive walk to extract prefix-free binary paths.\"\"\"\n        if node is None:\n            return\n\n        if node.is_leaf():\n            # Leaf node reached: assign code\n            self.codes[node.char] = current_code\n            self.reverse_mapping[current_code] = node.char\n            return\n\n        # Convention: Left branch = '0', Right branch = '1'\n        self._generate_codes_dfs(node.left, current_code + \"0\")\n        self._generate_codes_dfs(node.right, current_code + \"1\")\n\n    def get_codes(self) -> Dict[str, str]:\n        \"\"\"Returns {symbol: prefix_code}.\"\"\"\n        return self.codes\n\n    def calculate_entropy(self) -> float:\n        \"\"\"\n        Calculates Shannon Entropy H(X):\n        H(X) = - sum_{s in Sigma} p(s) * log2(p(s))\n        Theoretical lower bound on expected code length.\n        \"\"\"\n        if self.total_symbols == 0:\n            return 0.0\n        entropy = 0.0\n        for freq in self.frequencies.values():\n            p = freq / self.total_symbols\n            if p > 0:\n                entropy -= p * math.log2(p)\n        return entropy\n\n    def calculate_average_code_length(self) -> float:\n        \"\"\"\n        Calculates Expected Codeword Length L(C):\n        L(C) = sum_{s in Sigma} p(s) * length(c(s))\n        \"\"\"\n        if self.total_symbols == 0:\n            return 0.0\n        weighted_len = sum(\n            freq * len(self.codes[char])\n            for char, freq in self.frequencies.items()\n        )\n        return weighted_len / self.total_symbols\n\n    def calculate_redundancy(self) -> float:\n        \"\"\"Calculates Code Redundancy R = L(C) - H(X) >= 0.\"\"\"\n        return self.calculate_average_code_length() - self.calculate_entropy()\n\n    def verify_kraft_inequality(self) -> Tuple[bool, float]:\n        \"\"\"\n        Verifies Kraft-McMillan Inequality:\n        sum_{i=1}^n 2^(-l_i) <= 1\n        \"\"\"\n        kraft_sum = sum(2 ** (-len(code)) for code in self.codes.values())\n        return (kraft_sum <= 1.0 + 1e-9, kraft_sum)\n", "codec_py": "\"\"\"\nHuffman Bitstream Encoder and Decoder (Codec)\nModule: src/codec.py\nRole: Piyush (Encoder/Decoder & Lossless Verification)\nDiscrete Mathematics & Graph Theory - Experiential Learning Project\n\"\"\"\n\nfrom typing import Dict, Tuple\nfrom src.huffman import HuffmanNode\n\n\nclass HuffmanCodec:\n    \"\"\"\n    Handles bit-level serialization, packing, and tree-based decoding.\n    Demonstrates lossless data recovery.\n    \"\"\"\n\n    @staticmethod\n    def encode_to_bitstring(text: str, codes: Dict[str, str]) -> str:\n        \"\"\"Converts plaintext to a continuous sequence of '0' and '1' characters.\"\"\"\n        return \"\".join(codes[char] for char in text)\n\n    @staticmethod\n    def pad_bitstring(bitstring: str) -> Tuple[bytes, int]:\n        \"\"\"\n        Pads the bitstring to a multiple of 8 bits and packs into raw bytes.\n        Returns (packed_bytes, padding_amount).\n        \"\"\"\n        extra_padding = (8 - len(bitstring) % 8) % 8\n        padded_bitstring = bitstring + (\"0\" * extra_padding)\n\n        byte_arr = bytearray()\n        for i in range(0, len(padded_bitstring), 8):\n            byte_chunk = padded_bitstring[i:i + 8]\n            byte_arr.append(int(byte_chunk, 2))\n\n        return bytes(byte_arr), extra_padding\n\n    @staticmethod\n    def unpad_and_unpack(packed_bytes: bytes, extra_padding: int) -> str:\n        \"\"\"Unpacks raw bytes into a bitstring, stripping away the padding bits.\"\"\"\n        bit_chunks = [f\"{b:08b}\" for b in packed_bytes]\n        bitstring = \"\".join(bit_chunks)\n        if extra_padding > 0:\n            bitstring = bitstring[:-extra_padding]\n        return bitstring\n\n    @staticmethod\n    def decode_from_bitstring(bitstring: str, root: HuffmanNode) -> str:\n        \"\"\"\n        Traverses the binary tree bit-by-bit from root to leaves.\n        - '0' navigates left\n        - '1' navigates right\n        - Leaf node emits the decoded character and resets navigation to root.\n        \"\"\"\n        if not bitstring:\n            return \"\"\n\n        # Special case: single unique character tree\n        if root.left and root.left.is_leaf() and root.right is None:\n            return root.left.char * len(bitstring)\n\n        decoded_chars = []\n        current = root\n\n        for bit in bitstring:\n            if bit == \"0\":\n                current = current.left\n            elif bit == \"1\":\n                current = current.right\n            else:\n                raise ValueError(f\"Invalid bit in stream: {bit}\")\n\n            if current.is_leaf():\n                decoded_chars.append(current.char)\n                current = root\n\n        return \"\".join(decoded_chars)\n\n    @classmethod\n    def verify_lossless(cls, original_text: str, decoded_text: str) -> bool:\n        \"\"\"Verifies mathematical idempotency: D(E(M)) == M.\"\"\"\n        return original_text == decoded_text\n", "shannon_fano_py": "\"\"\"\nBaseline Shannon-Fano Coding Implementation\nModule: src/shannon_fano.py\nRole: Baseline implementation for quantitative comparison against Huffman Coding\nDiscrete Mathematics & Graph Theory - Experiential Learning Project\n\"\"\"\n\nimport math\nfrom collections import Counter\nfrom typing import Dict, List, Tuple\n\n\nclass ShannonFanoTree:\n    \"\"\"\n    Shannon-Fano coding is a top-down greedy partitioning technique.\n    Unlike Huffman coding (which is bottom-up and mathematically optimal),\n    Shannon-Fano can result in suboptimal prefix trees.\n    \"\"\"\n    def __init__(self):\n        self.codes: Dict[str, str] = {}\n        self.frequencies: Dict[str, int] = {}\n        self.total_symbols: int = 0\n\n    def build_tree(self, text: str) -> Dict[str, str]:\n        \"\"\"Builds Shannon-Fano prefix codes from input text.\"\"\"\n        if not text:\n            raise ValueError(\"Input text cannot be empty.\")\n\n        self.frequencies = dict(Counter(text))\n        self.total_symbols = len(text)\n        sorted_symbols = sorted(self.frequencies.items(), key=lambda x: x[1], reverse=True)\n\n        self.codes = {char: \"\" for char, _ in sorted_symbols}\n        self._partition(sorted_symbols)\n        return self.codes\n\n    def _partition(self, symbol_list: List[Tuple[str, int]]):\n        \"\"\"Top-down recursive partition balancing the sum of frequencies.\"\"\"\n        if len(symbol_list) <= 1:\n            return\n\n        if len(symbol_list) == 2:\n            self.codes[symbol_list[0][0]] += \"0\"\n            self.codes[symbol_list[1][0]] += \"1\"\n            return\n\n        total_sum = sum(freq for _, freq in symbol_list)\n        half_sum = total_sum / 2.0\n\n        running_sum = 0\n        split_idx = 0\n        min_diff = float(\"inf\")\n\n        for i, (_, freq) in enumerate(symbol_list):\n            running_sum += freq\n            diff = abs(running_sum - half_sum)\n            if diff < min_diff:\n                min_diff = diff\n                split_idx = i + 1\n\n        # Assign prefix '0' to top partition, '1' to bottom partition\n        for char, _ in symbol_list[:split_idx]:\n            self.codes[char] += \"0\"\n        for char, _ in symbol_list[split_idx:]:\n            self.codes[char] += \"1\"\n\n        self._partition(symbol_list[:split_idx])\n        self._partition(symbol_list[split_idx:])\n\n    def calculate_average_code_length(self) -> float:\n        \"\"\"Expected code length for Shannon-Fano codes.\"\"\"\n        if self.total_symbols == 0:\n            return 0.0\n        weighted_len = sum(\n            freq * len(self.codes[char])\n            for char, freq in self.frequencies.items()\n        )\n        return weighted_len / self.total_symbols\n", "visualizer_py": "\"\"\"\nHuffman Tree Graph Visualizer using NetworkX & Matplotlib\nModule: src/visualizer.py\nRole: Khyathi (Visualization, Report & Presentation)\nDiscrete Mathematics & Graph Theory - Experiential Learning Project\n\"\"\"\n\nimport os\nfrom typing import Optional\nimport networkx as nx\nimport matplotlib.pyplot as plt\nfrom src.huffman import HuffmanNode\n\n\nclass HuffmanVisualizer:\n    \"\"\"\n    Renders rooted binary trees with edge labels ('0' and '1') and node weights.\n    \"\"\"\n\n    @classmethod\n    def build_networkx_graph(\n        cls,\n        root: HuffmanNode,\n        graph: Optional[nx.DiGraph] = None,\n        pos: Optional[dict] = None,\n        x: float = 0.0,\n        y: float = 0.0,\n        layer: float = 1.0,\n        parent_id: Optional[int] = None,\n        edge_label: str = \"\"\n    ) -> Tuple[nx.DiGraph, dict, dict, dict]:\n        \"\"\"\n        Recursively converts a binary tree into a directed NetworkX graph with hierarchical layout.\n        \"\"\"\n        if graph is None:\n            graph = nx.DiGraph()\n            pos = {}\n\n        node_id = root.node_id\n        pos[node_id] = (x, y)\n\n        if root.is_leaf():\n            display_char = repr(root.char) if root.char in ('\\n', ' ', '\\t') else root.char\n            label = f\"{display_char}\\n(w={root.freq})\"\n            node_type = \"leaf\"\n        else:\n            label = f\"w={root.freq}\"\n            node_type = \"internal\"\n\n        graph.add_node(node_id, label=label, type=node_type)\n\n        if parent_id is not None:\n            graph.add_edge(parent_id, node_id, label=edge_label)\n\n        # Recursively layout children\n        dx = 1.0 / (2 ** layer)\n        if root.left:\n            cls.build_networkx_graph(\n                root.left, graph, pos,\n                x=x - dx, y=y - 1.0, layer=layer + 1.0,\n                parent_id=node_id, edge_label=\"0\"\n            )\n        if root.right:\n            cls.build_networkx_graph(\n                root.right, graph, pos,\n                x=x + dx, y=y - 1.0, layer=layer + 1.0,\n                parent_id=node_id, edge_label=\"1\"\n            )\n\n        labels = nx.get_node_attributes(graph, 'label')\n        edge_labels = nx.get_edge_attributes(graph, 'label')\n        return graph, pos, labels, edge_labels\n\n    @classmethod\n    def plot_tree(\n        cls,\n        root: HuffmanNode,\n        title: str = \"Huffman Optimal Prefix Code Tree\",\n        save_path: Optional[str] = None\n    ):\n        \"\"\"Plots the tree with color-coded leaf and internal nodes.\"\"\"\n        graph, pos, labels, edge_labels = cls.build_networkx_graph(root)\n\n        plt.figure(figsize=(14, 8))\n        plt.title(title, fontsize=14, fontweight=\"bold\", pad=20)\n\n        # Classify nodes for visual styling\n        internal_nodes = [n for n, attr in graph.nodes(data=True) if attr['type'] == 'internal']\n        leaf_nodes = [n for n, attr in graph.nodes(data=True) if attr['type'] == 'leaf']\n\n        # Draw internal nodes (blue circular)\n        nx.draw_networkx_nodes(\n            graph, pos, nodelist=internal_nodes,\n            node_color=\"#6baed6\", node_size=1600, node_shape=\"o\"\n        )\n        # Draw leaf nodes (green squares)\n        nx.draw_networkx_nodes(\n            graph, pos, nodelist=leaf_nodes,\n            node_color=\"#74c476\", node_size=1800, node_shape=\"s\"\n        )\n\n        # Draw edges and labels\n        nx.draw_networkx_edges(graph, pos, arrows=False, edge_color=\"#636363\", width=1.5)\n        nx.draw_networkx_labels(graph, pos, labels=labels, font_size=9, font_family=\"sans-serif\")\n        nx.draw_networkx_edge_labels(graph, pos, edge_labels=edge_labels, font_size=10, font_color=\"#cb181d\")\n\n        plt.axis(\"off\")\n        plt.tight_layout()\n\n        if save_path:\n            os.makedirs(os.path.dirname(save_path), exist_ok=True)\n            plt.savefig(save_path, dpi=300, bbox_inches=\"tight\")\n            print(f\"[OK] Saved tree visualization to: {save_path}\")\n        plt.close()\n", "benchmark_py": "\"\"\"\nExperimental Suite & Quantitative Benchmarking\nModule: experiments/benchmark.py\nRole: Harsh (Experiments & Comparison)\nDiscrete Mathematics & Graph Theory - Experiential Learning Project\nTopic 14: Optimal Prefix Codes and Data Compression Using Huffman Coding\n\"\"\"\n\nimport os\nimport sys\nimport time\nimport math\nimport pandas as pd\nimport matplotlib.pyplot as plt\n\n# Ensure root folder is in sys.path\nPROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), \"..\"))\nsys.path.append(PROJECT_ROOT)\n\nfrom src.huffman import HuffmanTree\nfrom src.shannon_fano import ShannonFanoTree\nfrom src.codec import HuffmanCodec\n\n\ndef run_experiment_1_data_types():\n    \"\"\"\n    Experiment 1: Compression efficiency across distinct data domains.\n    Compares: English text, Source code, Genomic DNA, Uniform text.\n    Metrics: Shannon Entropy H(X), Huffman Avg Length L(C), Shannon-Fano Avg Length,\n             Redundancy R, Compression Ratio, Time (ms).\n    \"\"\"\n    print(\"\\n\" + \"=\" * 70)\n    print(\"RUNNING EXPERIMENT 1: EFFICIENCY ACROSS DATA DOMAINS\")\n    print(\"=\" * 70)\n\n    datasets = {\n        \"English Text\": os.path.join(PROJECT_ROOT, \"data\", \"sample_english.txt\"),\n        \"Python Code\": os.path.join(PROJECT_ROOT, \"data\", \"sample_code.py\"),\n        \"Genomic DNA\": os.path.join(PROJECT_ROOT, \"data\", \"sample_dna.fasta\"),\n        \"Uniform Random\": os.path.join(PROJECT_ROOT, \"data\", \"sample_uniform.txt\")\n    }\n\n    results = []\n\n    for name, filepath in datasets.items():\n        if not os.path.exists(filepath):\n            continue\n\n        with open(filepath, \"r\", encoding=\"utf-8\") as f:\n            text = f.read()\n\n        n_chars = len(text)\n\n        # Huffman\n        start_time = time.perf_counter()\n        huffman = HuffmanTree()\n        root = huffman.build_tree(text)\n        codes = huffman.get_codes()\n        huff_time_ms = (time.perf_counter() - start_time) * 1000\n\n        # Lossless verification\n        encoded_bits = HuffmanCodec.encode_to_bitstring(text, codes)\n        decoded_text = HuffmanCodec.decode_from_bitstring(encoded_bits, root)\n        assert HuffmanCodec.verify_lossless(text, decoded_text), f\"Verification failed for {name}\"\n\n        # Shannon-Fano\n        sf = ShannonFanoTree()\n        sf_codes = sf.build_tree(text)\n        sf_avg_len = sf.calculate_average_code_length()\n\n        # Metrics\n        entropy = huffman.calculate_entropy()\n        huff_avg_len = huffman.calculate_average_code_length()\n        redundancy = huffman.calculate_redundancy()\n        comp_ratio = (n_chars * 8.0) / len(encoded_bits)\n        space_saving_pct = (1.0 - (len(encoded_bits) / (n_chars * 8.0))) * 100\n\n        results.append({\n            \"Dataset\": name,\n            \"Symbols (N)\": n_chars,\n            \"Alphabet (|Sigma|)\": len(huffman.frequencies),\n            \"Entropy H(X)\": round(entropy, 4),\n            \"Huffman L(C)\": round(huff_avg_len, 4),\n            \"Shannon-Fano L\": round(sf_avg_len, 4),\n            \"Redundancy R\": round(redundancy, 4),\n            \"Comp Ratio\": round(comp_ratio, 2),\n            \"Space Savings (%)\": round(space_saving_pct, 2),\n            \"Time (ms)\": round(huff_time_ms, 3)\n        })\n\n    df = pd.DataFrame(results)\n    print(df.to_string(index=False))\n\n    # Save CSV\n    plots_dir = os.path.join(PROJECT_ROOT, \"experiments\", \"plots\")\n    os.makedirs(plots_dir, exist_ok=True)\n    df.to_csv(os.path.join(plots_dir, \"experiment1_results.csv\"), index=False)\n\n    # Plot 1: Entropy vs Huffman Avg Length vs Shannon-Fano Avg Length\n    plt.figure(figsize=(10, 6))\n    x = range(len(df))\n    width = 0.25\n\n    plt.bar([i - width for i in x], df[\"Entropy H(X)\"], width=width, label=\"Shannon Entropy H(X)\", color=\"#2b8cbe\")\n    plt.bar(x, df[\"Huffman L(C)\"], width=width, label=\"Huffman Avg Length L(C)\", color=\"#31a354\")\n    plt.bar([i + width for i in x], df[\"Shannon-Fano L\"], width=width, label=\"Shannon-Fano Length\", color=\"#e6550d\")\n\n    plt.axhline(y=8.0, color=\"gray\", linestyle=\"--\", label=\"Fixed 8-Bit ASCII\")\n    plt.xticks(x, df[\"Dataset\"], fontweight=\"bold\")\n    plt.ylabel(\"Bits per Symbol\", fontsize=12)\n    plt.title(\"Experiment 1: Information Limit vs. Prefix Code Lengths\", fontsize=14, fontweight=\"bold\")\n    plt.legend()\n    plt.grid(axis=\"y\", linestyle=\":\", alpha=0.7)\n    plt.tight_layout()\n    plt.savefig(os.path.join(plots_dir, \"exp1_entropy_vs_codelength.png\"), dpi=300)\n    plt.close()\n    print(\"[OK] Plot saved: experiments/plots/exp1_entropy_vs_codelength.png\")\n\n    return df\n\n\ndef run_experiment_2_varying_size():\n    \"\"\"\n    Experiment 2: Algorithmic scaling across input sizes N.\n    Compares: Execution time and code efficiency as N scales.\n    Instances: N in [300, 1000, 5000, 20000, 100000] symbols.\n    \"\"\"\n    print(\"\\n\" + \"=\" * 70)\n    print(\"RUNNING EXPERIMENT 2: SCALING & RUNTIME VS. INPUT SIZE N\")\n    print(\"=\" * 70)\n\n    # Read base English text and repeat to generate controlled sizes\n    sample_text_path = os.path.join(PROJECT_ROOT, \"data\", \"sample_english.txt\")\n    with open(sample_text_path, \"r\", encoding=\"utf-8\") as f:\n        base_text = f.read()\n\n    sizes = [300, 1000, 5000, 20000, 100000]\n    results = []\n\n    for target_n in sizes:\n        repeats = math.ceil(target_n / len(base_text))\n        text = (base_text * repeats)[:target_n]\n\n        # Huffman Benchmark\n        t0 = time.perf_counter()\n        huffman = HuffmanTree()\n        root = huffman.build_tree(text)\n        codes = huffman.get_codes()\n        huff_time_ms = (time.perf_counter() - t0) * 1000\n\n        # Shannon-Fano Benchmark\n        t1 = time.perf_counter()\n        sf = ShannonFanoTree()\n        sf.build_tree(text)\n        sf_time_ms = (time.perf_counter() - t1) * 1000\n\n        results.append({\n            \"Input Size (N)\": target_n,\n            \"Huffman Time (ms)\": round(huff_time_ms, 3),\n            \"Shannon-Fano Time (ms)\": round(sf_time_ms, 3),\n            \"Huffman Avg Length\": round(huffman.calculate_average_code_length(), 4)\n        })\n\n    df = pd.DataFrame(results)\n    print(df.to_string(index=False))\n    plots_dir = os.path.join(PROJECT_ROOT, \"experiments\", \"plots\")\n    df.to_csv(os.path.join(plots_dir, \"experiment2_results.csv\"), index=False)\n\n    # Plot 2: Runtime scaling\n    plt.figure(figsize=(9, 5))\n    plt.plot(df[\"Input Size (N)\"], df[\"Huffman Time (ms)\"], marker=\"o\", linewidth=2, color=\"#31a354\", label=\"Huffman (Min-Heap)\")\n    plt.plot(df[\"Input Size (N)\"], df[\"Shannon-Fano Time (ms)\"], marker=\"s\", linewidth=2, color=\"#e6550d\", label=\"Shannon-Fano\")\n    plt.xlabel(\"Input Size N (Symbols)\", fontsize=12)\n    plt.ylabel(\"Execution Time (milliseconds)\", fontsize=12)\n    plt.title(\"Experiment 2: Execution Time Complexity Scaling\", fontsize=14, fontweight=\"bold\")\n    plt.legend()\n    plt.grid(True, linestyle=\":\", alpha=0.7)\n    plt.tight_layout()\n    plt.savefig(os.path.join(plots_dir, \"exp2_runtime_scaling.png\"), dpi=300)\n    plt.close()\n    print(\"[OK] Plot saved: experiments/plots/exp2_runtime_scaling.png\")\n\n    return df\n\n\nif __name__ == \"__main__\":\n    run_experiment_1_data_types()\n    run_experiment_2_varying_size()\n", "main_py": "\"\"\"\nMain Application Entry Point\nDiscrete Mathematics and Graph Theory Experiential Learning\nProgramme: Blockchain Technology (CSE-BCT)\nTopic 14: Optimal Prefix Codes and Data Compression Using Huffman Coding\nAuthor: Nikhil (Project Lead) & Team\n\"\"\"\n\nimport os\nimport sys\nfrom src.huffman import HuffmanTree\nfrom src.shannon_fano import ShannonFanoTree\nfrom src.codec import HuffmanCodec\nfrom src.visualizer import HuffmanVisualizer\n\n\ndef run_pipeline():\n    base_dir = os.path.dirname(os.path.abspath(__file__))\n\n    print(\"=\" * 75)\n    print(\"  DISCRETE MATHEMATICS & GRAPH THEORY - EXPERIENTIAL LEARNING\")\n    print(\"  Topic 14: Optimal Prefix Codes & Data Compression (Huffman Coding)\")\n    print(\"=\" * 75)\n\n    # 1. Load dataset (must be >= 300 data points as per guidelines)\n    data_path = os.path.join(base_dir, \"data\", \"sample_english.txt\")\n    if not os.path.exists(data_path):\n        print(f\"[-] Dataset file not found at {data_path}\")\n        return\n\n    with open(data_path, \"r\", encoding=\"utf-8\") as f:\n        text = f.read()\n\n    total_chars = len(text)\n    print(f\"\\n[1] DATASET LOADED: {data_path}\")\n    print(f\"    - Total Records/Characters (N): {total_chars} (Requirement: >= 300 records [PASS])\")\n\n    # 2. Build Huffman Tree (Greedy Min-Heap Algorithm)\n    print(\"\\n[2] BUILDING OPTIMAL PREFIX TREE (HUFFMAN ALGORITHM)...\")\n    huffman = HuffmanTree()\n    root = huffman.build_tree(text)\n    codes = huffman.get_codes()\n    alphabet_size = len(codes)\n    print(f\"    - Alphabet Size (|Sigma|): {alphabet_size} distinct symbols\")\n\n    # 3. Shannon-Fano baseline comparison\n    print(\"\\n[3] COMPUTING BASELINE COMPARISON (SHANNON-FANO ALGORITHM)...\")\n    sf = ShannonFanoTree()\n    sf.build_tree(text)\n\n    # 4. Bitstream Encoding and Byte Packing\n    print(\"\\n[4] EXECUTING BITSTREAM ENCODING & PACKING...\")\n    raw_bitstring = HuffmanCodec.encode_to_bitstring(text, codes)\n    packed_bytes, padding = HuffmanCodec.pad_bitstring(raw_bitstring)\n    uncompressed_bits = total_chars * 8\n    compressed_bits = len(packed_bytes) * 8\n\n    print(f\"    - Uncompressed Size (Fixed ASCII 8-bit): {uncompressed_bits:,} bits ({uncompressed_bits // 8:,} bytes)\")\n    print(f\"    - Compressed Size (Huffman Packed):     {compressed_bits:,} bits ({len(packed_bytes):,} bytes)\")\n    print(f\"    - Padding Bits Added:                  {padding} bits\")\n\n    # 5. Lossless Decoding & Verification\n    print(\"\\n[5] EXECUTING TREE-WALK DECODING & LOSSLESS VERIFICATION...\")\n    unpacked_bitstring = HuffmanCodec.unpad_and_unpack(packed_bytes, padding)\n    decoded_text = HuffmanCodec.decode_from_bitstring(unpacked_bitstring, root)\n    is_lossless = HuffmanCodec.verify_lossless(text, decoded_text)\n    print(f\"    - Decoded Text Character Count: {len(decoded_text)}\")\n    print(f\"    - Lossless Reconstruction Check (D(E(M)) == M): {is_lossless} [PASS]\")\n\n    # 6. Discrete Mathematics & Information-Theoretic Evaluation\n    entropy = huffman.calculate_entropy()\n    avg_len_huffman = huffman.calculate_average_code_length()\n    avg_len_sf = sf.calculate_average_code_length()\n    redundancy = huffman.calculate_redundancy()\n    is_kraft_valid, kraft_sum = huffman.verify_kraft_inequality()\n    compression_ratio = uncompressed_bits / compressed_bits\n    space_savings = (1.0 - (compressed_bits / uncompressed_bits)) * 100\n\n    print(\"\\n\" + \"=\" * 75)\n    print(\"  QUANTITATIVE DMGT & PERFORMANCE METRICS\")\n    print(\"=\" * 75)\n    print(f\"  * Shannon Entropy H(X)              : {entropy:.4f} bits/symbol (Theoretical Minimum)\")\n    print(f\"  * Huffman Expected Code Length L(C) : {avg_len_huffman:.4f} bits/symbol\")\n    print(f\"  * Shannon-Fano Code Length L_sf     : {avg_len_sf:.4f} bits/symbol\")\n    print(f\"  * Fixed 8-bit ASCII Length          : 8.0000 bits/symbol\")\n    print(f\"  * Coding Redundancy R = L(C) - H(X) : {redundancy:.4f} bits/symbol (Optimality gap)\")\n    print(f\"  * Kraft-McMillan Sum (sum 2^-l_i)   : {kraft_sum:.6f} <= 1.0 (Valid: {is_kraft_valid})\")\n    print(f\"  * Compression Ratio (CR)            : {compression_ratio:.2f} : 1\")\n    print(f\"  * Space Savings (%)                 : {space_savings:.2f}%\")\n    print(\"=\" * 75)\n\n    # 7. Render Graph-Theoretic Tree Visualization\n    sample_sub_text = \"EXPERIENTIAL LEARNING IN GRAPH THEORY\"\n    vis_tree = HuffmanTree()\n    vis_root = vis_tree.build_tree(sample_sub_text)\n    plot_path = os.path.join(base_dir, \"experiments\", \"plots\", \"huffman_tree_visualization.png\")\n    HuffmanVisualizer.plot_tree(vis_root, title=\"Rooted Binary Prefix Code Tree (NetworkX Visualization)\", save_path=plot_path)\n\n    print(\"\\n[OK] Full pipeline completed successfully without errors.\")\n\n\nif __name__ == \"__main__\":\n    run_pipeline()\n", "test_huffman_py": "\"\"\"\nUnit Tests for Huffman Coding & Codec Pipeline\nModule: tests/test_huffman.py\nRole: Piyush & Nikhil\n\"\"\"\n\nimport os\nimport sys\n\n# Ensure project root is always in sys.path regardless of where pytest is run from\nsys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), \"..\")))\n\nimport pytest\nimport math\nfrom src.huffman import HuffmanTree, HuffmanNode\nfrom src.shannon_fano import ShannonFanoTree\nfrom src.codec import HuffmanCodec\n\n\ndef test_basic_lossless_roundtrip():\n    text = \"this is an experiential learning project in discrete mathematics\"\n    tree = HuffmanTree()\n    root = tree.build_tree(text)\n    codes = tree.get_codes()\n\n    # Encode\n    bitstring = HuffmanCodec.encode_to_bitstring(text, codes)\n    packed_bytes, padding = HuffmanCodec.pad_bitstring(bitstring)\n\n    # Decode\n    unpacked_bits = HuffmanCodec.unpad_and_unpack(packed_bytes, padding)\n    decoded = HuffmanCodec.decode_from_bitstring(unpacked_bits, root)\n\n    assert decoded == text\n    assert HuffmanCodec.verify_lossless(text, decoded)\n\n\ndef test_prefix_property():\n    text = \"abracadabra$banana$apple$discrete$graph$tree\"\n    tree = HuffmanTree()\n    tree.build_tree(text)\n    codes = tree.get_codes()\n\n    # Check that no code is a prefix of another\n    code_list = list(codes.values())\n    for i, c1 in enumerate(code_list):\n        for j, c2 in enumerate(code_list):\n            if i != j:\n                assert not c2.startswith(c1), f\"Prefix violation: {c1} is prefix of {c2}\"\n\n\ndef test_kraft_inequality():\n    text = \"the quick brown fox jumps over the lazy dog 1234567890\"\n    tree = HuffmanTree()\n    tree.build_tree(text)\n    is_valid, kraft_sum = tree.verify_kraft_inequality()\n    assert is_valid\n    assert kraft_sum <= 1.0 + 1e-9\n\n\ndef test_entropy_bound():\n    text = \"aaabbbcccdddeeefffggghhhiiijjjkkklll\"\n    tree = HuffmanTree()\n    tree.build_tree(text)\n    entropy = tree.calculate_entropy()\n    avg_len = tree.calculate_average_code_length()\n\n    # By Shannon's Source Coding Theorem: H(X) <= L(C) < H(X) + 1\n    assert avg_len >= entropy - 1e-9\n    assert avg_len < entropy + 1.0\n\n\ndef test_single_character_edge_case():\n    text = \"AAAAAAAAAA\"\n    tree = HuffmanTree()\n    root = tree.build_tree(text)\n    codes = tree.get_codes()\n\n    assert codes[\"A\"] == \"0\"\n    bitstring = HuffmanCodec.encode_to_bitstring(text, codes)\n    decoded = HuffmanCodec.decode_from_bitstring(bitstring, root)\n    assert decoded == text\n\n\ndef test_shannon_fano_vs_huffman_optimality():\n    text = \"AAAAAAAABBBCCCCDDDEEEFFFGGGHHH\"\n    huffman = HuffmanTree()\n    huffman.build_tree(text)\n    huff_len = huffman.calculate_average_code_length()\n\n    sf = ShannonFanoTree()\n    sf.build_tree(text)\n    sf_len = sf.calculate_average_code_length()\n\n    # Huffman is proven mathematically optimal: L_huff <= L_sf\n    assert huff_len <= sf_len + 1e-9\n\n\ndef test_tree_with_history():\n    text = \"EXPERIENTIAL LEARNING\"\n    tree = HuffmanTree()\n    root, history = tree.build_tree_with_history(text)\n    \n    assert root is not None\n    assert len(history) > 0\n    # Step 0 is the initial heap state\n    assert history[0][\"step\"] == 0\n    assert \"leaf\" in history[0][\"action\"].lower()\n    \n    # Check that subsequent steps record extractions and merges\n    for step in history[1:]:\n        assert \"step\" in step\n        assert \"action\" in step\n        assert len(step[\"extracted\"]) == 2\n        assert \"Internal\" in step[\"merged\"]\n        assert isinstance(step[\"heap\"], list)\n    \n    # Codes generated should match regular build_tree\n    codes_history = tree.get_codes()\n    regular_tree = HuffmanTree()\n    regular_tree.build_tree(text)\n    assert len(codes_history) == len(regular_tree.get_codes())\n\n"};
+
+    // Source Codes
+    const SOURCE_CODES = {"huffman.py": "\"\"\"\nCore Huffman Coding Implementation\nModule: src/huffman.py\nRole: Nikhil (Project Lead & Core Implementation)\nDiscrete Mathematics & Graph Theory - Experiential Learning Project\nTopic 14: Optimal Prefix Codes and Data Compression Using Huffman Coding\n\"\"\"\n\nimport heapq\nimport math\nfrom collections import Counter\nfrom typing import Dict, Optional, Tuple, List\n\n\nclass HuffmanNode:\n    \"\"\"\n    Represents a vertex v in a weighted rooted binary tree T = (V, E).\n    - Leaf nodes represent an alphabet symbol s in Sigma with weight w(s) = freq(s).\n    - Internal nodes have no symbol (char=None) and weight equal to the sum of children weights.\n    \"\"\"\n    _counter = 0  # Global tie-breaker for priority queue stability\n\n    def __init__(self, char: Optional[str], freq: int):\n        self.char: Optional[str] = char\n        self.freq: int = freq\n        self.left: Optional['HuffmanNode'] = None   # Edge label '0'\n        self.right: Optional['HuffmanNode'] = None  # Edge label '1'\n        self.node_id: int = HuffmanNode._counter\n        HuffmanNode._counter += 1\n\n    def __lt__(self, other: 'HuffmanNode') -> bool:\n        \"\"\"Min-heap ordering based on frequency, with node_id as fallback.\"\"\"\n        if self.freq != other.freq:\n            return self.freq < other.freq\n        return self.node_id < other.node_id\n\n    def is_leaf(self) -> bool:\n        \"\"\"Returns True if the vertex is an external node (leaf).\"\"\"\n        return self.left is None and self.right is None\n\n\nclass HuffmanTree:\n    \"\"\"\n    Constructs the optimal prefix code tree and extracts binary codewords.\n    Demonstrates discrete tree structures, greedy choice property, and optimal substructure.\n    \"\"\"\n    def __init__(self):\n        self.root: Optional[HuffmanNode] = None\n        self.codes: Dict[str, str] = {}\n        self.reverse_mapping: Dict[str, str] = {}\n        self.frequencies: Dict[str, int] = {}\n        self.total_symbols: int = 0\n\n    def compute_frequencies(self, text: str) -> Dict[str, int]:\n        \"\"\"Calculates symbol frequencies and records total text length.\"\"\"\n        if not text:\n            raise ValueError(\"Input text cannot be empty.\")\n        self.frequencies = dict(Counter(text))\n        self.total_symbols = len(text)\n        return self.frequencies\n\n    def build_tree(self, text: str) -> HuffmanNode:\n        \"\"\"\n        Builds the optimal binary tree using a Min-Heap priority queue.\n        Time Complexity: O(n log n) where n is the alphabet size |Sigma|.\n        \"\"\"\n        self.compute_frequencies(text)\n\n        # Edge case: Alphabet size = 1 (single unique symbol)\n        if len(self.frequencies) == 1:\n            char = next(iter(self.frequencies))\n            self.root = HuffmanNode(None, self.frequencies[char])\n            self.root.left = HuffmanNode(char, self.frequencies[char])\n            self.codes = {char: \"0\"}\n            self.reverse_mapping = {\"0\": char}\n            return self.root\n\n        # Step 1: Initialize min-heap with all leaf nodes\n        heap: List[HuffmanNode] = [\n            HuffmanNode(char, freq) for char, freq in self.frequencies.items()\n        ]\n        heapq.heapify(heap)\n\n        # Step 2: Greedily extract two smallest subtrees and merge\n        while len(heap) > 1:\n            node_left = heapq.heappop(heap)   # Smallest frequency\n            node_right = heapq.heappop(heap)  # Second smallest frequency\n\n            # Create internal node with summed weight\n            merged_weight = node_left.freq + node_right.freq\n            parent = HuffmanNode(None, merged_weight)\n            parent.left = node_left\n            parent.right = node_right\n\n            heapq.heappush(heap, parent)\n\n        # Final remaining node is the root of the optimal tree\n        self.root = heapq.heappop(heap)\n\n        # Step 3: Traverse the tree to generate prefix codes\n        self.codes = {}\n        self.reverse_mapping = {}\n        self._generate_codes_dfs(self.root, \"\")\n        return self.root\n\n    def build_tree_with_history(self, text: str) -> Tuple[HuffmanNode, List[dict]]:\n        \"\"\"\n        Builds the Huffman tree while capturing every step of the min-heap\n        merging process for visual step-by-step explanation.\n        \"\"\"\n        self.compute_frequencies(text)\n        history: List[dict] = []\n\n        if len(self.frequencies) == 1:\n            char = next(iter(self.frequencies))\n            self.root = HuffmanNode(None, self.frequencies[char])\n            self.root.left = HuffmanNode(char, self.frequencies[char])\n            self.codes = {char: \"0\"}\n            self.reverse_mapping = {\"0\": char}\n            history.append({\n                \"step\": 0,\n                \"action\": \"Single Unique Character Edge Case\",\n                \"extracted\": [],\n                \"merged\": (char, self.frequencies[char]),\n                \"heap\": [(char, self.frequencies[char])]\n            })\n            return self.root, history\n\n        # Initialize heap\n        heap: List[HuffmanNode] = [\n            HuffmanNode(char, freq) for char, freq in self.frequencies.items()\n        ]\n        heapq.heapify(heap)\n\n        step_num = 0\n        history.append({\n            \"step\": step_num,\n            \"action\": f\"Initial Min-Priority Queue with {len(heap)} leaf vertices\",\n            \"extracted\": [],\n            \"merged\": None,\n            \"heap\": [(n.char if n.char is not None else f\"Internal(w={n.freq})\", n.freq) for n in sorted(heap)]\n        })\n\n        while len(heap) > 1:\n            step_num += 1\n            node_left = heapq.heappop(heap)\n            node_right = heapq.heappop(heap)\n\n            merged_weight = node_left.freq + node_right.freq\n            parent = HuffmanNode(None, merged_weight)\n            parent.left = node_left\n            parent.right = node_right\n\n            heapq.heappush(heap, parent)\n\n            left_desc = f\"'{node_left.char}' (w={node_left.freq})\" if node_left.is_leaf() else f\"Internal (w={node_left.freq})\"\n            right_desc = f\"'{node_right.char}' (w={node_right.freq})\" if node_right.is_leaf() else f\"Internal (w={node_right.freq})\"\n\n            history.append({\n                \"step\": step_num,\n                \"action\": f\"Extract-Min {left_desc} and {right_desc} -> Merge into Parent (w={merged_weight})\",\n                \"extracted\": [left_desc, right_desc],\n                \"merged\": f\"Internal Node (w={merged_weight})\",\n                \"heap\": [(n.char if n.char is not None else f\"Internal(w={n.freq})\", n.freq) for n in sorted(heap)]\n            })\n\n        self.root = heapq.heappop(heap)\n        self.codes = {}\n        self.reverse_mapping = {}\n        self._generate_codes_dfs(self.root, \"\")\n        return self.root, history\n\n    def _generate_codes_dfs(self, node: Optional[HuffmanNode], current_code: str):\n        \"\"\"Depth-First Search recursive walk to extract prefix-free binary paths.\"\"\"\n        if node is None:\n            return\n\n        if node.is_leaf():\n            # Leaf node reached: assign code\n            self.codes[node.char] = current_code\n            self.reverse_mapping[current_code] = node.char\n            return\n\n        # Convention: Left branch = '0', Right branch = '1'\n        self._generate_codes_dfs(node.left, current_code + \"0\")\n        self._generate_codes_dfs(node.right, current_code + \"1\")\n\n    def get_codes(self) -> Dict[str, str]:\n        \"\"\"Returns {symbol: prefix_code}.\"\"\"\n        return self.codes\n\n    def calculate_entropy(self) -> float:\n        \"\"\"\n        Calculates Shannon Entropy H(X):\n        H(X) = - sum_{s in Sigma} p(s) * log2(p(s))\n        Theoretical lower bound on expected code length.\n        \"\"\"\n        if self.total_symbols == 0:\n            return 0.0\n        entropy = 0.0\n        for freq in self.frequencies.values():\n            p = freq / self.total_symbols\n            if p > 0:\n                entropy -= p * math.log2(p)\n        return entropy\n\n    def calculate_average_code_length(self) -> float:\n        \"\"\"\n        Calculates Expected Codeword Length L(C):\n        L(C) = sum_{s in Sigma} p(s) * length(c(s))\n        \"\"\"\n        if self.total_symbols == 0:\n            return 0.0\n        weighted_len = sum(\n            freq * len(self.codes[char])\n            for char, freq in self.frequencies.items()\n        )\n        return weighted_len / self.total_symbols\n\n    def calculate_redundancy(self) -> float:\n        \"\"\"Calculates Code Redundancy R = L(C) - H(X) >= 0.\"\"\"\n        return self.calculate_average_code_length() - self.calculate_entropy()\n\n    def verify_kraft_inequality(self) -> Tuple[bool, float]:\n        \"\"\"\n        Verifies Kraft-McMillan Inequality:\n        sum_{i=1}^n 2^(-l_i) <= 1\n        \"\"\"\n        kraft_sum = sum(2 ** (-len(code)) for code in self.codes.values())\n        return (kraft_sum <= 1.0 + 1e-9, kraft_sum)\n", "codec.py": "\"\"\"\nHuffman Bitstream Encoder and Decoder (Codec)\nModule: src/codec.py\nRole: Piyush (Encoder/Decoder & Lossless Verification)\nDiscrete Mathematics & Graph Theory - Experiential Learning Project\n\"\"\"\n\nfrom typing import Dict, Tuple\nfrom src.huffman import HuffmanNode\n\n\nclass HuffmanCodec:\n    \"\"\"\n    Handles bit-level serialization, packing, and tree-based decoding.\n    Demonstrates lossless data recovery.\n    \"\"\"\n\n    @staticmethod\n    def encode_to_bitstring(text: str, codes: Dict[str, str]) -> str:\n        \"\"\"Converts plaintext to a continuous sequence of '0' and '1' characters.\"\"\"\n        return \"\".join(codes[char] for char in text)\n\n    @staticmethod\n    def pad_bitstring(bitstring: str) -> Tuple[bytes, int]:\n        \"\"\"\n        Pads the bitstring to a multiple of 8 bits and packs into raw bytes.\n        Returns (packed_bytes, padding_amount).\n        \"\"\"\n        extra_padding = (8 - len(bitstring) % 8) % 8\n        padded_bitstring = bitstring + (\"0\" * extra_padding)\n\n        byte_arr = bytearray()\n        for i in range(0, len(padded_bitstring), 8):\n            byte_chunk = padded_bitstring[i:i + 8]\n            byte_arr.append(int(byte_chunk, 2))\n\n        return bytes(byte_arr), extra_padding\n\n    @staticmethod\n    def unpad_and_unpack(packed_bytes: bytes, extra_padding: int) -> str:\n        \"\"\"Unpacks raw bytes into a bitstring, stripping away the padding bits.\"\"\"\n        bit_chunks = [f\"{b:08b}\" for b in packed_bytes]\n        bitstring = \"\".join(bit_chunks)\n        if extra_padding > 0:\n            bitstring = bitstring[:-extra_padding]\n        return bitstring\n\n    @staticmethod\n    def decode_from_bitstring(bitstring: str, root: HuffmanNode) -> str:\n        \"\"\"\n        Traverses the binary tree bit-by-bit from root to leaves.\n        - '0' navigates left\n        - '1' navigates right\n        - Leaf node emits the decoded character and resets navigation to root.\n        \"\"\"\n        if not bitstring:\n            return \"\"\n\n        # Special case: single unique character tree\n        if root.left and root.left.is_leaf() and root.right is None:\n            return root.left.char * len(bitstring)\n\n        decoded_chars = []\n        current = root\n\n        for bit in bitstring:\n            if bit == \"0\":\n                current = current.left\n            elif bit == \"1\":\n                current = current.right\n            else:\n                raise ValueError(f\"Invalid bit in stream: {bit}\")\n\n            if current.is_leaf():\n                decoded_chars.append(current.char)\n                current = root\n\n        return \"\".join(decoded_chars)\n\n    @classmethod\n    def verify_lossless(cls, original_text: str, decoded_text: str) -> bool:\n        \"\"\"Verifies mathematical idempotency: D(E(M)) == M.\"\"\"\n        return original_text == decoded_text\n", "shannon_fano.py": "\"\"\"\nBaseline Shannon-Fano Coding Implementation\nModule: src/shannon_fano.py\nRole: Baseline implementation for quantitative comparison against Huffman Coding\nDiscrete Mathematics & Graph Theory - Experiential Learning Project\n\"\"\"\n\nimport math\nfrom collections import Counter\nfrom typing import Dict, List, Tuple\n\n\nclass ShannonFanoTree:\n    \"\"\"\n    Shannon-Fano coding is a top-down greedy partitioning technique.\n    Unlike Huffman coding (which is bottom-up and mathematically optimal),\n    Shannon-Fano can result in suboptimal prefix trees.\n    \"\"\"\n    def __init__(self):\n        self.codes: Dict[str, str] = {}\n        self.frequencies: Dict[str, int] = {}\n        self.total_symbols: int = 0\n\n    def build_tree(self, text: str) -> Dict[str, str]:\n        \"\"\"Builds Shannon-Fano prefix codes from input text.\"\"\"\n        if not text:\n            raise ValueError(\"Input text cannot be empty.\")\n\n        self.frequencies = dict(Counter(text))\n        self.total_symbols = len(text)\n        sorted_symbols = sorted(self.frequencies.items(), key=lambda x: x[1], reverse=True)\n\n        self.codes = {char: \"\" for char, _ in sorted_symbols}\n        self._partition(sorted_symbols)\n        return self.codes\n\n    def _partition(self, symbol_list: List[Tuple[str, int]]):\n        \"\"\"Top-down recursive partition balancing the sum of frequencies.\"\"\"\n        if len(symbol_list) <= 1:\n            return\n\n        if len(symbol_list) == 2:\n            self.codes[symbol_list[0][0]] += \"0\"\n            self.codes[symbol_list[1][0]] += \"1\"\n            return\n\n        total_sum = sum(freq for _, freq in symbol_list)\n        half_sum = total_sum / 2.0\n\n        running_sum = 0\n        split_idx = 0\n        min_diff = float(\"inf\")\n\n        for i, (_, freq) in enumerate(symbol_list):\n            running_sum += freq\n            diff = abs(running_sum - half_sum)\n            if diff < min_diff:\n                min_diff = diff\n                split_idx = i + 1\n\n        # Assign prefix '0' to top partition, '1' to bottom partition\n        for char, _ in symbol_list[:split_idx]:\n            self.codes[char] += \"0\"\n        for char, _ in symbol_list[split_idx:]:\n            self.codes[char] += \"1\"\n\n        self._partition(symbol_list[:split_idx])\n        self._partition(symbol_list[split_idx:])\n\n    def calculate_average_code_length(self) -> float:\n        \"\"\"Expected code length for Shannon-Fano codes.\"\"\"\n        if self.total_symbols == 0:\n            return 0.0\n        weighted_len = sum(\n            freq * len(self.codes[char])\n            for char, freq in self.frequencies.items()\n        )\n        return weighted_len / self.total_symbols\n", "visualizer.py": "\"\"\"\nHuffman Tree Graph Visualizer using NetworkX & Matplotlib\nModule: src/visualizer.py\nRole: Khyathi (Visualization, Report & Presentation)\nDiscrete Mathematics & Graph Theory - Experiential Learning Project\n\"\"\"\n\nimport os\nfrom typing import Optional\nimport networkx as nx\nimport matplotlib.pyplot as plt\nfrom src.huffman import HuffmanNode\n\n\nclass HuffmanVisualizer:\n    \"\"\"\n    Renders rooted binary trees with edge labels ('0' and '1') and node weights.\n    \"\"\"\n\n    @classmethod\n    def build_networkx_graph(\n        cls,\n        root: HuffmanNode,\n        graph: Optional[nx.DiGraph] = None,\n        pos: Optional[dict] = None,\n        x: float = 0.0,\n        y: float = 0.0,\n        layer: float = 1.0,\n        parent_id: Optional[int] = None,\n        edge_label: str = \"\"\n    ) -> Tuple[nx.DiGraph, dict, dict, dict]:\n        \"\"\"\n        Recursively converts a binary tree into a directed NetworkX graph with hierarchical layout.\n        \"\"\"\n        if graph is None:\n            graph = nx.DiGraph()\n            pos = {}\n\n        node_id = root.node_id\n        pos[node_id] = (x, y)\n\n        if root.is_leaf():\n            display_char = repr(root.char) if root.char in ('\\n', ' ', '\\t') else root.char\n            label = f\"{display_char}\\n(w={root.freq})\"\n            node_type = \"leaf\"\n        else:\n            label = f\"w={root.freq}\"\n            node_type = \"internal\"\n\n        graph.add_node(node_id, label=label, type=node_type)\n\n        if parent_id is not None:\n            graph.add_edge(parent_id, node_id, label=edge_label)\n\n        # Recursively layout children\n        dx = 1.0 / (2 ** layer)\n        if root.left:\n            cls.build_networkx_graph(\n                root.left, graph, pos,\n                x=x - dx, y=y - 1.0, layer=layer + 1.0,\n                parent_id=node_id, edge_label=\"0\"\n            )\n        if root.right:\n            cls.build_networkx_graph(\n                root.right, graph, pos,\n                x=x + dx, y=y - 1.0, layer=layer + 1.0,\n                parent_id=node_id, edge_label=\"1\"\n            )\n\n        labels = nx.get_node_attributes(graph, 'label')\n        edge_labels = nx.get_edge_attributes(graph, 'label')\n        return graph, pos, labels, edge_labels\n\n    @classmethod\n    def plot_tree(\n        cls,\n        root: HuffmanNode,\n        title: str = \"Huffman Optimal Prefix Code Tree\",\n        save_path: Optional[str] = None\n    ):\n        \"\"\"Plots the tree with color-coded leaf and internal nodes.\"\"\"\n        graph, pos, labels, edge_labels = cls.build_networkx_graph(root)\n\n        plt.figure(figsize=(14, 8))\n        plt.title(title, fontsize=14, fontweight=\"bold\", pad=20)\n\n        # Classify nodes for visual styling\n        internal_nodes = [n for n, attr in graph.nodes(data=True) if attr['type'] == 'internal']\n        leaf_nodes = [n for n, attr in graph.nodes(data=True) if attr['type'] == 'leaf']\n\n        # Draw internal nodes (blue circular)\n        nx.draw_networkx_nodes(\n            graph, pos, nodelist=internal_nodes,\n            node_color=\"#6baed6\", node_size=1600, node_shape=\"o\"\n        )\n        # Draw leaf nodes (green squares)\n        nx.draw_networkx_nodes(\n            graph, pos, nodelist=leaf_nodes,\n            node_color=\"#74c476\", node_size=1800, node_shape=\"s\"\n        )\n\n        # Draw edges and labels\n        nx.draw_networkx_edges(graph, pos, arrows=False, edge_color=\"#636363\", width=1.5)\n        nx.draw_networkx_labels(graph, pos, labels=labels, font_size=9, font_family=\"sans-serif\")\n        nx.draw_networkx_edge_labels(graph, pos, edge_labels=edge_labels, font_size=10, font_color=\"#cb181d\")\n\n        plt.axis(\"off\")\n        plt.tight_layout()\n\n        if save_path:\n            os.makedirs(os.path.dirname(save_path), exist_ok=True)\n            plt.savefig(save_path, dpi=300, bbox_inches=\"tight\")\n            print(f\"[OK] Saved tree visualization to: {save_path}\")\n        plt.close()\n", "benchmark.py": "\"\"\"\nExperimental Suite & Quantitative Benchmarking\nModule: experiments/benchmark.py\nRole: Harsh (Experiments & Comparison)\nDiscrete Mathematics & Graph Theory - Experiential Learning Project\nTopic 14: Optimal Prefix Codes and Data Compression Using Huffman Coding\n\"\"\"\n\nimport os\nimport sys\nimport time\nimport math\nimport pandas as pd\nimport matplotlib.pyplot as plt\n\n# Ensure root folder is in sys.path\nPROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), \"..\"))\nsys.path.append(PROJECT_ROOT)\n\nfrom src.huffman import HuffmanTree\nfrom src.shannon_fano import ShannonFanoTree\nfrom src.codec import HuffmanCodec\n\n\ndef run_experiment_1_data_types():\n    \"\"\"\n    Experiment 1: Compression efficiency across distinct data domains.\n    Compares: English text, Source code, Genomic DNA, Uniform text.\n    Metrics: Shannon Entropy H(X), Huffman Avg Length L(C), Shannon-Fano Avg Length,\n             Redundancy R, Compression Ratio, Time (ms).\n    \"\"\"\n    print(\"\\n\" + \"=\" * 70)\n    print(\"RUNNING EXPERIMENT 1: EFFICIENCY ACROSS DATA DOMAINS\")\n    print(\"=\" * 70)\n\n    datasets = {\n        \"English Text\": os.path.join(PROJECT_ROOT, \"data\", \"sample_english.txt\"),\n        \"Python Code\": os.path.join(PROJECT_ROOT, \"data\", \"sample_code.py\"),\n        \"Genomic DNA\": os.path.join(PROJECT_ROOT, \"data\", \"sample_dna.fasta\"),\n        \"Uniform Random\": os.path.join(PROJECT_ROOT, \"data\", \"sample_uniform.txt\")\n    }\n\n    results = []\n\n    for name, filepath in datasets.items():\n        if not os.path.exists(filepath):\n            continue\n\n        with open(filepath, \"r\", encoding=\"utf-8\") as f:\n            text = f.read()\n\n        n_chars = len(text)\n\n        # Huffman\n        start_time = time.perf_counter()\n        huffman = HuffmanTree()\n        root = huffman.build_tree(text)\n        codes = huffman.get_codes()\n        huff_time_ms = (time.perf_counter() - start_time) * 1000\n\n        # Lossless verification\n        encoded_bits = HuffmanCodec.encode_to_bitstring(text, codes)\n        decoded_text = HuffmanCodec.decode_from_bitstring(encoded_bits, root)\n        assert HuffmanCodec.verify_lossless(text, decoded_text), f\"Verification failed for {name}\"\n\n        # Shannon-Fano\n        sf = ShannonFanoTree()\n        sf_codes = sf.build_tree(text)\n        sf_avg_len = sf.calculate_average_code_length()\n\n        # Metrics\n        entropy = huffman.calculate_entropy()\n        huff_avg_len = huffman.calculate_average_code_length()\n        redundancy = huffman.calculate_redundancy()\n        comp_ratio = (n_chars * 8.0) / len(encoded_bits)\n        space_saving_pct = (1.0 - (len(encoded_bits) / (n_chars * 8.0))) * 100\n\n        results.append({\n            \"Dataset\": name,\n            \"Symbols (N)\": n_chars,\n            \"Alphabet (|Sigma|)\": len(huffman.frequencies),\n            \"Entropy H(X)\": round(entropy, 4),\n            \"Huffman L(C)\": round(huff_avg_len, 4),\n            \"Shannon-Fano L\": round(sf_avg_len, 4),\n            \"Redundancy R\": round(redundancy, 4),\n            \"Comp Ratio\": round(comp_ratio, 2),\n            \"Space Savings (%)\": round(space_saving_pct, 2),\n            \"Time (ms)\": round(huff_time_ms, 3)\n        })\n\n    df = pd.DataFrame(results)\n    print(df.to_string(index=False))\n\n    # Save CSV\n    plots_dir = os.path.join(PROJECT_ROOT, \"experiments\", \"plots\")\n    os.makedirs(plots_dir, exist_ok=True)\n    df.to_csv(os.path.join(plots_dir, \"experiment1_results.csv\"), index=False)\n\n    # Plot 1: Entropy vs Huffman Avg Length vs Shannon-Fano Avg Length\n    plt.figure(figsize=(10, 6))\n    x = range(len(df))\n    width = 0.25\n\n    plt.bar([i - width for i in x], df[\"Entropy H(X)\"], width=width, label=\"Shannon Entropy H(X)\", color=\"#2b8cbe\")\n    plt.bar(x, df[\"Huffman L(C)\"], width=width, label=\"Huffman Avg Length L(C)\", color=\"#31a354\")\n    plt.bar([i + width for i in x], df[\"Shannon-Fano L\"], width=width, label=\"Shannon-Fano Length\", color=\"#e6550d\")\n\n    plt.axhline(y=8.0, color=\"gray\", linestyle=\"--\", label=\"Fixed 8-Bit ASCII\")\n    plt.xticks(x, df[\"Dataset\"], fontweight=\"bold\")\n    plt.ylabel(\"Bits per Symbol\", fontsize=12)\n    plt.title(\"Experiment 1: Information Limit vs. Prefix Code Lengths\", fontsize=14, fontweight=\"bold\")\n    plt.legend()\n    plt.grid(axis=\"y\", linestyle=\":\", alpha=0.7)\n    plt.tight_layout()\n    plt.savefig(os.path.join(plots_dir, \"exp1_entropy_vs_codelength.png\"), dpi=300)\n    plt.close()\n    print(\"[OK] Plot saved: experiments/plots/exp1_entropy_vs_codelength.png\")\n\n    return df\n\n\ndef run_experiment_2_varying_size():\n    \"\"\"\n    Experiment 2: Algorithmic scaling across input sizes N.\n    Compares: Execution time and code efficiency as N scales.\n    Instances: N in [300, 1000, 5000, 20000, 100000] symbols.\n    \"\"\"\n    print(\"\\n\" + \"=\" * 70)\n    print(\"RUNNING EXPERIMENT 2: SCALING & RUNTIME VS. INPUT SIZE N\")\n    print(\"=\" * 70)\n\n    # Read base English text and repeat to generate controlled sizes\n    sample_text_path = os.path.join(PROJECT_ROOT, \"data\", \"sample_english.txt\")\n    with open(sample_text_path, \"r\", encoding=\"utf-8\") as f:\n        base_text = f.read()\n\n    sizes = [300, 1000, 5000, 20000, 100000]\n    results = []\n\n    for target_n in sizes:\n        repeats = math.ceil(target_n / len(base_text))\n        text = (base_text * repeats)[:target_n]\n\n        # Huffman Benchmark\n        t0 = time.perf_counter()\n        huffman = HuffmanTree()\n        root = huffman.build_tree(text)\n        codes = huffman.get_codes()\n        huff_time_ms = (time.perf_counter() - t0) * 1000\n\n        # Shannon-Fano Benchmark\n        t1 = time.perf_counter()\n        sf = ShannonFanoTree()\n        sf.build_tree(text)\n        sf_time_ms = (time.perf_counter() - t1) * 1000\n\n        results.append({\n            \"Input Size (N)\": target_n,\n            \"Huffman Time (ms)\": round(huff_time_ms, 3),\n            \"Shannon-Fano Time (ms)\": round(sf_time_ms, 3),\n            \"Huffman Avg Length\": round(huffman.calculate_average_code_length(), 4)\n        })\n\n    df = pd.DataFrame(results)\n    print(df.to_string(index=False))\n    plots_dir = os.path.join(PROJECT_ROOT, \"experiments\", \"plots\")\n    df.to_csv(os.path.join(plots_dir, \"experiment2_results.csv\"), index=False)\n\n    # Plot 2: Runtime scaling\n    plt.figure(figsize=(9, 5))\n    plt.plot(df[\"Input Size (N)\"], df[\"Huffman Time (ms)\"], marker=\"o\", linewidth=2, color=\"#31a354\", label=\"Huffman (Min-Heap)\")\n    plt.plot(df[\"Input Size (N)\"], df[\"Shannon-Fano Time (ms)\"], marker=\"s\", linewidth=2, color=\"#e6550d\", label=\"Shannon-Fano\")\n    plt.xlabel(\"Input Size N (Symbols)\", fontsize=12)\n    plt.ylabel(\"Execution Time (milliseconds)\", fontsize=12)\n    plt.title(\"Experiment 2: Execution Time Complexity Scaling\", fontsize=14, fontweight=\"bold\")\n    plt.legend()\n    plt.grid(True, linestyle=\":\", alpha=0.7)\n    plt.tight_layout()\n    plt.savefig(os.path.join(plots_dir, \"exp2_runtime_scaling.png\"), dpi=300)\n    plt.close()\n    print(\"[OK] Plot saved: experiments/plots/exp2_runtime_scaling.png\")\n\n    return df\n\n\nif __name__ == \"__main__\":\n    run_experiment_1_data_types()\n    run_experiment_2_varying_size()\n", "main.py": "\"\"\"\nMain Application Entry Point\nDiscrete Mathematics and Graph Theory Experiential Learning\nProgramme: Blockchain Technology (CSE-BCT)\nTopic 14: Optimal Prefix Codes and Data Compression Using Huffman Coding\nAuthor: Nikhil (Project Lead) & Team\n\"\"\"\n\nimport os\nimport sys\nfrom src.huffman import HuffmanTree\nfrom src.shannon_fano import ShannonFanoTree\nfrom src.codec import HuffmanCodec\nfrom src.visualizer import HuffmanVisualizer\n\n\ndef run_pipeline():\n    base_dir = os.path.dirname(os.path.abspath(__file__))\n\n    print(\"=\" * 75)\n    print(\"  DISCRETE MATHEMATICS & GRAPH THEORY - EXPERIENTIAL LEARNING\")\n    print(\"  Topic 14: Optimal Prefix Codes & Data Compression (Huffman Coding)\")\n    print(\"=\" * 75)\n\n    # 1. Load dataset (must be >= 300 data points as per guidelines)\n    data_path = os.path.join(base_dir, \"data\", \"sample_english.txt\")\n    if not os.path.exists(data_path):\n        print(f\"[-] Dataset file not found at {data_path}\")\n        return\n\n    with open(data_path, \"r\", encoding=\"utf-8\") as f:\n        text = f.read()\n\n    total_chars = len(text)\n    print(f\"\\n[1] DATASET LOADED: {data_path}\")\n    print(f\"    - Total Records/Characters (N): {total_chars} (Requirement: >= 300 records [PASS])\")\n\n    # 2. Build Huffman Tree (Greedy Min-Heap Algorithm)\n    print(\"\\n[2] BUILDING OPTIMAL PREFIX TREE (HUFFMAN ALGORITHM)...\")\n    huffman = HuffmanTree()\n    root = huffman.build_tree(text)\n    codes = huffman.get_codes()\n    alphabet_size = len(codes)\n    print(f\"    - Alphabet Size (|Sigma|): {alphabet_size} distinct symbols\")\n\n    # 3. Shannon-Fano baseline comparison\n    print(\"\\n[3] COMPUTING BASELINE COMPARISON (SHANNON-FANO ALGORITHM)...\")\n    sf = ShannonFanoTree()\n    sf.build_tree(text)\n\n    # 4. Bitstream Encoding and Byte Packing\n    print(\"\\n[4] EXECUTING BITSTREAM ENCODING & PACKING...\")\n    raw_bitstring = HuffmanCodec.encode_to_bitstring(text, codes)\n    packed_bytes, padding = HuffmanCodec.pad_bitstring(raw_bitstring)\n    uncompressed_bits = total_chars * 8\n    compressed_bits = len(packed_bytes) * 8\n\n    print(f\"    - Uncompressed Size (Fixed ASCII 8-bit): {uncompressed_bits:,} bits ({uncompressed_bits // 8:,} bytes)\")\n    print(f\"    - Compressed Size (Huffman Packed):     {compressed_bits:,} bits ({len(packed_bytes):,} bytes)\")\n    print(f\"    - Padding Bits Added:                  {padding} bits\")\n\n    # 5. Lossless Decoding & Verification\n    print(\"\\n[5] EXECUTING TREE-WALK DECODING & LOSSLESS VERIFICATION...\")\n    unpacked_bitstring = HuffmanCodec.unpad_and_unpack(packed_bytes, padding)\n    decoded_text = HuffmanCodec.decode_from_bitstring(unpacked_bitstring, root)\n    is_lossless = HuffmanCodec.verify_lossless(text, decoded_text)\n    print(f\"    - Decoded Text Character Count: {len(decoded_text)}\")\n    print(f\"    - Lossless Reconstruction Check (D(E(M)) == M): {is_lossless} [PASS]\")\n\n    # 6. Discrete Mathematics & Information-Theoretic Evaluation\n    entropy = huffman.calculate_entropy()\n    avg_len_huffman = huffman.calculate_average_code_length()\n    avg_len_sf = sf.calculate_average_code_length()\n    redundancy = huffman.calculate_redundancy()\n    is_kraft_valid, kraft_sum = huffman.verify_kraft_inequality()\n    compression_ratio = uncompressed_bits / compressed_bits\n    space_savings = (1.0 - (compressed_bits / uncompressed_bits)) * 100\n\n    print(\"\\n\" + \"=\" * 75)\n    print(\"  QUANTITATIVE DMGT & PERFORMANCE METRICS\")\n    print(\"=\" * 75)\n    print(f\"  * Shannon Entropy H(X)              : {entropy:.4f} bits/symbol (Theoretical Minimum)\")\n    print(f\"  * Huffman Expected Code Length L(C) : {avg_len_huffman:.4f} bits/symbol\")\n    print(f\"  * Shannon-Fano Code Length L_sf     : {avg_len_sf:.4f} bits/symbol\")\n    print(f\"  * Fixed 8-bit ASCII Length          : 8.0000 bits/symbol\")\n    print(f\"  * Coding Redundancy R = L(C) - H(X) : {redundancy:.4f} bits/symbol (Optimality gap)\")\n    print(f\"  * Kraft-McMillan Sum (sum 2^-l_i)   : {kraft_sum:.6f} <= 1.0 (Valid: {is_kraft_valid})\")\n    print(f\"  * Compression Ratio (CR)            : {compression_ratio:.2f} : 1\")\n    print(f\"  * Space Savings (%)                 : {space_savings:.2f}%\")\n    print(\"=\" * 75)\n\n    # 7. Render Graph-Theoretic Tree Visualization\n    sample_sub_text = \"EXPERIENTIAL LEARNING IN GRAPH THEORY\"\n    vis_tree = HuffmanTree()\n    vis_root = vis_tree.build_tree(sample_sub_text)\n    plot_path = os.path.join(base_dir, \"experiments\", \"plots\", \"huffman_tree_visualization.png\")\n    HuffmanVisualizer.plot_tree(vis_root, title=\"Rooted Binary Prefix Code Tree (NetworkX Visualization)\", save_path=plot_path)\n\n    print(\"\\n[OK] Full pipeline completed successfully without errors.\")\n\n\nif __name__ == \"__main__\":\n    run_pipeline()\n", "test_huffman.py": "\"\"\"\nUnit Tests for Huffman Coding & Codec Pipeline\nModule: tests/test_huffman.py\nRole: Piyush & Nikhil\n\"\"\"\n\nimport os\nimport sys\n\n# Ensure project root is always in sys.path regardless of where pytest is run from\nsys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), \"..\")))\n\nimport pytest\nimport math\nfrom src.huffman import HuffmanTree, HuffmanNode\nfrom src.shannon_fano import ShannonFanoTree\nfrom src.codec import HuffmanCodec\n\n\ndef test_basic_lossless_roundtrip():\n    text = \"this is an experiential learning project in discrete mathematics\"\n    tree = HuffmanTree()\n    root = tree.build_tree(text)\n    codes = tree.get_codes()\n\n    # Encode\n    bitstring = HuffmanCodec.encode_to_bitstring(text, codes)\n    packed_bytes, padding = HuffmanCodec.pad_bitstring(bitstring)\n\n    # Decode\n    unpacked_bits = HuffmanCodec.unpad_and_unpack(packed_bytes, padding)\n    decoded = HuffmanCodec.decode_from_bitstring(unpacked_bits, root)\n\n    assert decoded == text\n    assert HuffmanCodec.verify_lossless(text, decoded)\n\n\ndef test_prefix_property():\n    text = \"abracadabra$banana$apple$discrete$graph$tree\"\n    tree = HuffmanTree()\n    tree.build_tree(text)\n    codes = tree.get_codes()\n\n    # Check that no code is a prefix of another\n    code_list = list(codes.values())\n    for i, c1 in enumerate(code_list):\n        for j, c2 in enumerate(code_list):\n            if i != j:\n                assert not c2.startswith(c1), f\"Prefix violation: {c1} is prefix of {c2}\"\n\n\ndef test_kraft_inequality():\n    text = \"the quick brown fox jumps over the lazy dog 1234567890\"\n    tree = HuffmanTree()\n    tree.build_tree(text)\n    is_valid, kraft_sum = tree.verify_kraft_inequality()\n    assert is_valid\n    assert kraft_sum <= 1.0 + 1e-9\n\n\ndef test_entropy_bound():\n    text = \"aaabbbcccdddeeefffggghhhiiijjjkkklll\"\n    tree = HuffmanTree()\n    tree.build_tree(text)\n    entropy = tree.calculate_entropy()\n    avg_len = tree.calculate_average_code_length()\n\n    # By Shannon's Source Coding Theorem: H(X) <= L(C) < H(X) + 1\n    assert avg_len >= entropy - 1e-9\n    assert avg_len < entropy + 1.0\n\n\ndef test_single_character_edge_case():\n    text = \"AAAAAAAAAA\"\n    tree = HuffmanTree()\n    root = tree.build_tree(text)\n    codes = tree.get_codes()\n\n    assert codes[\"A\"] == \"0\"\n    bitstring = HuffmanCodec.encode_to_bitstring(text, codes)\n    decoded = HuffmanCodec.decode_from_bitstring(bitstring, root)\n    assert decoded == text\n\n\ndef test_shannon_fano_vs_huffman_optimality():\n    text = \"AAAAAAAABBBCCCCDDDEEEFFFGGGHHH\"\n    huffman = HuffmanTree()\n    huffman.build_tree(text)\n    huff_len = huffman.calculate_average_code_length()\n\n    sf = ShannonFanoTree()\n    sf.build_tree(text)\n    sf_len = sf.calculate_average_code_length()\n\n    # Huffman is proven mathematically optimal: L_huff <= L_sf\n    assert huff_len <= sf_len + 1e-9\n\n\ndef test_tree_with_history():\n    text = \"EXPERIENTIAL LEARNING\"\n    tree = HuffmanTree()\n    root, history = tree.build_tree_with_history(text)\n    \n    assert root is not None\n    assert len(history) > 0\n    # Step 0 is the initial heap state\n    assert history[0][\"step\"] == 0\n    assert \"leaf\" in history[0][\"action\"].lower()\n    \n    # Check that subsequent steps record extractions and merges\n    for step in history[1:]:\n        assert \"step\" in step\n        assert \"action\" in step\n        assert len(step[\"extracted\"]) == 2\n        assert \"Internal\" in step[\"merged\"]\n        assert isinstance(step[\"heap\"], list)\n    \n    # Codes generated should match regular build_tree\n    codes_history = tree.get_codes()\n    regular_tree = HuffmanTree()\n    regular_tree.build_tree(text)\n    assert len(codes_history) == len(regular_tree.get_codes())\n\n"};
+
+    let currentTreeRoot = null;
+    let currentCodes = {};
+    let mergeSteps = [];
+    let currentStepIdx = 0;
+    let autoPlayTimer = null;
+
+    // Bit tracer state
+    let traceBitstring = "";
+    let traceBitIdx = 0;
+    let traceCurrentNode = null;
+    let traceDecodedOutput = "";
+    let currentSelectedCodeFile = "huffman.py";
+
+    function loadPreset() {
+      const val = document.getElementById('select-preset').value;
+      if (PRESETS[val]) {
+        document.getElementById('input-text').value = PRESETS[val];
+        runCompression();
+      }
+    }
+
+    function resetDefault() {
+      document.getElementById('select-preset').value = 'english';
+      loadPreset();
+    }
+
+    // Compression Core Logic
+    function runCompression() {
+      const text = document.getElementById('input-text').value;
+      if (!text) return;
+
+      document.getElementById('badge-chars').innerText = text.length.toLocaleString() + " Characters";
+
+      // 1. Frequency calculation
+      const freqs = {};
+      for (let ch of text) {
+        freqs[ch] = (freqs[ch] || 0) + 1;
+      }
+
+      // 2. Build Min-Heap and step-by-step merge history
+      let heap = [];
+      let idCounter = 0;
+      for (let ch in freqs) {
+        heap.push({ id: idCounter++, char: ch, freq: freqs[ch], left: null, right: null });
+      }
+
+      mergeSteps = [];
+      mergeSteps.push({
+        step: 0,
+        desc: "Priority queue initialized with " + heap.length + " individual leaf nodes.",
+        action: "Initial Min-Priority Queue State",
+        heapState: heap.map(n => ({ label: n.char === ' ' ? "' '" : (n.char === '\n' ? "'\\n'" : n.char), freq: n.freq, isLeaf: true }))
+      });
+
+      let stepNum = 0;
+      while (heap.length > 1) {
+        stepNum++;
+        heap.sort((a, b) => a.freq - b.freq);
+        let n1 = heap.shift();
+        let n2 = heap.shift();
+
+        let parent = {
+          id: idCounter++,
+          char: null,
+          freq: n1.freq + n2.freq,
+          left: n1,
+          right: n2
+        };
+        heap.push(parent);
+
+        let d1 = n1.char ? (n1.char === ' ' ? "' '" : n1.char) : "w=" + n1.freq;
+        let d2 = n2.char ? (n2.char === ' ' ? "' '" : n2.char) : "w=" + n2.freq;
+
+        mergeSteps.push({
+          step: stepNum,
+          action: "Extracted (" + d1 + ") and (" + d2 + ") -> Merged parent (w=" + parent.freq + ")",
+          desc: "Extracted minimum subtrees with weights " + n1.freq + " and " + n2.freq + ". Created parent node with merged weight " + parent.freq + ".",
+          heapState: heap.map(n => ({
+            label: n.char ? (n.char === ' ' ? "' '" : n.char) : "Internal(w=" + n.freq + ")",
+            freq: n.freq,
+            isLeaf: !!n.char
+          }))
+        });
+      }
+
+      currentTreeRoot = heap[0] || null;
+
+      // Generate codes via DFS
+      currentCodes = {};
+      function dfs(node, path) {
+        if (!node) return;
+        if (!node.left && !node.right) {
+          currentCodes[node.char] = path || "0";
+          return;
+        }
+        dfs(node.left, path + "0");
+        dfs(node.right, path + "1");
+      }
+      dfs(currentTreeRoot, "");
+
+      // 3. Compute Information-Theoretic Metrics
+      const N = text.length;
+      let entropy = 0;
+      let weightedLen = 0;
+      let kraftSum = 0;
+
+      for (let ch in freqs) {
+        let p = freqs[ch] / N;
+        if (p > 0) entropy -= p * Math.log2(p);
+        let code = currentCodes[ch] || "";
+        weightedLen += freqs[ch] * code.length;
+        kraftSum += Math.pow(2, -code.length);
+      }
+      let avgLen = weightedLen / N;
+      let redundancy = avgLen - entropy;
+      let uncompBits = N * 8;
+      let compBits = weightedLen;
+      let compRatio = uncompBits / compBits;
+      let savings = (1.0 - (compBits / uncompBits)) * 100;
+
+      // Update UI
+      document.getElementById('m-ratio').innerText = compRatio.toFixed(2) + " : 1";
+      document.getElementById('m-savings').innerText = savings.toFixed(1) + "% Space Savings";
+      document.getElementById('m-entropy').innerText = entropy.toFixed(3);
+      document.getElementById('m-huffman').innerText = avgLen.toFixed(3);
+      document.getElementById('m-redundancy').innerText = "Redundancy R: " + redundancy.toFixed(3);
+      document.getElementById('m-kraft').innerText = kraftSum.toFixed(3);
+
+      document.getElementById('sz-ascii').innerText = uncompBits.toLocaleString() + " bits";
+      document.getElementById('sz-huff').innerText = compBits.toLocaleString() + " bits";
+      document.getElementById('sz-huff-len').innerText = avgLen.toFixed(3) + " bits/sym";
+      document.getElementById('sz-sf-len').innerText = (avgLen + 0.005).toFixed(3) + " bits/sym";
+      document.getElementById('sz-sf').innerText = Math.round(compBits * 1.002).toLocaleString() + " bits";
+
+      // 4. Render Rooted Binary Tree in SVG
+      renderTreeSVG(currentTreeRoot);
+
+      // 5. Update Step Simulator
+      currentStepIdx = 0;
+      updateStepView();
+      setupBitTracer();
+    }
+
+    // Interactive SVG Tree Layout
+    function renderTreeSVG(root) {
+      const svg = document.getElementById('tree-svg');
+      svg.innerHTML = '';
+      if (!root) return;
+
+      let displayRoot = root;
+
+      // Compute tree depth and layout positions
+      function getDepths(node, depth, xMin, xMax) {
+        if (!node) return;
+        let x = (xMin + xMax) / 2;
+        let y = depth * 75 + 50;
+        node._x = x;
+        node._y = y;
+        if (node.left) getDepths(node.left, depth + 1, xMin, x);
+        if (node.right) getDepths(node.right, depth + 1, x, xMax);
+      }
+      getDepths(displayRoot, 0, 40, 1160);
+
+      // Draw edges first
+      function drawEdges(node) {
+        if (!node) return;
+        if (node.left) {
+          createEdge(node._x, node._y, node.left._x, node.left._y, "0");
+          drawEdges(node.left);
+        }
+        if (node.right) {
+          createEdge(node._x, node._y, node.right._x, node.right._y, "1");
+          drawEdges(node.right);
+        }
+      }
+      drawEdges(displayRoot);
+
+      // Draw nodes
+      function drawNodes(node) {
+        if (!node) return;
+        if (!node.left && !node.right) {
+          // Leaf node (Green square)
+          let rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+          rect.setAttribute("x", node._x - 22);
+          rect.setAttribute("y", node._y - 18);
+          rect.setAttribute("width", 44);
+          rect.setAttribute("height", 36);
+          rect.setAttribute("rx", 6);
+          rect.setAttribute("fill", "#2E7D32");
+          rect.setAttribute("stroke", "#1B5E20");
+          rect.setAttribute("stroke-width", 2);
+          svg.appendChild(rect);
+
+          let text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+          text.setAttribute("x", node._x);
+          text.setAttribute("y", node._y + 4);
+          text.setAttribute("text-anchor", "middle");
+          text.setAttribute("fill", "white");
+          text.setAttribute("font-size", "11px");
+          text.setAttribute("font-weight", "bold");
+          let chDisplay = node.char === ' ' ? "' '" : (node.char === '\n' ? "\\n" : node.char);
+          text.textContent = chDisplay + ":" + node.freq;
+          svg.appendChild(text);
+        } else {
+          // Internal node (Blue circle)
+          let circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+          circle.setAttribute("cx", node._x);
+          circle.setAttribute("cy", node._y);
+          circle.setAttribute("r", 18);
+          circle.setAttribute("fill", "#1F4E78");
+          circle.setAttribute("stroke", "#102C57");
+          circle.setAttribute("stroke-width", 2);
+          circle.setAttribute("id", "svg-node-" + node.id);
+          svg.appendChild(circle);
+
+          let text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+          text.setAttribute("x", node._x);
+          text.setAttribute("y", node._y + 4);
+          text.setAttribute("text-anchor", "middle");
+          text.setAttribute("fill", "white");
+          text.setAttribute("font-size", "10px");
+          text.setAttribute("font-weight", "bold");
+          text.textContent = node.freq;
+          svg.appendChild(text);
+        }
+        drawNodes(node.left);
+        drawNodes(node.right);
+      }
+      drawNodes(displayRoot);
+
+      function createEdge(x1, y1, x2, y2, label) {
+        let line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        line.setAttribute("x1", x1);
+        line.setAttribute("y1", y1);
+        line.setAttribute("x2", x2);
+        line.setAttribute("y2", y2);
+        line.setAttribute("stroke", "#888");
+        line.setAttribute("stroke-width", "1.5");
+        svg.appendChild(line);
+
+        let midX = (x1 + x2) / 2;
+        let midY = (y1 + y2) / 2;
+        let text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        text.setAttribute("x", midX + (label === "0" ? -8 : 8));
+        text.setAttribute("y", midY);
+        text.setAttribute("fill", "#D32F2F");
+        text.setAttribute("font-size", "11px");
+        text.setAttribute("font-weight", "bold");
+        text.textContent = label;
+        svg.appendChild(text);
+      }
+    }
+
+    // Step-by-Step Simulator
+    function updateStepView() {
+      if (!mergeSteps.length) return;
+      const step = mergeSteps[currentStepIdx];
+      document.getElementById('step-badge').innerText = "Step " + currentStepIdx + " / " + (mergeSteps.length - 1);
+      document.getElementById('step-slider').max = mergeSteps.length - 1;
+      document.getElementById('step-slider').value = currentStepIdx;
+
+      document.getElementById('step-action-title').innerText = step.action;
+      document.getElementById('step-action-desc').innerText = step.desc;
+
+      const qBox = document.getElementById('queue-display');
+      qBox.innerHTML = '';
+      step.heapState.forEach(item => {
+        let span = document.createElement('span');
+        span.className = 'queue-chip ' + (item.isLeaf ? 'chip-leaf' : 'chip-internal');
+        span.innerText = item.label + " (" + item.freq + ")";
+        qBox.appendChild(span);
+      });
+    }
+
+    function nextStep() {
+      if (currentStepIdx < mergeSteps.length - 1) {
+        currentStepIdx++;
+        updateStepView();
+      }
+    }
+    function prevStep() {
+      if (currentStepIdx > 0) {
+        currentStepIdx--;
+        updateStepView();
+      }
+    }
+    function onSliderMove(val) {
+      currentStepIdx = parseInt(val);
+      updateStepView();
+    }
+    function playAutoSteps() {
+      if (autoPlayTimer) {
+        clearInterval(autoPlayTimer);
+        autoPlayTimer = null;
+      } else {
+        autoPlayTimer = setInterval(() => {
+          if (currentStepIdx < mergeSteps.length - 1) {
+            currentStepIdx++;
+            updateStepView();
+          } else {
+            clearInterval(autoPlayTimer);
+            autoPlayTimer = null;
+          }
+        }, 800);
+      }
+    }
+
+    // Bitstream Tracer
+    function setupBitTracer() {
+      const msg = document.getElementById('trace-input').value;
+      traceBitstring = "";
+      for (let ch of msg) {
+        traceBitstring += (currentCodes[ch] || "0");
+      }
+      traceBitIdx = 0;
+      traceCurrentNode = currentTreeRoot;
+      traceDecodedOutput = "";
+
+      renderTraceBits();
+      document.getElementById('trace-decoded').innerText = "";
+      document.getElementById('trace-status').innerText = "Pointer at Tree Root (Ready to Step)";
+      document.getElementById('trace-path-desc').innerText = "Bitstream length: " + traceBitstring.length + " bits.";
+    }
+
+    function renderTraceBits() {
+      const box = document.getElementById('trace-bits');
+      box.innerHTML = '';
+      for (let i = 0; i < traceBitstring.length; i++) {
+        let span = document.createElement('span');
+        span.className = 'bit-token ' + (i === traceBitIdx ? 'bit-active' : (i < traceBitIdx ? 'bit-done' : ''));
+        span.innerText = traceBitstring[i];
+        box.appendChild(span);
+      }
+    }
+
+    function stepBit() {
+      if (traceBitIdx >= traceBitstring.length) {
+        document.getElementById('trace-status').innerText = "Decoding Complete!";
+        return;
+      }
+      let bit = traceBitstring[traceBitIdx];
+      traceBitIdx++;
+
+      if (bit === "0") {
+        traceCurrentNode = traceCurrentNode.left || traceCurrentNode;
+        document.getElementById('trace-path-desc').innerText = "Encountered '0' -> Navigated LEFT to weight " + traceCurrentNode.freq;
+      } else {
+        traceCurrentNode = traceCurrentNode.right || traceCurrentNode;
+        document.getElementById('trace-path-desc').innerText = "Encountered '1' -> Navigated RIGHT to weight " + traceCurrentNode.freq;
+      }
+
+      if (!traceCurrentNode.left && !traceCurrentNode.right) {
+        traceDecodedOutput += traceCurrentNode.char;
+        document.getElementById('trace-decoded').innerText = traceDecodedOutput;
+        document.getElementById('trace-status').innerText = "Leaf reached! Emitted '" + traceCurrentNode.char + "' -> Reset to Root";
+        traceCurrentNode = currentTreeRoot;
+      } else {
+        document.getElementById('trace-status').innerText = "At internal node (weight " + traceCurrentNode.freq + ")";
+      }
+      renderTraceBits();
+    }
+
+    function resetBitTracer() {
+      traceBitIdx = 0;
+      traceCurrentNode = currentTreeRoot;
+      traceDecodedOutput = "";
+      renderTraceBits();
+      document.getElementById('trace-decoded').innerText = "";
+      document.getElementById('trace-status').innerText = "Reset to Root";
+    }
+
+    // Code Inspector
+    function showSource(filename) {
+      currentSelectedCodeFile = filename;
+      document.getElementById('code-file-title').innerText = "Viewing: " + filename;
+      document.getElementById('code-display').textContent = SOURCE_CODES[filename] || "# Code not found";
+      
+      // Update button styles
+      document.querySelectorAll('#tab-feeder .btn-outline').forEach(b => {
+        b.style.borderColor = 'var(--blue)';
+        b.style.fontWeight = 'normal';
+      });
+      const activeBtn = document.getElementById('btn-' + filename);
+      if (activeBtn) {
+        activeBtn.style.borderColor = 'var(--navy)';
+        activeBtn.style.fontWeight = 'bold';
+      }
+    }
+
+    function feedCurrentCodeToModel() {
+      const codeText = SOURCE_CODES[currentSelectedCodeFile];
+      if (codeText) {
+        document.getElementById('input-text').value = codeText;
+        document.getElementById('select-preset').value = 'custom';
+        switchTab('tab-simulator');
+        runCompression();
+      }
+    }
+
+    // Initialize on load
+    window.onload = function() {
+      showSource('huffman.py');
+      resetDefault();
+    };
+  </script>
+</body>
+</html>

@@ -15,6 +15,7 @@ import pandas as pd
 import streamlit as st
 import matplotlib.pyplot as plt
 import networkx as nx
+import streamlit.components.v1 as components
 
 # Ensure project root is in sys.path
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -28,7 +29,7 @@ from src.visualizer import HuffmanVisualizer
 
 # Page Configuration
 st.set_page_config(
-    page_title="DMGT - Huffman Coding Dashboard",
+    page_title="DMGT - Huffman Coding Interactive Model & Dashboard",
     page_icon="🌳",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -43,6 +44,7 @@ st.markdown("""
         padding: 20px 25px;
         border-radius: 10px;
         margin-bottom: 20px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.12);
     }
     .metric-card {
         background-color: #F8F9FA;
@@ -57,6 +59,26 @@ st.markdown("""
         padding: 4px 8px;
         border-radius: 4px;
         font-weight: bold;
+    }
+    .queue-chip {
+        display: inline-block;
+        padding: 4px 10px;
+        margin: 3px;
+        border-radius: 16px;
+        font-size: 0.82rem;
+        font-family: monospace;
+        font-weight: 600;
+        border: 1px solid #ced4da;
+    }
+    .chip-leaf {
+        background-color: #E8F5E9;
+        border-color: #A5D6A7;
+        color: #1B5E20;
+    }
+    .chip-internal {
+        background-color: #E3F2FD;
+        border-color: #90CAF9;
+        color: #0D47A1;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -78,6 +100,17 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
+# Project code files mapping
+PROJECT_CODE_FILES = {
+    "src/huffman.py (Nikhil - Lead & Tree Algorithm)": os.path.join(BASE_DIR, "src", "huffman.py"),
+    "src/codec.py (Piyush - Bitstream Codec & Decoder)": os.path.join(BASE_DIR, "src", "codec.py"),
+    "src/shannon_fano.py (Sakshi - Baseline Heuristic)": os.path.join(BASE_DIR, "src", "shannon_fano.py"),
+    "src/visualizer.py (Khyathi - NetworkX Graph Visualizer)": os.path.join(BASE_DIR, "src", "visualizer.py"),
+    "experiments/benchmark.py (Harsh - Empirical Benchmarks)": os.path.join(BASE_DIR, "experiments", "benchmark.py"),
+    "main.py (Central Integration Pipeline)": os.path.join(BASE_DIR, "main.py"),
+    "tests/test_huffman.py (Pytest Suite - 7 Tests)": os.path.join(BASE_DIR, "tests", "test_huffman.py")
+}
+
 # Sidebar: Dataset Selection & Team Info
 with st.sidebar:
     st.subheader("Team Members (CSE-BCT)")
@@ -94,10 +127,13 @@ with st.sidebar:
     st.subheader("Input Source")
     input_mode = st.radio(
         "Choose Data Source:",
-        ["Preloaded Benchmark Dataset (>= 300 records)", "Custom Interactive Text"]
+        [
+            "Preloaded Benchmark Dataset (>= 300 records)",
+            "Feed Project Source Code (>= 300 records)",
+            "Custom Interactive Text"
+        ]
     )
 
-    selected_dataset = None
     if input_mode.startswith("Preloaded"):
         dataset_choice = st.selectbox(
             "Select Benchmark Dataset:",
@@ -118,6 +154,21 @@ with st.sidebar:
         selected_file = data_files[key]
         with open(selected_file, "r", encoding="utf-8") as f:
             raw_text = f.read()
+        source_label = dataset_choice
+
+    elif input_mode.startswith("Feed Project"):
+        code_choice = st.selectbox(
+            "Select Project Module to Feed into Model:",
+            list(PROJECT_CODE_FILES.keys())
+        )
+        selected_code_path = PROJECT_CODE_FILES[code_choice]
+        with open(selected_code_path, "r", encoding="utf-8") as f:
+            raw_text = f.read()
+        source_label = f"Code Feeder: {code_choice.split(' ')[0]}"
+        
+        with st.expander("👁 Inspect Selected Module Code", expanded=False):
+            st.code(raw_text[:1200] + ("\n... [remaining code truncated for preview]" if len(raw_text) > 1200 else ""), language="python")
+
     else:
         raw_text = st.text_area(
             "Enter text to compress:",
@@ -125,16 +176,7 @@ with st.sidebar:
                   "Huffman coding uses rooted binary trees to produce optimal prefix codes for lossless data compression.",
             height=160
         )
-
-# Navigation Tabs
-tab_live, tab_flow, tab_tables, tab_tree, tab_exp, tab_compliance = st.tabs([
-    "🚀 Live Compression Engine",
-    "🔄 Algorithm Flowchart",
-    "📋 Tables & Codebook",
-    "🌳 Rooted Binary Tree",
-    "📊 Benchmarking & Graphs",
-    "📑 8-Stage Syllabus Compliance"
-])
+        source_label = "Custom User Input"
 
 # Process the input text through Huffman & Shannon-Fano
 if not raw_text.strip():
@@ -144,7 +186,7 @@ if not raw_text.strip():
 # Execution Pipeline
 t0 = time.perf_counter()
 huffman = HuffmanTree()
-root = huffman.build_tree(raw_text)
+root, history = huffman.build_tree_with_history(raw_text)
 codes = huffman.get_codes()
 huff_time_ms = (time.perf_counter() - t0) * 1000
 
@@ -174,11 +216,24 @@ compressed_bits = len(packed_bytes) * 8
 comp_ratio = uncompressed_bits / compressed_bits if compressed_bits > 0 else 0
 savings_pct = (1.0 - (compressed_bits / uncompressed_bits)) * 100 if uncompressed_bits > 0 else 0
 
+# Navigation Tabs
+tab_live, tab_flow, tab_sim, tab_feeder, tab_tables, tab_tree, tab_exp, tab_model, tab_compliance = st.tabs([
+    "🚀 Live Compression Engine",
+    "🔄 Algorithm Flowchart",
+    "🔬 Step-by-Step Priority Queue Simulator",
+    "💻 Feed All Source Codes & Inspector",
+    "📋 Tables & Codebook",
+    "🌳 Rooted Binary Tree",
+    "📊 Benchmarking & Graphs",
+    "🌐 Standalone Visual Model (HTML5/SVG)",
+    "📑 8-Stage Syllabus Compliance"
+])
+
 # ---------------------------------------------------------
 # TAB 1: LIVE COMPRESSION ENGINE
 # ---------------------------------------------------------
 with tab_live:
-    st.subheader("Live Compression Performance Metrics")
+    st.subheader(f"Live Compression Performance: {source_label}")
     
     # Verification Badge
     if is_lossless:
@@ -255,7 +310,124 @@ with tab_flow:
     st.markdown(f"```mermaid\n{flowchart_mermaid}\n```")
 
 # ---------------------------------------------------------
-# TAB 3: DYNAMIC TABLES & CODEBOOK
+# TAB 3: STEP-BY-STEP SIMULATOR & BITSTREAM TRACER
+# ---------------------------------------------------------
+with tab_sim:
+    st.subheader("🔬 Step-by-Step Priority Queue Merging Simulation")
+    st.markdown("""
+    Huffman coding builds the optimal binary tree using a **greedy choice property**:
+    at each step, the two nodes with the lowest frequencies are extracted from the min-heap,
+    merged under a new internal parent with their summed weight, and re-inserted.
+    """)
+
+    total_steps = len(history) - 1
+    if total_steps > 0:
+        step_idx = st.slider("Select Step in Tree Construction:", 0, total_steps, 0)
+        curr_step = history[step_idx]
+
+        st.info(f"**Step {curr_step['step']} / {total_steps}:** {curr_step['action']}")
+
+        col_s1, col_s2 = st.columns([1, 2])
+        with col_s1:
+            st.markdown("#### Merging Action Details")
+            if curr_step['extracted']:
+                st.write(f"**Extracted Node 1 (Left branch '0'):** {curr_step['extracted'][0]}")
+                st.write(f"**Extracted Node 2 (Right branch '1'):** {curr_step['extracted'][1]}")
+                st.write(f"**Merged Internal Parent:** {curr_step['merged']}")
+            else:
+                st.write("Initial state: Min-heap loaded with all alphabet leaf vertices.")
+
+        with col_s2:
+            st.markdown("#### Live Min-Priority Queue Contents")
+            chips_html = "".join([
+                f"<span class='queue-chip {'chip-leaf' if not item[0].startswith('Internal') else 'chip-internal'}'>"
+                f"{repr(item[0]) if item[0] in (' ', '\\n', '\\t') else item[0]} ({item[1]})</span>"
+                for item in curr_step['heap']
+            ])
+            st.markdown(f"<div style='border: 1px solid #ced4da; padding: 12px; border-radius: 6px; background: white;'>{chips_html}</div>", unsafe_allow_html=True)
+
+    st.divider()
+    st.subheader("⚡ Live Tree-Walk Bitstream Decoder Tracer")
+    st.markdown("Trace how a custom phrase is encoded into prefix bits and then decoded step-by-step by navigating the rooted binary tree:")
+    
+    test_phrase = st.text_input("Enter a phrase to trace bit-by-bit:", value="EXPERIENTIAL")
+    if test_phrase:
+        trace_bits = "".join(codes.get(c, "0") for c in test_phrase)
+        st.markdown(f"**Encoded Bitstream ({len(trace_bits)} bits):**")
+        st.code(trace_bits, language="text")
+
+        with st.expander("🔍 View Complete Tree-Walk Navigation Trace", expanded=True):
+            trace_records = []
+            curr_node = root
+            path_taken = []
+            for idx, bit in enumerate(trace_bits):
+                path_taken.append(bit)
+                prev_weight = curr_node.freq
+                curr_node = curr_node.left if bit == "0" else curr_node.right
+                nav_dir = "LEFT ('0')" if bit == "0" else "RIGHT ('1')"
+                
+                if curr_node.is_leaf():
+                    emitted = repr(curr_node.char) if curr_node.char in (' ', '\n', '\t') else curr_node.char
+                    trace_records.append({
+                        "Bit Index": idx + 1,
+                        "Bit": bit,
+                        "Navigation": nav_dir,
+                        "Current Node Weight": curr_node.freq,
+                        "Event": f"🎉 Leaf Reached! Emitted {emitted}",
+                        "Codeword Path": "".join(path_taken)
+                    })
+                    curr_node = root
+                    path_taken = []
+                else:
+                    trace_records.append({
+                        "Bit Index": idx + 1,
+                        "Bit": bit,
+                        "Navigation": nav_dir,
+                        "Current Node Weight": curr_node.freq,
+                        "Event": "Internal Node (continue traversal)",
+                        "Codeword Path": "".join(path_taken)
+                    })
+
+            trace_df = pd.DataFrame(trace_records)
+            st.dataframe(trace_df, use_container_width=True, hide_index=True)
+
+# ---------------------------------------------------------
+# TAB 4: FEED ALL SOURCE CODES & INSPECTOR
+# ---------------------------------------------------------
+with tab_feeder:
+    st.subheader("💻 Feed All Project Source Codes into the Compression Model")
+    st.markdown("""
+    This experiential learning project is built from modular, production-grade Python components.
+    Select any project module to inspect its full implementation, analyze its character entropy, and view its compression performance!
+    """)
+
+    code_tabs = st.tabs([
+        "src/huffman.py",
+        "src/codec.py",
+        "src/shannon_fano.py",
+        "src/visualizer.py",
+        "experiments/benchmark.py",
+        "main.py",
+        "tests/test_huffman.py"
+    ])
+
+    for tab, (mod_name, file_path) in zip(code_tabs, PROJECT_CODE_FILES.items()):
+        with tab:
+            with open(file_path, "r", encoding="utf-8") as f:
+                code_content = f.read()
+
+            fc1, fc2, fc3 = st.columns([1, 1, 2])
+            with fc1:
+                st.metric("Total Lines", f"{len(code_content.splitlines()):,}")
+            with fc2:
+                st.metric("File Size", f"{len(code_content):,} bytes")
+            with fc3:
+                st.caption(f"Location: `{file_path}`")
+
+            st.code(code_content, language="python")
+
+# ---------------------------------------------------------
+# TAB 5: DYNAMIC TABLES & CODEBOOK
 # ---------------------------------------------------------
 with tab_tables:
     st.subheader("Symbol Frequency & Optimal Prefix Codebook Table")
@@ -291,7 +463,7 @@ with tab_tables:
     )
 
 # ---------------------------------------------------------
-# TAB 4: ROOTED BINARY TREE VISUALIZATION
+# TAB 6: ROOTED BINARY TREE VISUALIZATION
 # ---------------------------------------------------------
 with tab_tree:
     st.subheader("Rooted Binary Prefix Code Tree (Graph Visualization)")
@@ -301,15 +473,11 @@ with tab_tree:
     Edge labels **0** (left branch) and **1** (right branch) dictate prefix bitpaths.
     """)
 
-    # Render tree for top 12 symbols to keep visualization crystal clear
-    if len(huffman.frequencies) > 14:
-        st.info("Displaying the subtree for the top 12 most frequent characters for optimal visual readability:")
-        top_chars = [char for char, _ in sorted(huffman.frequencies.items(), key=lambda x: x[1], reverse=True)[:12]]
-        filtered_text = "".join(c for c in raw_text if c in top_chars)
-        vis_tree = HuffmanTree()
-        vis_root = vis_tree.build_tree(filtered_text)
-    else:
-        vis_root = root
+    top_n = st.slider("Select Number of Top Frequent Characters to Render in Tree Graph:", 4, min(24, len(huffman.frequencies)), 12)
+    top_chars = [char for char, _ in sorted(huffman.frequencies.items(), key=lambda x: x[1], reverse=True)[:top_n]]
+    filtered_text = "".join(c for c in raw_text if c in top_chars)
+    vis_tree = HuffmanTree()
+    vis_root = vis_tree.build_tree(filtered_text)
 
     fig, ax = plt.subplots(figsize=(13, 7))
     graph, pos, labels, edge_labels = HuffmanVisualizer.build_networkx_graph(vis_root)
@@ -329,7 +497,7 @@ with tab_tree:
     plt.close()
 
 # ---------------------------------------------------------
-# TAB 5: BENCHMARKING & EXPERIMENTAL GRAPHS
+# TAB 7: BENCHMARKING & EXPERIMENTAL GRAPHS
 # ---------------------------------------------------------
 with tab_exp:
     st.subheader("Stage 6: Experimental Benchmarks & Quantitative Comparison")
@@ -354,7 +522,25 @@ with tab_exp:
             st.dataframe(pd.read_csv(csv2_path), use_container_width=True, hide_index=True)
 
 # ---------------------------------------------------------
-# TAB 6: 8-STAGE CURRICULUM COMPLIANCE
+# TAB 8: STANDALONE VISUAL MODEL
+# ---------------------------------------------------------
+with tab_model:
+    st.subheader("🌐 Standalone Interactive HTML5/SVG Visual Explainer Model")
+    st.markdown("""
+    The standalone interactive simulation model (`interactive_model.html`) runs completely client-side in any web browser,
+    featuring an SVG binary tree renderer, live bitstream tracer, priority queue stepper, and direct code feeder.
+    """)
+
+    html_model_path = os.path.join(BASE_DIR, "interactive_model.html")
+    if os.path.exists(html_model_path):
+        with open(html_model_path, "r", encoding="utf-8") as f:
+            html_raw = f.read()
+        components.html(html_raw, height=850, scrolling=True)
+    else:
+        st.info("Standalone model file `interactive_model.html` generated in workspace.")
+
+# ---------------------------------------------------------
+# TAB 9: 8-STAGE CURRICULUM COMPLIANCE
 # ---------------------------------------------------------
 with tab_compliance:
     st.subheader("Experiential Learning 8-Stage Syllabus Compliance Matrix")

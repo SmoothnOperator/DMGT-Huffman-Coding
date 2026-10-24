@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Interactive Huffman Coding Visual Simulation Model & Blockchain Simulator - DMGT Topic 14</title>
+  <title>Interactive Huffman Coding Visual Simulation Model - DMGT Topic 14</title>
   <style>
     /* High-Tech Dark Mode (Default) & Light Theme Styles */
     :root {
@@ -540,8 +540,8 @@
         <p style="color: #F0AD4E; font-weight: bold; letter-spacing: 0.5px; text-transform: uppercase;">
           JAIN (Deemed-to-be University) • School of Computer Science & Engineering
         </p>
-        <h1>Optimal Prefix Codes, Blockchain Gas & Algorithm Race Model</h1>
-        <p>DMGT Topic 14 • CSE - BLOCKCHAIN • Faculty Evaluator: Dr. Priya Satish</p>
+        <h1>Optimal Prefix Codes & Algorithm Race Simulation Model</h1>
+        <p>DMGT Topic 14 • B.Tech CSE • Faculty Evaluator: Dr. Priya Satish</p>
       </div>
       <div style="display: flex; align-items: center; gap: 12px;">
         <button class="btn btn-sm btn-outline" id="theme-toggle-btn" onclick="toggleTheme()" style="color: #F0AD4E; border-color: #F0AD4E;">
@@ -561,7 +561,6 @@
       <button class="tab-btn active" onclick="switchTab('tab-simulator')">🌳 Visual Simulation Model</button>
       <button class="tab-btn" onclick="switchTab('tab-step')">🔄 Step-by-Step Priority Queue</button>
       <button class="tab-btn" onclick="switchTab('tab-tracer')">⚡ Interactive Bitstream Tracer</button>
-      <button class="tab-btn" onclick="switchTab('tab-blockchain')">⛓️ Blockchain Gas & P2P Simulator</button>
       <button class="tab-btn" onclick="switchTab('tab-race')">⚔️ Algorithm Race: Huffman vs Shannon-Fano</button>
       <button class="tab-btn" onclick="switchTab('tab-feeder')">💻 Code Feeder & Source Inspector</button>
       <button class="tab-btn" onclick="switchTab('tab-benchmark')">📊 Experimental Benchmarks</button>
@@ -805,122 +804,7 @@
       </div>
     </div>
 
-    <!-- TAB 4: BLOCKCHAIN GAS & P2P SIMULATOR (FEATURE 1) -->
-    <div id="tab-blockchain" class="tab-content">
-      <div class="card">
-        <div class="card-title">
-          <span>⛓️ Blockchain EVM Calldata Gas & P2P Network Propagation Simulator</span>
-          <span class="badge badge-eth">CSE - BLOCKCHAIN TECHNOLOGY</span>
-        </div>
-        <p style="font-size: 0.92rem; color: var(--text-muted); margin-bottom: 15px;">
-          In Layer-1 and Layer-2 rollups (e.g. Arbitrum, Optimism, zkSync), transaction batches are committed to Ethereum as calldata.
-          Under <strong>EIP-2028</strong>, every non-zero byte costs <strong>16 gas</strong> and every zero byte costs <strong>4 gas</strong>.
-          Huffman lossless compression drastically shrinks payload footprint, lowering gas costs and mitigating P2P block propagation latency (orphan/uncle rates).
-        </p>
-
-        <!-- Interactive Sliders -->
-        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; background: var(--card-sub); padding: 14px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 18px;">
-          <div>
-            <label style="font-weight: 600; font-size: 0.85rem;">Gas Price (Gwei): <span id="val-gas-price" style="color: var(--navy); font-weight: bold;">25</span></label>
-            <input type="range" id="slider-gas-price" min="5" max="150" value="25" oninput="updateBlockchainSimulation()">
-          </div>
-          <div>
-            <label style="font-weight: 600; font-size: 0.85rem;">ETH Price (USD): $<span id="val-eth-price" style="color: var(--navy); font-weight: bold;">3,000</span></label>
-            <input type="range" id="slider-eth-price" min="1500" max="6000" step="100" value="3000" oninput="updateBlockchainSimulation()">
-          </div>
-          <div>
-            <label style="font-weight: 600; font-size: 0.85rem;">P2P Validator Nodes: <span id="val-p2p-nodes" style="color: var(--navy); font-weight: bold;">1,000</span></label>
-            <input type="range" id="slider-p2p-nodes" min="100" max="5000" step="100" value="1000" oninput="updateBlockchainSimulation()">
-          </div>
-        </div>
-
-        <!-- 4 Key Blockchain Metrics -->
-        <div class="metrics-grid">
-          <div class="metric-box" style="border-left-color: var(--eth);">
-            <div class="metric-label">EVM Calldata Gas Saved</div>
-            <div class="metric-val" id="bc-gas-saved">--</div>
-            <div class="metric-sub" id="bc-gas-saved-pct">Per Transaction Call</div>
-          </div>
-          <div class="metric-box" style="border-left-color: var(--green);">
-            <div class="metric-label">USD Cost Saved / Tx</div>
-            <div class="metric-val" id="bc-usd-saved">--</div>
-            <div class="metric-sub" id="bc-eth-saved">In Ethereum L1 Gas</div>
-          </div>
-          <div class="metric-box" style="border-left-color: #F59E0B;">
-            <div class="metric-label">Annual L2 Rollup Savings</div>
-            <div class="metric-val" id="bc-annual-saved">--</div>
-            <div class="metric-sub">Assuming 100,000 Batches/Yr</div>
-          </div>
-          <div class="metric-box" style="border-left-color: #A855F7;">
-            <div class="metric-label">P2P Latency Reduction</div>
-            <div class="metric-val" id="bc-latency-reduction">--</div>
-            <div class="metric-sub">Decker & Wattenhofer Model</div>
-          </div>
-        </div>
-
-        <!-- Calldata Breakdown Table -->
-        <h4 style="color: var(--navy); margin: 20px 0 8px 0;">Ethereum EIP-2028 Calldata Gas Cost Breakdown</h4>
-        <table>
-          <thead>
-            <tr>
-              <th>Payload Representation</th>
-              <th>Total Size (Bytes)</th>
-              <th>Non-Zero Bytes (16 Gas)</th>
-              <th>Zero Bytes (4 Gas)</th>
-              <th>Total Calldata Gas</th>
-              <th>Cost in ETH (@ 25 Gwei)</th>
-              <th>Cost in USD (@ $3k)</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><strong>Uncompressed Fixed ASCII</strong></td>
-              <td id="tbl-raw-bytes">8,769</td>
-              <td id="tbl-raw-nonzero">8,769</td>
-              <td>0</td>
-              <td id="tbl-raw-gas" style="color: #F87171; font-weight: bold;">140,304 gas</td>
-              <td id="tbl-raw-eth">0.00351 ETH</td>
-              <td id="tbl-raw-usd">$10.52</td>
-            </tr>
-            <tr style="background: rgba(16, 185, 129, 0.12);">
-              <td><strong>Huffman Compressed Payload</strong></td>
-              <td id="tbl-comp-bytes" style="color: var(--green); font-weight: bold;">4,981</td>
-              <td id="tbl-comp-nonzero">4,962</td>
-              <td id="tbl-comp-zero">19</td>
-              <td id="tbl-comp-gas" style="color: var(--green); font-weight: bold;">79,468 gas</td>
-              <td id="tbl-comp-eth" style="color: var(--green);">0.00199 ETH</td>
-              <td id="tbl-comp-usd" style="color: var(--green); font-weight: bold;">$5.96</td>
-            </tr>
-            <tr style="background: rgba(245, 158, 11, 0.12); font-weight: bold;">
-              <td><strong>Net Improvement / Savings</strong></td>
-              <td id="tbl-diff-bytes">-3,788 B (-43.2%)</td>
-              <td>-</td>
-              <td>-</td>
-              <td id="tbl-diff-gas" style="color: var(--green);">-60,836 gas (-43.4%)</td>
-              <td id="tbl-diff-eth" style="color: var(--green);">-0.00152 ETH</td>
-              <td id="tbl-diff-usd" style="color: var(--green); font-size: 1.05rem;">-$4.56 saved / tx</td>
-            </tr>
-          </tbody>
-        </table>
-
-        <!-- Cryptographic Consensus Hash Verification -->
-        <div style="background: var(--card-sub); border: 1px solid var(--border); border-left: 4px solid var(--green); padding: 14px 18px; border-radius: 6px; margin-top: 20px;">
-          <h4 style="color: var(--navy); margin-bottom: 6px;">🔐 Cryptographic Integrity & Consensus Verification (SHA-256)</h4>
-          <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 10px;">
-            A compression scheme can only be trusted in decentralized ledgers if decoding guarantees 100% mathematical fidelity. Any 1-bit drift corrupts the block hash and triggers a consensus fork!
-          </p>
-          <div style="font-family: monospace; font-size: 0.82rem; word-break: break-all; background: var(--input-bg); padding: 10px; border-radius: 6px; border: 1px solid var(--border); margin-bottom: 6px;">
-            <div><strong>Original Payload SHA-256:</strong> <span id="sha-orig" style="color: var(--navy);">Click "Compress" to compute hash</span></div>
-            <div><strong>Decoded Payload SHA-256:</strong> <span id="sha-deco" style="color: var(--green);">Click "Compress" to compute hash</span></div>
-          </div>
-          <div id="sha-status" style="font-size: 0.85rem; font-weight: bold; color: var(--green);">
-            ✅ Lossless Cryptographic Idempotency: Verified D(E(M)) == M
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- TAB 5: ALGORITHM RACE: HUFFMAN VS SHANNON-FANO (FEATURE 4) -->
+    <!-- TAB 4: ALGORITHM RACE: HUFFMAN VS SHANNON-FANO -->
     <div id="tab-race" class="tab-content">
       <div class="card">
         <div class="card-title">
@@ -936,7 +820,7 @@
         <div style="background: var(--card-sub); border: 1px solid var(--border); padding: 16px; border-radius: 8px; margin-bottom: 20px;">
           <h4 style="color: var(--navy); margin-bottom: 8px;">Interactive Bit Consumption Race</h4>
           <div style="display: flex; gap: 10px; margin-bottom: 14px;">
-            <input type="text" id="race-test-input" value="BLOCKCHAIN AND GRAPH THEORY OPTIMIZATION" style="flex: 1; margin: 0;">
+            <input type="text" id="race-test-input" value="DISCRETE MATHEMATICS AND GRAPH THEORY OPTIMIZATION" style="flex: 1; margin: 0;">
             <button class="btn btn-green" onclick="startAlgorithmRace()">🏁 Start Encoding Race</button>
           </div>
 
@@ -994,7 +878,7 @@
       </div>
     </div>
 
-    <!-- TAB 6: CODE FEEDER & INSPECTOR -->
+    <!-- TAB 5: CODE FEEDER & INSPECTOR -->
     <div id="tab-feeder" class="tab-content">
       <div class="card">
         <div class="card-title">
@@ -1024,7 +908,7 @@
       </div>
     </div>
 
-    <!-- TAB 7: BENCHMARKING -->
+    <!-- TAB 6: BENCHMARKING -->
     <div id="tab-benchmark" class="tab-content">
       <div class="card">
         <div class="card-title">
@@ -1158,13 +1042,6 @@
     let currentViewMode = 'adaptive';
     let currentSelectedCodeFile = "huffman.py";
 
-    // Fast In-Browser SHA-256 for Cryptographic Verification
-    async function computeSHA256(str) {
-      const buf = new TextEncoder().encode(str);
-      const hashBuf = await crypto.subtle.digest('SHA-256', buf);
-      const hashArr = Array.from(new Uint8Array(hashBuf));
-      return hashArr.map(b => b.toString(16).padStart(2, '0')).join('');
-    }
 
     function onPresetChange() {
       loadPreset(false);
@@ -1375,22 +1252,13 @@
       animateMetric('sz-sf', 0, sfWeightedLen, 850, 0, "", " bits");
       document.getElementById('badge-optimality').innerText = "Mathematically Optimal";
 
-      // 5. Update Feature 1: Blockchain Gas & Propagation
-      updateBlockchainSimulation();
-
-      // Cryptographic SHA-256 Hashes
-      const shaOrig = await computeSHA256(text);
-      document.getElementById('sha-orig').innerText = shaOrig;
-      document.getElementById('sha-deco').innerText = shaOrig;
-      document.getElementById('sha-status').innerText = "✅ Lossless Cryptographic Idempotency: Verified D(E(M)) == M (SHA-256 Bit-for-Bit Identical)";
-
-      // 6. Update Feature 4: Algorithm Divergence Table
+      // 5. Update Algorithm Divergence Table
       populateDivergenceTable();
 
-      // 7. Render Rooted Binary Tree with Cascading Assembly Animation
+      // 6. Render Rooted Binary Tree with Cascading Assembly Animation
       renderTreeSVG(currentTreeRoot, true);
 
-      // 8. Update Step Simulator & Bitstream Tracer
+      // 7. Update Step Simulator & Bitstream Tracer
       currentStepIdx = 0;
       updateStepView();
       setupBitTracer();
@@ -1401,66 +1269,7 @@
       }, 80);
     }
 
-    // FEATURE 1: Blockchain Gas & P2P Simulator Calculation
-    function updateBlockchainSimulation() {
-      const text = currentText || document.getElementById('input-text').value;
-      if (!text) return;
-
-      const gasPriceGwei = parseFloat(document.getElementById('slider-gas-price').value) || 25;
-      const ethPriceUSD = parseFloat(document.getElementById('slider-eth-price').value) || 3000;
-      const p2pNodes = parseInt(document.getElementById('slider-p2p-nodes').value) || 1000;
-
-      document.getElementById('val-gas-price').innerText = gasPriceGwei;
-      document.getElementById('val-eth-price').innerText = ethPriceUSD.toLocaleString();
-      document.getElementById('val-p2p-nodes').innerText = p2pNodes.toLocaleString();
-
-      const rawBytes = text.length;
-      let compBits = 0;
-      for (let ch of text) {
-        compBits += (currentCodes[ch] || "").length;
-      }
-      const compBytes = Math.ceil(compBits / 8) || Math.round(rawBytes * 0.56);
-
-      const rawGas = rawBytes * 16;
-      const compZeroBytes = Math.round(compBytes / 256);
-      const compNonZeroBytes = compBytes - compZeroBytes;
-      const compGas = (compNonZeroBytes * 16) + (compZeroBytes * 4);
-
-      const gasSaved = Math.max(0, rawGas - compGas);
-      const gasSavedPct = ((gasSaved / rawGas) * 100).toFixed(1);
-
-      const ethSavedPerTx = (gasSaved * gasPriceGwei * 1e-9);
-      const usdSavedPerTx = (ethSavedPerTx * ethPriceUSD);
-      const annualRollupSaved = (usdSavedPerTx * 100000);
-      const latencyReductionPct = gasSavedPct;
-
-      document.getElementById('bc-gas-saved').innerText = gasSaved.toLocaleString() + " Gas";
-      document.getElementById('bc-gas-saved-pct').innerText = gasSavedPct + "% Calldata Gas Reduction";
-      document.getElementById('bc-usd-saved').innerText = "$" + usdSavedPerTx.toFixed(2) + " USD";
-      document.getElementById('bc-eth-saved').innerText = ethSavedPerTx.toFixed(5) + " ETH Saved / Tx";
-      document.getElementById('bc-annual-saved').innerText = "$" + Math.round(annualRollupSaved).toLocaleString() + " / Year";
-      document.getElementById('bc-latency-reduction').innerText = "-" + latencyReductionPct + "% Latency";
-
-      document.getElementById('tbl-raw-bytes').innerText = rawBytes.toLocaleString() + " B";
-      document.getElementById('tbl-raw-nonzero').innerText = rawBytes.toLocaleString();
-      document.getElementById('tbl-raw-gas').innerText = rawGas.toLocaleString() + " gas";
-      document.getElementById('tbl-raw-eth').innerText = (rawGas * gasPriceGwei * 1e-9).toFixed(5) + " ETH";
-      document.getElementById('tbl-raw-usd').innerText = "$" + ((rawGas * gasPriceGwei * 1e-9) * ethPriceUSD).toFixed(2);
-
-      document.getElementById('tbl-comp-bytes').innerText = compBytes.toLocaleString() + " B";
-      document.getElementById('tbl-comp-nonzero').innerText = compNonZeroBytes.toLocaleString();
-      document.getElementById('tbl-comp-zero').innerText = compZeroBytes.toLocaleString();
-      document.getElementById('tbl-comp-gas').innerText = compGas.toLocaleString() + " gas";
-      document.getElementById('tbl-comp-eth').innerText = (compGas * gasPriceGwei * 1e-9).toFixed(5) + " ETH";
-      document.getElementById('tbl-comp-usd').innerText = "$" + ((compGas * gasPriceGwei * 1e-9) * ethPriceUSD).toFixed(2);
-
-      document.getElementById('tbl-diff-bytes').innerText = "-" + (rawBytes - compBytes).toLocaleString() + " B (-" + gasSavedPct + "%)";
-      document.getElementById('tbl-diff-gas').innerText = "-" + gasSaved.toLocaleString() + " gas (-" + gasSavedPct + "%)";
-      document.getElementById('tbl-diff-eth').innerText = "-" + ethSavedPerTx.toFixed(5) + " ETH";
-      document.getElementById('tbl-diff-usd').innerText = "-$" + usdSavedPerTx.toFixed(2) + " saved / tx";
-    }
-
-    // FEATURE 4: Algorithm Race & Divergence Table
+    // Algorithm Race & Divergence Table
     function populateDivergenceTable() {
       const tbody = document.getElementById('divergence-table-body');
       tbody.innerHTML = '';
@@ -1506,7 +1315,7 @@
     }
 
     function startAlgorithmRace() {
-      const testMsg = document.getElementById('race-test-input').value || "BLOCKCHAIN AND GRAPH THEORY OPTIMIZATION";
+      const testMsg = document.getElementById('race-test-input').value || "DISCRETE MATHEMATICS AND GRAPH THEORY OPTIMIZATION";
       let hBits = 0;
       let sfBits = 0;
       for (let ch of testMsg) {

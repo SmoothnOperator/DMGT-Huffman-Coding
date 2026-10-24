@@ -178,9 +178,23 @@ with st.sidebar:
         )
         source_label = "Custom User Input"
 
+    st.divider()
+    compress_button = st.button("⚡ Compress & Generate Model", type="primary", use_container_width=True)
+
+# Session state tracking for explicit generation
+if "has_compressed" not in st.session_state:
+    st.session_state["has_compressed"] = False
+
+if compress_button:
+    st.session_state["has_compressed"] = True
+
 # Process the input text through Huffman & Shannon-Fano
 if not raw_text.strip():
     st.warning("Please enter or select text to begin compression.")
+    st.stop()
+
+if not st.session_state["has_compressed"]:
+    st.info(f"📥 **Data Source Ready:** `{source_label}` ({len(raw_text):,} characters). Click **'⚡ Compress & Generate Model'** above to run the greedy tree builder and generate all tables, charts, and rooted binary tree graphs.")
     st.stop()
 
 # Execution Pipeline

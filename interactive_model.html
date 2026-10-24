@@ -130,19 +130,25 @@
       background: var(--blue);
       color: white;
       border: none;
-      padding: 9px 15px;
+      padding: 10px 16px;
       font-weight: 600;
       border-radius: 6px;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      font-size: 0.88rem;
+      font-size: 0.9rem;
       transition: all 0.2s ease;
     }
     .btn:hover { background: var(--navy); }
-    .btn-green { background: var(--green); }
-    .btn-green:hover { background: #1B5E20; }
+    .btn-green {
+      background: var(--green);
+      box-shadow: 0 2px 6px rgba(46, 125, 50, 0.3);
+    }
+    .btn-green:hover {
+      background: #1B5E20;
+      transform: translateY(-1px);
+    }
     .btn-outline {
       background: transparent;
       border: 1px solid var(--blue);
@@ -251,6 +257,7 @@
     }
     .badge-pass { background: #D4EDDA; color: #155724; }
     .badge-warn { background: #FFF3CD; color: #856404; }
+    .badge-ready { background: #E2E3E5; color: #383D41; }
     pre {
       background: #272822;
       color: #F8F8F2;
@@ -301,6 +308,14 @@
       background: #C8E6C9;
       color: #1B5E20;
     }
+    .pulse-glow {
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(46, 125, 50, 0.4); }
+      70% { box-shadow: 0 0 0 10px rgba(46, 125, 50, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(46, 125, 50, 0); }
+    }
   </style>
 </head>
 <body>
@@ -337,11 +352,11 @@
         <div class="card">
           <div class="card-title">
             <span>📥 Input Feeder & Data Source</span>
-            <span class="badge badge-pass" id="badge-chars">8,769 Characters</span>
+            <span class="badge badge-pass" id="badge-chars">8,769 Characters (Ready)</span>
           </div>
 
           <label style="font-weight: 600; font-size: 0.9rem;">Quick Preload Data / Code Source:</label>
-          <select id="select-preset" onchange="loadPreset()">
+          <select id="select-preset" onchange="onPresetChange()">
             <option value="huffman_py" selected>Code Feeder: src/huffman.py (N = 8,769 - Tree in Screenshot)</option>
             <option value="english">Dataset A: Natural English Text (N = 2,001)</option>
             <option value="code">Dataset B: Python Source Code (N = 1,432)</option>
@@ -359,37 +374,42 @@
           <label style="font-weight: 600; font-size: 0.9rem;">Source Content:</label>
           <textarea id="input-text" rows="7" placeholder="Type or paste any text to compress..."></textarea>
 
-          <div style="display: flex; gap: 10px;">
-            <button class="btn btn-green" onclick="runCompression()">⚡ Compress & Generate Model</button>
+          <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <button class="btn btn-green pulse-glow" id="btn-compress-main" onclick="runCompression()" style="font-size: 1rem; padding: 11px 22px;">
+              ⚡ Compress & Generate Model
+            </button>
             <button class="btn btn-outline" onclick="resetDefault()">Reset Default</button>
+            <span id="compress-status-text" style="font-size: 0.88rem; color: #555; margin-left: 5px;">
+              👈 Click Compress to build tree & metrics
+            </span>
           </div>
         </div>
 
         <div class="card">
           <div class="card-title">
             <span>📊 Information-Theoretic Performance Metrics</span>
-            <span class="badge badge-pass" id="badge-lossless">Lossless: TRUE</span>
+            <span class="badge badge-ready" id="badge-lossless">Status: Ready to Compress</span>
           </div>
 
           <div class="metrics-grid">
             <div class="metric-box">
               <div class="metric-label">Compression Ratio</div>
-              <div class="metric-val" id="m-ratio">1.76 : 1</div>
-              <div class="metric-sub" id="m-savings">43.2% Space Savings</div>
+              <div class="metric-val" id="m-ratio">-- : 1</div>
+              <div class="metric-sub" id="m-savings">Pending Compression</div>
             </div>
             <div class="metric-box">
               <div class="metric-label">Shannon Entropy H(X)</div>
-              <div class="metric-val" id="m-entropy">4.521</div>
+              <div class="metric-val" id="m-entropy">--</div>
               <div class="metric-sub">Theoretical Limit (b/sym)</div>
             </div>
             <div class="metric-box">
               <div class="metric-label">Huffman Avg Length L(C)</div>
-              <div class="metric-val" id="m-huffman">4.544</div>
-              <div class="metric-sub" id="m-redundancy">Redundancy R: 0.023</div>
+              <div class="metric-val" id="m-huffman">--</div>
+              <div class="metric-sub" id="m-redundancy">Redundancy R: --</div>
             </div>
             <div class="metric-box">
               <div class="metric-label">Kraft-McMillan Sum</div>
-              <div class="metric-val" id="m-kraft">1.000</div>
+              <div class="metric-val" id="m-kraft">--</div>
               <div class="metric-sub">Full Binary Tree Invariant</div>
             </div>
           </div>
@@ -407,31 +427,31 @@
               <tr>
                 <td><strong>Fixed 8-Bit ASCII</strong></td>
                 <td>8.000 bits/sym</td>
-                <td id="sz-ascii">70,152 bits</td>
+                <td id="sz-ascii">-- bits</td>
                 <td><span class="badge badge-warn">Redundant Baseline</span></td>
               </tr>
               <tr>
                 <td><strong>Shannon-Fano Coding</strong></td>
-                <td id="sz-sf-len">4.568 bits/sym</td>
-                <td id="sz-sf">40,058 bits</td>
+                <td id="sz-sf-len">-- bits/sym</td>
+                <td id="sz-sf">-- bits</td>
                 <td>Top-down Heuristic</td>
               </tr>
               <tr style="background: #E8F5E9;">
                 <td><strong>Huffman Optimal Tree</strong></td>
-                <td id="sz-huff-len" style="font-weight: bold; color: var(--green);">4.544 bits/sym</td>
-                <td id="sz-huff" style="font-weight: bold; color: var(--green);">39,848 bits</td>
-                <td><span class="badge badge-pass">Mathematically Optimal</span></td>
+                <td id="sz-huff-len" style="font-weight: bold; color: var(--green);">-- bits/sym</td>
+                <td id="sz-huff" style="font-weight: bold; color: var(--green);">-- bits</td>
+                <td><span class="badge badge-pass" id="badge-optimality">Awaiting Click</span></td>
               </tr>
             </tbody>
           </table>
         </div>
       </div>
 
-      <!-- Rooted Binary Tree Canvas/SVG with Enhanced Controls -->
-      <div class="card">
+      <!-- Rooted Binary Tree Canvas/SVG with Explicit Generation & Controls -->
+      <div class="card" id="tree-card-section">
         <div class="card-title">
           <span>🌳 Rooted Binary Prefix Code Tree Visualization</span>
-          <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+          <div id="tree-action-buttons" style="display: none; gap: 8px; align-items: center; flex-wrap: wrap;">
             <span class="badge badge-pass" id="tree-stats-badge">80 Leaves • Max Depth: 14</span>
             <button class="btn btn-sm btn-outline" onclick="zoomInTree()">🔍 Zoom In (+)</button>
             <button class="btn btn-sm btn-outline" onclick="zoomOutTree()">🔍 Zoom Out (-)</button>
@@ -441,36 +461,51 @@
           </div>
         </div>
 
-        <div class="tree-toolbar">
-          <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-            <label style="font-weight: 600; font-size: 0.88rem; margin: 0;">Tree View Mode:</label>
-            <select id="tree-view-mode" onchange="onTreeViewModeChange()" style="width: auto; margin: 0; padding: 6px 10px;">
-              <option value="adaptive" selected>🌟 Adaptive Clean View (Top Levels - Zero Overlap)</option>
-              <option value="full">🌲 Full Complete Tree (All 80 Vertices - Scrollable & Pan)</option>
-              <option value="top12">🎯 Top 12 Significant Symbols (Textbook Clarity)</option>
-              <option value="top20">🎯 Top 20 Significant Symbols</option>
-            </select>
-          </div>
-
-          <div id="depth-slider-container" style="display: flex; align-items: center; gap: 8px;">
-            <label style="font-weight: 600; font-size: 0.88rem; margin: 0;">Max Depth:</label>
-            <input type="range" id="tree-depth-slider" min="3" max="14" value="5" style="width: 140px; margin: 0;" oninput="onDepthSliderChange(this.value)">
-            <span id="depth-slider-val" style="font-weight: bold; font-size: 0.88rem; min-width: 25px;">5</span>
-          </div>
-
-          <div style="font-size: 0.82rem; color: #555;">
-            <span style="display: inline-block; width: 12px; height: 12px; background: #1F4E78; border-radius: 50%; vertical-align: middle; margin-right: 4px;"></span> Blue Circle = Internal Node (Weight)
-            &nbsp;&bull;&nbsp;
-            <span style="display: inline-block; width: 12px; height: 12px; background: #2E7D32; border-radius: 2px; vertical-align: middle; margin-right: 4px;"></span> Green Square = Leaf Node (Char, Weight)
-            &nbsp;&bull;&nbsp;
-            <span style="color: #D32F2F; font-weight: bold;">0</span> / <span style="color: #D32F2F; font-weight: bold;">1</span> = Path Bits
-          </div>
+        <!-- Initial Placeholder: Shown until Compress is clicked -->
+        <div id="tree-placeholder" style="text-align: center; padding: 75px 20px; background: #FAFBFD; border: 2px dashed #DDE2E5; border-radius: 8px;">
+          <div style="font-size: 3.5rem; margin-bottom: 12px;">🌳</div>
+          <h3 style="color: var(--navy); margin-bottom: 8px; font-size: 1.3rem;">Rooted Binary Prefix Code Tree</h3>
+          <p id="placeholder-desc" style="font-size: 0.95rem; color: #555; max-width: 540px; margin: 0 auto 20px auto; line-height: 1.6;">
+            Data source loaded (<strong>8,769 characters</strong>). Click the <strong>"⚡ Compress & Generate Model"</strong> button below to build the optimal prefix tree graph and compute metrics.
+          </p>
+          <button class="btn btn-green" style="font-size: 1rem; padding: 12px 26px;" onclick="runCompression()">
+            ⚡ Compress & Generate Model
+          </button>
         </div>
 
-        <div class="svg-container" id="tree-svg-container" title="Drag to pan, mouse-wheel to zoom">
-          <svg id="tree-svg">
-            <g id="tree-viewport"></g>
-          </svg>
+        <!-- Active View: Generated after Compress is clicked -->
+        <div id="tree-active-view" style="display: none;">
+          <div class="tree-toolbar">
+            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+              <label style="font-weight: 600; font-size: 0.88rem; margin: 0;">Tree View Mode:</label>
+              <select id="tree-view-mode" onchange="onTreeViewModeChange()" style="width: auto; margin: 0; padding: 6px 10px;">
+                <option value="adaptive" selected>🌟 Adaptive Clean View (Top Levels - Zero Overlap)</option>
+                <option value="full">🌲 Full Complete Tree (All 80 Vertices - Scrollable & Pan)</option>
+                <option value="top12">🎯 Top 12 Significant Symbols (Textbook Clarity)</option>
+                <option value="top20">🎯 Top 20 Significant Symbols</option>
+              </select>
+            </div>
+
+            <div id="depth-slider-container" style="display: flex; align-items: center; gap: 8px;">
+              <label style="font-weight: 600; font-size: 0.88rem; margin: 0;">Max Depth:</label>
+              <input type="range" id="tree-depth-slider" min="3" max="14" value="5" style="width: 140px; margin: 0;" oninput="onDepthSliderChange(this.value)">
+              <span id="depth-slider-val" style="font-weight: bold; font-size: 0.88rem; min-width: 25px;">5</span>
+            </div>
+
+            <div style="font-size: 0.82rem; color: #555;">
+              <span style="display: inline-block; width: 12px; height: 12px; background: #1F4E78; border-radius: 50%; vertical-align: middle; margin-right: 4px;"></span> Blue Circle = Internal Node (Weight)
+              &nbsp;&bull;&nbsp;
+              <span style="display: inline-block; width: 12px; height: 12px; background: #2E7D32; border-radius: 2px; vertical-align: middle; margin-right: 4px;"></span> Green Square = Leaf Node (Char, Weight)
+              &nbsp;&bull;&nbsp;
+              <span style="color: #D32F2F; font-weight: bold;">0</span> / <span style="color: #D32F2F; font-weight: bold;">1</span> = Path Bits
+            </div>
+          </div>
+
+          <div class="svg-container" id="tree-svg-container" title="Drag to pan, mouse-wheel to zoom">
+            <svg id="tree-svg">
+              <g id="tree-viewport"></g>
+            </svg>
+          </div>
         </div>
       </div>
     </div>
@@ -496,7 +531,7 @@
 
         <div style="background: #F4F6F9; border-left: 4px solid var(--navy); padding: 12px 18px; border-radius: 6px; margin: 15px 0;">
           <h4 id="step-action-title" style="color: var(--navy); margin-bottom: 4px;">Initial State</h4>
-          <p id="step-action-desc" style="font-size: 0.9rem; color: #333;">Priority queue initialized with leaf nodes.</p>
+          <p id="step-action-desc" style="font-size: 0.9rem; color: #333;">Click "Compress & Generate Model" in Tab 1 to populate simulation.</p>
         </div>
 
         <h4 style="margin: 10px 0 6px 0; color: var(--blue);">Current Min-Priority Queue Array State:</h4>
@@ -693,25 +728,54 @@
     let traceDecodedOutput = "";
     let currentSelectedCodeFile = "huffman.py";
 
-    function loadPreset() {
+    function onPresetChange() {
+      loadPreset(false);
+    }
+
+    function loadPreset(autoRun) {
       const val = document.getElementById('select-preset').value;
       if (PRESETS[val]) {
-        document.getElementById('input-text').value = PRESETS[val];
-        runCompression();
+        const text = PRESETS[val];
+        document.getElementById('input-text').value = text;
+        document.getElementById('badge-chars').innerText = text.length.toLocaleString() + " Characters (Ready)";
+        
+        if (autoRun) {
+          runCompression();
+        } else {
+          // Reset to placeholder state waiting for explicit click
+          document.getElementById('tree-placeholder').style.display = 'block';
+          document.getElementById('tree-active-view').style.display = 'none';
+          document.getElementById('tree-action-buttons').style.display = 'none';
+          document.getElementById('compress-status-text').innerText = "👈 Click Compress to generate graph";
+          document.getElementById('badge-lossless').className = "badge badge-ready";
+          document.getElementById('badge-lossless').innerText = "Status: Ready to Compress";
+          document.getElementById('placeholder-desc').innerHTML = "Data source loaded (<strong>" + text.length.toLocaleString() + " characters</strong>). Click the <strong>\"⚡ Compress & Generate Model\"</strong> button below to generate the tree graph.";
+        }
       }
     }
 
     function resetDefault() {
       document.getElementById('select-preset').value = 'huffman_py';
-      loadPreset();
+      loadPreset(false);
     }
 
-    // Compression Core Logic
+    // Explicit Compression Trigger: Generates only after clicking Compress
     function runCompression() {
       const text = document.getElementById('input-text').value;
-      if (!text) return;
+      if (!text || !text.trim()) {
+        alert("Please enter or select text before compressing.");
+        return;
+      }
 
-      document.getElementById('badge-chars').innerText = text.length.toLocaleString() + " Characters";
+      // Switch view from placeholder to active tree
+      document.getElementById('tree-placeholder').style.display = 'none';
+      document.getElementById('tree-active-view').style.display = 'block';
+      document.getElementById('tree-action-buttons').style.display = 'flex';
+      document.getElementById('compress-status-text').innerText = "✅ Tree generated successfully!";
+      document.getElementById('badge-lossless').className = "badge badge-pass";
+      document.getElementById('badge-lossless').innerText = "Lossless: TRUE (D(E(M)) == M)";
+      document.getElementById('badge-chars').innerText = text.length.toLocaleString() + " Characters (Compressed)";
+      document.getElementById('btn-compress-main').classList.remove('pulse-glow');
 
       // 1. Frequency calculation
       const freqs = {};
@@ -813,6 +877,7 @@
       document.getElementById('sz-huff-len').innerText = avgLen.toFixed(3) + " bits/sym";
       document.getElementById('sz-sf-len').innerText = (avgLen + 0.024).toFixed(3) + " bits/sym";
       document.getElementById('sz-sf').innerText = Math.round(compBits * 1.005).toLocaleString() + " bits";
+      document.getElementById('badge-optimality').innerText = "Mathematically Optimal";
 
       // 4. Render Rooted Binary Tree in SVG (Zero-Overlap In-Order Layout)
       renderTreeSVG(currentTreeRoot);
@@ -821,6 +886,11 @@
       currentStepIdx = 0;
       updateStepView();
       setupBitTracer();
+
+      // Smooth scroll to the generated tree
+      setTimeout(() => {
+        document.getElementById('tree-card-section').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 50);
     }
 
     // Tree Depth Calculation
@@ -844,12 +914,16 @@
       } else {
         sliderBox.style.display = 'none';
       }
-      renderTreeSVG(currentTreeRoot);
+      if (currentTreeRoot) {
+        renderTreeSVG(currentTreeRoot);
+      }
     }
 
     function onDepthSliderChange(val) {
       document.getElementById('depth-slider-val').innerText = val;
-      renderTreeSVG(currentTreeRoot);
+      if (currentTreeRoot) {
+        renderTreeSVG(currentTreeRoot);
+      }
     }
 
     // Zero-Overlap In-Order SVG Tree Renderer
@@ -1311,15 +1385,15 @@
         document.getElementById('input-text').value = codeText;
         document.getElementById('select-preset').value = 'custom';
         switchTab('tab-simulator');
-        runCompression();
+        runCompression(); // Explicit user intent: feed and generate
       }
     }
 
-    // Initialize on load with src/huffman.py (the exact tree from screenshot!)
+    // Initialize on load: Load text into textarea but WAIT FOR USER CLICK on Compress!
     window.onload = function() {
       showSource('huffman.py');
       document.getElementById('select-preset').value = 'huffman_py';
-      loadPreset();
+      loadPreset(false); // Does NOT auto-run; waits for button click!
     };
   </script>
 </body>

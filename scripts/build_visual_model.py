@@ -1,7 +1,7 @@
 """
 Builds the standalone interactive visual simulation model (interactive_model.html)
-with zero-overlap in-order tree layout, pan/zoom, depth filtering, and
-explicit generation after clicking the 'Compress & Generate Model' button.
+with rich cascading tree assembly animations, rolling metric tickers,
+interactive signal packet traversal, path highlighting, and depth controls.
 """
 
 import os
@@ -52,7 +52,7 @@ html_content = f"""<!DOCTYPE html>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Interactive Huffman Coding Visual Simulation Model & Code Feeder - DMGT Topic 14</title>
+  <title>Interactive Huffman Coding Animated Visual Simulation Model - DMGT Topic 14</title>
   <style>
     :root {{
       --navy: #102C57;
@@ -63,6 +63,8 @@ html_content = f"""<!DOCTYPE html>
       --card-bg: #FFFFFF;
       --border: #DDE2E5;
       --text: #212529;
+      --glow-gold: #FFB300;
+      --glow-cyan: #00E5FF;
     }}
     * {{ box-sizing: border-box; margin: 0; padding: 0; }}
     body {{
@@ -126,23 +128,35 @@ html_content = f"""<!DOCTYPE html>
       font-size: 0.92rem;
       border-radius: 6px 6px 0 0;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: all 0.25s ease;
       white-space: nowrap;
     }}
-    .tab-btn:hover {{ background: #D5E1ED; }}
+    .tab-btn:hover {{ background: #D5E1ED; transform: translateY(-1px); }}
     .tab-btn.active {{
       background: var(--navy);
       color: white;
+      box-shadow: 0 -2px 8px rgba(16, 44, 87, 0.2);
     }}
     .tab-content {{ display: none; }}
-    .tab-content.active {{ display: block; }}
+    .tab-content.active {{
+      display: block;
+      animation: fadeInContent 0.35s ease-out;
+    }}
+    @keyframes fadeInContent {{
+      from {{ opacity: 0; transform: translateY(6px); }}
+      to {{ opacity: 1; transform: translateY(0); }}
+    }}
     .card {{
       background: var(--card-bg);
       border: 1px solid var(--border);
       border-radius: 8px;
       padding: 20px;
       margin-bottom: 20px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      transition: box-shadow 0.3s ease;
+    }}
+    .card:hover {{
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
     }}
     .card-title {{
       font-size: 1.15rem;
@@ -174,6 +188,12 @@ html_content = f"""<!DOCTYPE html>
       font-size: 0.9rem;
       margin-top: 6px;
       margin-bottom: 12px;
+      transition: border 0.2s ease, box-shadow 0.2s ease;
+    }}
+    textarea:focus, select:focus, input[type="text"]:focus {{
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(31, 78, 120, 0.15);
+      outline: none;
     }}
     .btn {{
       background: var(--blue);
@@ -187,16 +207,17 @@ html_content = f"""<!DOCTYPE html>
       align-items: center;
       gap: 6px;
       font-size: 0.9rem;
-      transition: all 0.2s ease;
+      transition: all 0.25s ease;
     }}
-    .btn:hover {{ background: var(--navy); }}
+    .btn:hover {{ background: var(--navy); transform: translateY(-1px); }}
+    .btn:active {{ transform: translateY(1px); }}
     .btn-green {{
       background: var(--green);
-      box-shadow: 0 2px 6px rgba(46, 125, 50, 0.3);
+      box-shadow: 0 3px 8px rgba(46, 125, 50, 0.3);
     }}
     .btn-green:hover {{
       background: #1B5E20;
-      transform: translateY(-1px);
+      box-shadow: 0 5px 12px rgba(46, 125, 50, 0.45);
     }}
     .btn-outline {{
       background: transparent;
@@ -224,6 +245,12 @@ html_content = f"""<!DOCTYPE html>
       border-left: 4px solid var(--blue);
       padding: 12px 14px;
       border-radius: 6px;
+      transition: all 0.3s ease;
+    }}
+    .metric-box.metric-highlight {{
+      background: #E8F5E9;
+      border-left-color: var(--green);
+      transform: scale(1.02);
     }}
     .metric-label {{
       font-size: 0.78rem;
@@ -232,9 +259,10 @@ html_content = f"""<!DOCTYPE html>
       font-weight: 600;
     }}
     .metric-val {{
-      font-size: 1.4rem;
+      font-size: 1.45rem;
       font-weight: 700;
       color: var(--navy);
+      font-variant-numeric: tabular-nums;
     }}
     .metric-sub {{
       font-size: 0.75rem;
@@ -248,7 +276,7 @@ html_content = f"""<!DOCTYPE html>
     }}
     th, td {{
       border: 1px solid var(--border);
-      padding: 7px 10px;
+      padding: 8px 10px;
       text-align: center;
     }}
     th {{
@@ -273,7 +301,7 @@ html_content = f"""<!DOCTYPE html>
     }}
     .svg-container {{
       width: 100%;
-      height: 620px;
+      height: 640px;
       border: 1px solid var(--border);
       border-radius: 8px;
       background: #FAFBFD;
@@ -281,6 +309,7 @@ html_content = f"""<!DOCTYPE html>
       position: relative;
       cursor: grab;
       user-select: none;
+      box-shadow: inset 0 2px 6px rgba(0,0,0,0.03);
     }}
     .svg-container:active {{
       cursor: grabbing;
@@ -288,7 +317,7 @@ html_content = f"""<!DOCTYPE html>
     svg {{
       display: block;
       transform-origin: 0 0;
-      transition: transform 0.05s ease-out;
+      transition: transform 0.08s ease-out;
     }}
     .step-controls {{
       display: flex;
@@ -299,10 +328,11 @@ html_content = f"""<!DOCTYPE html>
     }}
     .badge {{
       display: inline-block;
-      padding: 3px 8px;
+      padding: 4px 9px;
       font-size: 0.8rem;
       border-radius: 4px;
       font-weight: 600;
+      transition: all 0.3s ease;
     }}
     .badge-pass {{ background: #D4EDDA; color: #155724; }}
     .badge-warn {{ background: #FFF3CD; color: #856404; }}
@@ -328,6 +358,7 @@ html_content = f"""<!DOCTYPE html>
       font-size: 0.82rem;
       font-family: monospace;
       font-weight: 600;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }}
     .chip-leaf {{
       background: #E8F5E9;
@@ -341,29 +372,131 @@ html_content = f"""<!DOCTYPE html>
     }}
     .bit-token {{
       display: inline-block;
-      padding: 2px 4px;
-      margin: 1px;
+      padding: 3px 6px;
+      margin: 2px;
       font-family: monospace;
       font-weight: bold;
-      border-radius: 3px;
-      font-size: 0.88rem;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      transition: all 0.2s ease;
     }}
     .bit-active {{
       background: #FF5722;
       color: white;
-      transform: scale(1.15);
+      transform: scale(1.22);
+      box-shadow: 0 0 8px #FF5722;
     }}
     .bit-done {{
       background: #C8E6C9;
       color: #1B5E20;
     }}
     .pulse-glow {{
-      animation: pulse 1.5s infinite;
+      animation: pulseGlowBtn 1.8s infinite;
     }}
-    @keyframes pulse {{
-      0% {{ box-shadow: 0 0 0 0 rgba(46, 125, 50, 0.4); }}
-      70% {{ box-shadow: 0 0 0 10px rgba(46, 125, 50, 0); }}
+    @keyframes pulseGlowBtn {{
+      0% {{ box-shadow: 0 0 0 0 rgba(46, 125, 50, 0.5); }}
+      70% {{ box-shadow: 0 0 0 12px rgba(46, 125, 50, 0); }}
       100% {{ box-shadow: 0 0 0 0 rgba(46, 125, 50, 0); }}
+    }}
+
+    /* SVG Keyframe Animations for Tree Unfurling */
+    @keyframes nodePopIn {{
+      0% {{
+        transform: scale(0);
+        opacity: 0;
+      }}
+      70% {{
+        transform: scale(1.18);
+        opacity: 1;
+      }}
+      100% {{
+        transform: scale(1);
+        opacity: 1;
+      }}
+    }}
+
+    @keyframes edgeDrawIn {{
+      from {{
+        stroke-dashoffset: 1000;
+        opacity: 0.2;
+      }}
+      to {{
+        stroke-dashoffset: 0;
+        opacity: 1;
+      }}
+    }}
+
+    @keyframes labelFadeIn {{
+      0% {{ opacity: 0; transform: translateY(4px) scale(0.8); }}
+      100% {{ opacity: 1; transform: translateY(0) scale(1); }}
+    }}
+
+    .anim-node {{
+      transform-box: fill-box;
+      transform-origin: center;
+      animation: nodePopIn 0.42s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }}
+
+    .anim-edge {{
+      animation: edgeDrawIn 0.35s ease-out forwards;
+    }}
+
+    .anim-label {{
+      transform-box: fill-box;
+      transform-origin: center;
+      animation: labelFadeIn 0.3s ease-out forwards;
+    }}
+
+    /* Interactive Node Hover & Path Highlight */
+    .tree-node-group {{
+      cursor: pointer;
+      transition: filter 0.2s ease;
+    }}
+    .tree-node-group:hover circle {{
+      fill: #0288D1 !important;
+      stroke: #81D4FA !important;
+      stroke-width: 3.5px !important;
+      filter: drop-shadow(0 0 10px #0288D1) !important;
+    }}
+    .tree-node-group:hover rect {{
+      fill: #1B5E20 !important;
+      stroke: #A5D6A7 !important;
+      stroke-width: 3.2px !important;
+      filter: drop-shadow(0 0 12px #2E7D32) !important;
+    }}
+    .highlight-edge {{
+      stroke: #FF9100 !important;
+      stroke-width: 3.8px !important;
+      filter: drop-shadow(0 0 8px #FF9100) !important;
+    }}
+    .highlight-node circle {{
+      fill: #FF6D00 !important;
+      stroke: #FFE082 !important;
+      stroke-width: 4px !important;
+      filter: drop-shadow(0 0 14px #FF6D00) !important;
+    }}
+    .highlight-node rect {{
+      fill: #FF6D00 !important;
+      stroke: #FFE082 !important;
+      stroke-width: 4px !important;
+      filter: drop-shadow(0 0 14px #FF6D00) !important;
+    }}
+    
+    /* Floating HUD Toast for Path Details */
+    #tree-hud {{
+      position: absolute;
+      bottom: 16px;
+      left: 16px;
+      background: rgba(16, 44, 87, 0.92);
+      color: white;
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      pointer-events: none;
+      display: none;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+      z-index: 100;
+      backdrop-filter: blur(4px);
     }}
   </style>
 </head>
@@ -429,7 +562,7 @@ html_content = f"""<!DOCTYPE html>
             </button>
             <button class="btn btn-outline" onclick="resetDefault()">Reset Default</button>
             <span id="compress-status-text" style="font-size: 0.88rem; color: #555; margin-left: 5px;">
-              👈 Click Compress to build tree & metrics
+              👈 Click Compress to generate animated tree
             </span>
           </div>
         </div>
@@ -441,22 +574,22 @@ html_content = f"""<!DOCTYPE html>
           </div>
 
           <div class="metrics-grid">
-            <div class="metric-box">
+            <div class="metric-box" id="box-ratio">
               <div class="metric-label">Compression Ratio</div>
               <div class="metric-val" id="m-ratio">-- : 1</div>
               <div class="metric-sub" id="m-savings">Pending Compression</div>
             </div>
-            <div class="metric-box">
+            <div class="metric-box" id="box-entropy">
               <div class="metric-label">Shannon Entropy H(X)</div>
               <div class="metric-val" id="m-entropy">--</div>
               <div class="metric-sub">Theoretical Limit (b/sym)</div>
             </div>
-            <div class="metric-box">
+            <div class="metric-box" id="box-huffman">
               <div class="metric-label">Huffman Avg Length L(C)</div>
               <div class="metric-val" id="m-huffman">--</div>
               <div class="metric-sub" id="m-redundancy">Redundancy R: --</div>
             </div>
-            <div class="metric-box">
+            <div class="metric-box" id="box-kraft">
               <div class="metric-label">Kraft-McMillan Sum</div>
               <div class="metric-val" id="m-kraft">--</div>
               <div class="metric-sub">Full Binary Tree Invariant</div>
@@ -497,14 +630,16 @@ html_content = f"""<!DOCTYPE html>
       </div>
 
       <!-- Rooted Binary Tree Canvas/SVG with Explicit Generation & Controls -->
-      <div class="card" id="tree-card-section">
+      <div class="card" id="tree-card-section" style="position: relative;">
         <div class="card-title">
           <span>🌳 Rooted Binary Prefix Code Tree Visualization</span>
           <div id="tree-action-buttons" style="display: none; gap: 8px; align-items: center; flex-wrap: wrap;">
             <span class="badge badge-pass" id="tree-stats-badge">80 Leaves • Max Depth: 14</span>
+            <button class="btn btn-sm btn-outline" onclick="replayTreeAnimation()">▶ Replay Animation</button>
+            <button class="btn btn-sm btn-outline" onclick="animateRandomSignal()">✨ Trace Random Symbol</button>
             <button class="btn btn-sm btn-outline" onclick="zoomInTree()">🔍 Zoom In (+)</button>
             <button class="btn btn-sm btn-outline" onclick="zoomOutTree()">🔍 Zoom Out (-)</button>
-            <button class="btn btn-sm btn-outline" onclick="fitTreeWidth()">↔ Fit to Screen</button>
+            <button class="btn btn-sm btn-outline" onclick="fitTreeWidth()">↔ Fit Screen</button>
             <button class="btn btn-sm btn-outline" onclick="resetTreeZoom()">↺ 100%</button>
             <button class="btn btn-sm btn-green" onclick="exportTreeSVG()">📥 Export SVG</button>
           </div>
@@ -512,10 +647,10 @@ html_content = f"""<!DOCTYPE html>
 
         <!-- Initial Placeholder: Shown until Compress is clicked -->
         <div id="tree-placeholder" style="text-align: center; padding: 75px 20px; background: #FAFBFD; border: 2px dashed #DDE2E5; border-radius: 8px;">
-          <div style="font-size: 3.5rem; margin-bottom: 12px;">🌳</div>
+          <div style="font-size: 3.5rem; margin-bottom: 12px; animation: pulseGlowBtn 2s infinite;">🌳</div>
           <h3 style="color: var(--navy); margin-bottom: 8px; font-size: 1.3rem;">Rooted Binary Prefix Code Tree</h3>
           <p id="placeholder-desc" style="font-size: 0.95rem; color: #555; max-width: 540px; margin: 0 auto 20px auto; line-height: 1.6;">
-            Data source loaded (<strong>8,769 characters</strong>). Click the <strong>"⚡ Compress & Generate Model"</strong> button below to build the optimal prefix tree graph and compute metrics.
+            Data source loaded (<strong>8,769 characters</strong>). Click the <strong>"⚡ Compress & Generate Model"</strong> button below to assemble the animated tree and calculate metrics.
           </p>
           <button class="btn btn-green" style="font-size: 1rem; padding: 12px 26px;" onclick="runCompression()">
             ⚡ Compress & Generate Model
@@ -542,15 +677,16 @@ html_content = f"""<!DOCTYPE html>
             </div>
 
             <div style="font-size: 0.82rem; color: #555;">
-              <span style="display: inline-block; width: 12px; height: 12px; background: #1F4E78; border-radius: 50%; vertical-align: middle; margin-right: 4px;"></span> Blue Circle = Internal Node (Weight)
+              <span style="display: inline-block; width: 12px; height: 12px; background: #1F4E78; border-radius: 50%; vertical-align: middle; margin-right: 4px;"></span> Blue Circle = Internal (Weight)
               &nbsp;&bull;&nbsp;
-              <span style="display: inline-block; width: 12px; height: 12px; background: #2E7D32; border-radius: 2px; vertical-align: middle; margin-right: 4px;"></span> Green Square = Leaf Node (Char, Weight)
+              <span style="display: inline-block; width: 12px; height: 12px; background: #2E7D32; border-radius: 2px; vertical-align: middle; margin-right: 4px;"></span> Green Square = Leaf (Char : Weight)
               &nbsp;&bull;&nbsp;
               <span style="color: #D32F2F; font-weight: bold;">0</span> / <span style="color: #D32F2F; font-weight: bold;">1</span> = Path Bits
             </div>
           </div>
 
-          <div class="svg-container" id="tree-svg-container" title="Drag to pan, mouse-wheel to zoom">
+          <div class="svg-container" id="tree-svg-container" title="Drag to pan, mouse-wheel to zoom. Click any node to animate its codeword path!">
+            <div id="tree-hud">Click a node to trace its codeword path</div>
             <svg id="tree-svg">
               <g id="tree-viewport"></g>
             </svg>
@@ -769,6 +905,7 @@ html_content = f"""<!DOCTYPE html>
     let startY = 0;
     let treeMaxDepth = 14;
     let currentViewMode = 'adaptive';
+    let packetTimer = null;
 
     // Bit tracer state
     let traceBitstring = "";
@@ -795,10 +932,10 @@ html_content = f"""<!DOCTYPE html>
           document.getElementById('tree-placeholder').style.display = 'block';
           document.getElementById('tree-active-view').style.display = 'none';
           document.getElementById('tree-action-buttons').style.display = 'none';
-          document.getElementById('compress-status-text').innerText = "👈 Click Compress to generate graph";
+          document.getElementById('compress-status-text').innerText = "👈 Click Compress to generate animated tree";
           document.getElementById('badge-lossless').className = "badge badge-ready";
           document.getElementById('badge-lossless').innerText = "Status: Ready to Compress";
-          document.getElementById('placeholder-desc').innerHTML = "Data source loaded (<strong>" + text.length.toLocaleString() + " characters</strong>). Click the <strong>\\"⚡ Compress & Generate Model\\"</strong> button below to generate the tree graph.";
+          document.getElementById('placeholder-desc').innerHTML = "Data source loaded (<strong>" + text.length.toLocaleString() + " characters</strong>). Click the <strong>\\"⚡ Compress & Generate Model\\"</strong> button below to assemble the animated tree and calculate metrics.";
         }}
       }}
     }}
@@ -808,7 +945,25 @@ html_content = f"""<!DOCTYPE html>
       loadPreset(false);
     }}
 
-    // Explicit Compression Trigger: Generates only after clicking Compress
+    // Animated Metric Rolling Counter
+    function animateMetric(id, start, end, duration, decimals = 0, prefix = "", suffix = "") {{
+      const el = document.getElementById(id);
+      if (!el) return;
+      let startTime = null;
+      function tick(now) {{
+        if (!startTime) startTime = now;
+        const progress = Math.min((now - startTime) / duration, 1);
+        const easeOut = 1 - Math.pow(1 - progress, 3);
+        const val = start + (end - start) * easeOut;
+        el.innerText = prefix + (decimals > 0 ? val.toFixed(decimals) : Math.round(val).toLocaleString()) + suffix;
+        if (progress < 1) {{
+          requestAnimationFrame(tick);
+        }}
+      }}
+      requestAnimationFrame(tick);
+    }}
+
+    // Explicit Compression Trigger: Generates only after clicking Compress with rich animations!
     function runCompression() {{
       const text = document.getElementById('input-text').value;
       if (!text || !text.trim()) {{
@@ -820,11 +975,17 @@ html_content = f"""<!DOCTYPE html>
       document.getElementById('tree-placeholder').style.display = 'none';
       document.getElementById('tree-active-view').style.display = 'block';
       document.getElementById('tree-action-buttons').style.display = 'flex';
-      document.getElementById('compress-status-text').innerText = "✅ Tree generated successfully!";
+      document.getElementById('compress-status-text').innerText = "✅ Model generated with animations!";
       document.getElementById('badge-lossless').className = "badge badge-pass";
       document.getElementById('badge-lossless').innerText = "Lossless: TRUE (D(E(M)) == M)";
       document.getElementById('badge-chars').innerText = text.length.toLocaleString() + " Characters (Compressed)";
       document.getElementById('btn-compress-main').classList.remove('pulse-glow');
+
+      // Highlight metric boxes
+      document.querySelectorAll('.metric-box').forEach(b => {{
+        b.classList.add('metric-highlight');
+        setTimeout(() => b.classList.remove('metric-highlight'), 1200);
+      }});
 
       // 1. Frequency calculation
       const freqs = {{}};
@@ -913,23 +1074,23 @@ html_content = f"""<!DOCTYPE html>
       let compRatio = uncompBits / compBits;
       let savings = (1.0 - (compBits / uncompBits)) * 100;
 
-      // Update UI
-      document.getElementById('m-ratio').innerText = compRatio.toFixed(2) + " : 1";
-      document.getElementById('m-savings').innerText = savings.toFixed(1) + "% Space Savings";
-      document.getElementById('m-entropy').innerText = entropy.toFixed(3);
-      document.getElementById('m-huffman').innerText = avgLen.toFixed(3);
-      document.getElementById('m-redundancy').innerText = "Redundancy R: " + redundancy.toFixed(3);
-      document.getElementById('m-kraft').innerText = kraftSum.toFixed(3);
+      // Animate Rolling Metrics
+      animateMetric('m-ratio', 1.0, compRatio, 850, 2, "", " : 1");
+      animateMetric('m-savings', 0.0, savings, 850, 1, "", "% Space Savings");
+      animateMetric('m-entropy', 0.0, entropy, 850, 3);
+      animateMetric('m-huffman', 0.0, avgLen, 850, 3);
+      animateMetric('m-redundancy', 0.0, redundancy, 850, 3, "Redundancy R: ");
+      animateMetric('m-kraft', 0.0, kraftSum, 850, 3);
 
-      document.getElementById('sz-ascii').innerText = uncompBits.toLocaleString() + " bits";
-      document.getElementById('sz-huff').innerText = compBits.toLocaleString() + " bits";
-      document.getElementById('sz-huff-len').innerText = avgLen.toFixed(3) + " bits/sym";
-      document.getElementById('sz-sf-len').innerText = (avgLen + 0.024).toFixed(3) + " bits/sym";
-      document.getElementById('sz-sf').innerText = Math.round(compBits * 1.005).toLocaleString() + " bits";
+      animateMetric('sz-ascii', 0, uncompBits, 850, 0, "", " bits");
+      animateMetric('sz-huff', 0, compBits, 850, 0, "", " bits");
+      animateMetric('sz-huff-len', 0.0, avgLen, 850, 3, "", " bits/sym");
+      animateMetric('sz-sf-len', 0.0, avgLen + 0.024, 850, 3, "", " bits/sym");
+      animateMetric('sz-sf', 0, Math.round(compBits * 1.005), 850, 0, "", " bits");
       document.getElementById('badge-optimality').innerText = "Mathematically Optimal";
 
-      // 4. Render Rooted Binary Tree in SVG (Zero-Overlap In-Order Layout)
-      renderTreeSVG(currentTreeRoot);
+      // 4. Render Rooted Binary Tree with Cascading Assembly Animation
+      renderTreeSVG(currentTreeRoot, true);
 
       // 5. Update Step Simulator
       currentStepIdx = 0;
@@ -939,7 +1100,7 @@ html_content = f"""<!DOCTYPE html>
       // Smooth scroll to the generated tree
       setTimeout(() => {{
         document.getElementById('tree-card-section').scrollIntoView({{ behavior: 'smooth', block: 'nearest' }});
-      }}, 50);
+      }}, 80);
     }}
 
     // Tree Depth Calculation
@@ -954,7 +1115,6 @@ html_content = f"""<!DOCTYPE html>
       return countTotalLeaves(node.left) + countTotalLeaves(node.right);
     }}
 
-    // View Mode & Slider Handlers
     function onTreeViewModeChange() {{
       currentViewMode = document.getElementById('tree-view-mode').value;
       const sliderBox = document.getElementById('depth-slider-container');
@@ -964,19 +1124,25 @@ html_content = f"""<!DOCTYPE html>
         sliderBox.style.display = 'none';
       }}
       if (currentTreeRoot) {{
-        renderTreeSVG(currentTreeRoot);
+        renderTreeSVG(currentTreeRoot, true);
       }}
     }}
 
     function onDepthSliderChange(val) {{
       document.getElementById('depth-slider-val').innerText = val;
       if (currentTreeRoot) {{
-        renderTreeSVG(currentTreeRoot);
+        renderTreeSVG(currentTreeRoot, false);
       }}
     }}
 
-    // Zero-Overlap In-Order SVG Tree Renderer
-    function renderTreeSVG(root) {{
+    function replayTreeAnimation() {{
+      if (currentTreeRoot) {{
+        renderTreeSVG(currentTreeRoot, true);
+      }}
+    }}
+
+    // Zero-Overlap In-Order SVG Tree Renderer with Level-by-Level Animated Reveal
+    function renderTreeSVG(root, animate = true) {{
       const svg = document.getElementById('tree-svg');
       const viewport = document.getElementById('tree-viewport');
       viewport.innerHTML = '';
@@ -1013,7 +1179,6 @@ html_content = f"""<!DOCTYPE html>
       }} else if (currentViewMode === 'adaptive') {{
         effectiveMaxDepth = parseInt(document.getElementById('tree-depth-slider').value) || 5;
       }} else {{
-        // Full tree
         effectiveMaxDepth = null;
       }}
 
@@ -1024,6 +1189,7 @@ html_content = f"""<!DOCTYPE html>
 
       function assignCoords(node, depth, maxD) {{
         if (!node) return null;
+        node._depth = depth;
         if (maxD !== null && depth > maxD) return null;
 
         const isTerm = (!node.left && !node.right) || (maxD !== null && depth === maxD);
@@ -1064,23 +1230,63 @@ html_content = f"""<!DOCTYPE html>
       svg.setAttribute("height", totalCanvasHeight);
       svg.setAttribute("viewBox", "0 0 " + totalCanvasWidth + " " + totalCanvasHeight);
 
-      // Draw edges first
+      // Edge container group
+      const edgeGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+      edgeGroup.setAttribute("id", "edges-layer");
+      viewport.appendChild(edgeGroup);
+
+      // Node container group
+      const nodeGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+      nodeGroup.setAttribute("id", "nodes-layer");
+      viewport.appendChild(nodeGroup);
+
+      // Packet animation container group (on top)
+      const packetGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+      packetGroup.setAttribute("id", "packet-layer");
+      viewport.appendChild(packetGroup);
+
+      // Draw edges first with animated cascading draw
       function drawEdges(node) {{
         if (!node) return;
         if (node.left && node.left._x !== undefined) {{
-          createEdge(node._x, node._y, node.left._x, node.left._y, "0");
+          createAnimatedEdge(node, node.left, "0");
           drawEdges(node.left);
         }}
         if (node.right && node.right._x !== undefined) {{
-          createEdge(node._x, node._y, node.right._x, node.right._y, "1");
+          createAnimatedEdge(node, node.right, "1");
           drawEdges(node.right);
         }}
       }}
       drawEdges(displayRoot);
 
-      // Draw nodes
+      // Draw nodes with cascading popIn animation
       function drawNodes(node) {{
         if (!node || node._x === undefined) return;
+
+        const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        g.setAttribute("class", "tree-node-group" + (animate ? " anim-node" : ""));
+        g.setAttribute("id", "svg-node-" + node.id);
+        g.setAttribute("data-char", node.char || "");
+        g.setAttribute("data-freq", node.freq);
+        g.setAttribute("data-depth", node._depth);
+
+        const delayMs = animate ? Math.min(800, node._depth * 90) : 0;
+        if (animate) {{
+          g.style.animationDelay = delayMs + "ms";
+        }}
+
+        // Hover tooltip and path highlighting
+        g.addEventListener("mouseenter", () => {{
+          highlightNodePath(node, displayRoot);
+          showTreeHud(node);
+        }});
+        g.addEventListener("mouseleave", () => {{
+          clearPathHighlight();
+          hideTreeHud();
+        }});
+        g.addEventListener("click", () => {{
+          animateSignalToNode(node, displayRoot);
+        }});
 
         if (!node.left && !node.right) {{
           // Leaf node (Green rounded rectangle)
@@ -1093,12 +1299,12 @@ html_content = f"""<!DOCTYPE html>
           rect.setAttribute("fill", "#2E7D32");
           rect.setAttribute("stroke", "#1B5E20");
           rect.setAttribute("stroke-width", "2");
-          rect.style.filter = "drop-shadow(0 2px 4px rgba(0,0,0,0.15))";
+          rect.style.filter = "drop-shadow(0 2px 4px rgba(0,0,0,0.18))";
 
           let title = document.createElementNS("http://www.w3.org/2000/svg", "title");
-          title.textContent = "Leaf Node: '" + node.char + "' (ASCII " + (node.char ? node.char.charCodeAt(0) : '?') + ")\\nWeight: " + node.freq + "\\nPrefix Code: " + (currentCodes[node.char] || '');
+          title.textContent = "Leaf Node: '" + node.char + "' (ASCII " + (node.char ? node.char.charCodeAt(0) : '?') + ")\\nWeight: " + node.freq + "\\nPrefix Code: " + (currentCodes[node.char] || '') + "\\n👉 Click to animate bitstream path!";
           rect.appendChild(title);
-          viewport.appendChild(rect);
+          g.appendChild(rect);
 
           let text = document.createElementNS("http://www.w3.org/2000/svg", "text");
           text.setAttribute("x", node._x);
@@ -1110,8 +1316,7 @@ html_content = f"""<!DOCTYPE html>
           text.setAttribute("font-weight", "bold");
           let chDisplay = node.char === ' ' ? "' '" : (node.char === '\\n' ? "\\\\n" : (node.char === '\\t' ? "\\\\t" : node.char));
           text.textContent = chDisplay + ":" + node.freq;
-          text.appendChild(title.cloneNode(true));
-          viewport.appendChild(text);
+          g.appendChild(text);
 
         }} else {{
           // Internal node (Blue circle)
@@ -1122,12 +1327,12 @@ html_content = f"""<!DOCTYPE html>
           circle.setAttribute("fill", "#1F4E78");
           circle.setAttribute("stroke", "#102C57");
           circle.setAttribute("stroke-width", "2.2");
-          circle.style.filter = "drop-shadow(0 2px 4px rgba(0,0,0,0.15))";
+          circle.style.filter = "drop-shadow(0 2px 4px rgba(0,0,0,0.18))";
 
           let title = document.createElementNS("http://www.w3.org/2000/svg", "title");
-          title.textContent = "Internal Vertex (Weight: " + node.freq + ")" + (node._isTruncated ? "\\n[Subtree continues below - increase Max Depth]" : "");
+          title.textContent = "Internal Vertex (Weight: " + node.freq + ")" + (node._isTruncated ? "\\n[Subtree continues below - increase Max Depth]" : "") + "\\n👉 Click to trace path from root!";
           circle.appendChild(title);
-          viewport.appendChild(circle);
+          g.appendChild(circle);
 
           let text = document.createElementNS("http://www.w3.org/2000/svg", "text");
           text.setAttribute("x", node._x);
@@ -1138,8 +1343,7 @@ html_content = f"""<!DOCTYPE html>
           text.setAttribute("font-weight", "bold");
           text.setAttribute("font-family", "sans-serif");
           text.textContent = node.freq;
-          text.appendChild(title.cloneNode(true));
-          viewport.appendChild(text);
+          g.appendChild(text);
 
           if (node._isTruncated) {{
             let pill = document.createElementNS("http://www.w3.org/2000/svg", "rect");
@@ -1149,7 +1353,7 @@ html_content = f"""<!DOCTYPE html>
             pill.setAttribute("height", 14);
             pill.setAttribute("rx", 7);
             pill.setAttribute("fill", "#E6550D");
-            viewport.appendChild(pill);
+            g.appendChild(pill);
 
             let pillText = document.createElementNS("http://www.w3.org/2000/svg", "text");
             pillText.setAttribute("x", node._x);
@@ -1159,9 +1363,11 @@ html_content = f"""<!DOCTYPE html>
             pillText.setAttribute("font-size", "8.5px");
             pillText.setAttribute("font-weight", "bold");
             pillText.textContent = "+sub";
-            viewport.appendChild(pillText);
+            g.appendChild(pillText);
           }}
         }}
+
+        nodeGroup.appendChild(g);
 
         if (!node._isTruncated) {{
           drawNodes(node.left);
@@ -1170,40 +1376,65 @@ html_content = f"""<!DOCTYPE html>
       }}
       drawNodes(displayRoot);
 
-      function createEdge(x1, y1, x2, y2, label) {{
+      function createAnimatedEdge(pNode, cNode, label) {{
+        const x1 = pNode._x, y1 = pNode._y;
+        const x2 = cNode._x, y2 = cNode._y;
+        const edgeLength = Math.hypot(x2 - x1, y2 - y1);
+        const delayMs = animate ? Math.min(750, pNode._depth * 90) : 0;
+
+        let edgeId = "edge-" + pNode.id + "-" + cNode.id;
+
         let line = document.createElementNS("http://www.w3.org/2000/svg", "line");
         line.setAttribute("x1", x1);
         line.setAttribute("y1", y1);
         line.setAttribute("x2", x2);
         line.setAttribute("y2", y2);
+        line.setAttribute("id", edgeId);
         line.setAttribute("stroke", "#7F8C8D");
-        line.setAttribute("stroke-width", "1.6");
-        viewport.appendChild(line);
+        line.setAttribute("stroke-width", "1.7");
+        line.setAttribute("class", "edge-path" + (animate ? " anim-edge" : ""));
 
+        if (animate) {{
+          line.style.strokeDasharray = edgeLength;
+          line.style.strokeDashoffset = edgeLength;
+          line.style.animationDelay = delayMs + "ms";
+        }}
+
+        edgeGroup.appendChild(line);
+
+        // Midpoint Label
         let midX = (x1 + x2) / 2;
         let midY = (y1 + y2) / 2;
+
+        let labelG = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        labelG.setAttribute("class", "edge-label-g" + (animate ? " anim-label" : ""));
+        if (animate) {{
+          labelG.style.animationDelay = (delayMs + 120) + "ms";
+        }}
 
         // White pill background for label to guarantee readability
         let bg = document.createElementNS("http://www.w3.org/2000/svg", "rect");
         bg.setAttribute("x", midX + (label === "0" ? -14 : 4));
         bg.setAttribute("y", midY - 8);
-        bg.setAttribute("width", 12);
-        bg.setAttribute("height", 12);
+        bg.setAttribute("width", 13);
+        bg.setAttribute("height", 13);
         bg.setAttribute("rx", 3);
         bg.setAttribute("fill", "#FFFFFF");
         bg.setAttribute("stroke", "#D32F2F");
         bg.setAttribute("stroke-width", "1");
-        viewport.appendChild(bg);
+        labelG.appendChild(bg);
 
         let text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-        text.setAttribute("x", midX + (label === "0" ? -8 : 10));
-        text.setAttribute("y", midY + 1.5);
+        text.setAttribute("x", midX + (label === "0" ? -7.5 : 10.5));
+        text.setAttribute("y", midY + 2);
         text.setAttribute("text-anchor", "middle");
         text.setAttribute("fill", "#D32F2F");
         text.setAttribute("font-size", "10px");
         text.setAttribute("font-weight", "bold");
         text.textContent = label;
-        viewport.appendChild(text);
+        labelG.appendChild(text);
+
+        edgeGroup.appendChild(labelG);
       }}
 
       // Reset transform
@@ -1213,6 +1444,139 @@ html_content = f"""<!DOCTYPE html>
       const container = document.getElementById('tree-svg-container');
       if (displayRoot._x) {{
         container.scrollLeft = displayRoot._x - (container.clientWidth / 2);
+      }}
+    }}
+
+    // Path Finding for Interactive Highlighting & Packet Animation
+    function findPath(target, curr, path = []) {{
+      if (!curr) return null;
+      path.push(curr);
+      if (curr.id === target.id) return path;
+      if (curr.left) {{
+        let res = findPath(target, curr.left, [...path]);
+        if (res) return res;
+      }}
+      if (curr.right) {{
+        let res = findPath(target, curr.right, [...path]);
+        if (res) return res;
+      }}
+      return null;
+    }}
+
+    function highlightNodePath(targetNode, root) {{
+      clearPathHighlight();
+      const path = findPath(targetNode, root);
+      if (!path || path.length === 0) return;
+
+      for (let i = 0; i < path.length; i++) {{
+        const nodeEl = document.getElementById("svg-node-" + path[i].id);
+        if (nodeEl) nodeEl.classList.add("highlight-node");
+
+        if (i < path.length - 1) {{
+          const edgeEl = document.getElementById("edge-" + path[i].id + "-" + path[i+1].id);
+          if (edgeEl) edgeEl.classList.add("highlight-edge");
+        }}
+      }}
+    }}
+
+    function clearPathHighlight() {{
+      document.querySelectorAll(".highlight-node").forEach(n => n.classList.remove("highlight-node"));
+      document.querySelectorAll(".highlight-edge").forEach(e => e.classList.remove("highlight-edge"));
+    }}
+
+    function showTreeHud(node) {{
+      const hud = document.getElementById('tree-hud');
+      if (!hud) return;
+      let text = "";
+      if (!node.left && !node.right) {{
+        let ch = node.char === ' ' ? "' ' (Space)" : (node.char === '\\n' ? "'\\n' (Newline)" : "'" + node.char + "'");
+        text = "🌿 <strong>Leaf Symbol:</strong> " + ch + " | <strong>Weight:</strong> " + node.freq + " | <strong>Codeword:</strong> <code>" + (currentCodes[node.char] || '0') + "</code> (" + (currentCodes[node.char] || '0').length + " bits)";
+      }} else {{
+        text = "🔵 <strong>Internal Node</strong> | <strong>Merged Weight:</strong> " + node.freq + " | <strong>Depth:</strong> " + (node._depth || 0) + " | Click to trace packet!";
+      }}
+      hud.innerHTML = text;
+      hud.style.display = "block";
+    }}
+
+    function hideTreeHud() {{
+      const hud = document.getElementById('tree-hud');
+      if (hud) hud.style.display = "none";
+    }}
+
+    // Animated Traveling Signal Packet
+    function animateSignalToNode(targetNode, root) {{
+      const path = findPath(targetNode, root);
+      if (!path || path.length < 2) return;
+
+      highlightNodePath(targetNode, root);
+
+      const packetLayer = document.getElementById('packet-layer');
+      packetLayer.innerHTML = '';
+
+      let packet = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      packet.setAttribute("r", "7");
+      packet.setAttribute("fill", "#00E5FF");
+      packet.setAttribute("stroke", "#FFFFFF");
+      packet.setAttribute("stroke-width", "2");
+      packet.style.filter = "drop-shadow(0 0 10px #00E5FF)";
+      packetLayer.appendChild(packet);
+
+      let step = 0;
+      function movePacket() {{
+        if (step >= path.length) {{
+          // Pulse destination shockwave
+          const dest = path[path.length - 1];
+          let shockwave = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+          shockwave.setAttribute("cx", dest._x);
+          shockwave.setAttribute("cy", dest._y);
+          shockwave.setAttribute("r", "20");
+          shockwave.setAttribute("fill", "none");
+          shockwave.setAttribute("stroke", "#00E5FF");
+          shockwave.setAttribute("stroke-width", "3");
+          packetLayer.appendChild(shockwave);
+
+          let r = 20, op = 1.0;
+          let shockTimer = setInterval(() => {{
+            r += 3;
+            op -= 0.08;
+            shockwave.setAttribute("r", r);
+            shockwave.style.opacity = op;
+            if (op <= 0) {{
+              clearInterval(shockTimer);
+              packetLayer.innerHTML = '';
+            }}
+          }}, 30);
+          return;
+        }}
+
+        const currNode = path[step];
+        packet.setAttribute("cx", currNode._x);
+        packet.setAttribute("cy", currNode._y);
+        step++;
+        setTimeout(movePacket, 220);
+      }}
+
+      movePacket();
+    }}
+
+    function animateRandomSignal() {{
+      if (!currentTreeRoot) return;
+      // Pick random leaf
+      const text = document.getElementById('input-text').value;
+      const chars = Object.keys(currentCodes);
+      if (!chars.length) return;
+      const rndChar = chars[Math.floor(Math.random() * chars.length)];
+      
+      function findLeaf(node) {{
+        if (!node) return null;
+        if (!node.left && !node.right && node.char === rndChar) return node;
+        return findLeaf(node.left) || findLeaf(node.right);
+      }}
+      const leaf = findLeaf(currentTreeRoot);
+      if (leaf) {{
+        animateSignalToNode(leaf, currentTreeRoot);
+        showTreeHud(leaf);
+        setTimeout(hideTreeHud, 3500);
       }}
     }}
 

@@ -5,19 +5,55 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Interactive Huffman Coding Visual Simulation Model & Blockchain Simulator - DMGT Topic 14</title>
   <style>
+    /* High-Tech Dark Mode (Default) & Light Theme Styles */
     :root {
+      --navy: #38BDF8;
+      --blue: #2563EB;
+      --accent: #F97316;
+      --green: #10B981;
+      --bg: #0B0F19;
+      --card-bg: #131A2A;
+      --card-sub: #182236;
+      --border: #232F48;
+      --text: #F1F5F9;
+      --text-muted: #94A3B8;
+      --eth: #6366F1;
+      --glow-gold: #F59E0B;
+      --glow-cyan: #00E5FF;
+      --svg-bg: #070B14;
+      --table-header: #1E293B;
+      --table-row-even: #101624;
+      --table-row-odd: #141C2E;
+      --input-bg: #0E1422;
+      --input-border: #2A3854;
+      --chip-bg: #1E293B;
+      --chip-border: #334155;
+    }
+
+    body.light-theme {
       --navy: #102C57;
       --blue: #1F4E78;
       --accent: #E6550D;
       --green: #2E7D32;
       --bg: #F8F9FA;
       --card-bg: #FFFFFF;
+      --card-sub: #F4F6F9;
       --border: #DDE2E5;
       --text: #212529;
+      --text-muted: #64748B;
       --eth: #627EEA;
       --glow-gold: #FFB300;
       --glow-cyan: #00E5FF;
+      --svg-bg: #FAFBFD;
+      --table-header: #EAEFF5;
+      --table-row-even: #FBFCFE;
+      --table-row-odd: #FFFFFF;
+      --input-bg: #FFFFFF;
+      --input-border: #CED4DA;
+      --chip-bg: #E9ECEF;
+      --chip-border: #CED4DA;
     }
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -25,12 +61,19 @@
       color: var(--text);
       line-height: 1.5;
       padding-bottom: 50px;
+      transition: background 0.3s ease, color 0.3s ease;
     }
     header {
-      background: linear-gradient(135deg, var(--navy) 0%, var(--blue) 100%);
+      background: linear-gradient(135deg, #090D16 0%, #111A2E 100%);
       color: white;
       padding: 20px 30px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+      border-bottom: 1px solid var(--border);
+    }
+    body.light-theme header {
+      background: linear-gradient(135deg, #102C57 0%, #1F4E78 100%);
       box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      border-bottom: none;
     }
     .header-content {
       max-width: 1450px;
@@ -45,14 +88,18 @@
       font-size: 1.55rem;
       font-weight: 700;
       margin-bottom: 4px;
+      color: #FFFFFF;
     }
     .header-title p {
       font-size: 0.9rem;
+      color: #94A3B8;
+    }
+    body.light-theme .header-title p {
       color: #DDE6ED;
     }
     .header-badge {
-      background: rgba(255,255,255,0.15);
-      border: 1px solid rgba(255,255,255,0.3);
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.18);
       padding: 8px 14px;
       border-radius: 8px;
       font-size: 0.85rem;
@@ -74,20 +121,23 @@
     .tab-btn {
       padding: 10px 18px;
       border: none;
-      background: #EAEFF5;
-      color: var(--navy);
+      background: var(--card-sub);
+      color: var(--text-muted);
       font-weight: 600;
       font-size: 0.92rem;
       border-radius: 6px 6px 0 0;
       cursor: pointer;
       transition: all 0.25s ease;
       white-space: nowrap;
+      border-top: 2px solid transparent;
     }
-    .tab-btn:hover { background: #D5E1ED; transform: translateY(-1px); }
+    .tab-btn:hover { background: #1C273E; color: var(--text); transform: translateY(-1px); }
+    body.light-theme .tab-btn:hover { background: #D5E1ED; color: var(--navy); }
     .tab-btn.active {
-      background: var(--navy);
-      color: white;
-      box-shadow: 0 -2px 8px rgba(16, 44, 87, 0.2);
+      background: var(--card-bg);
+      color: var(--navy);
+      border-top: 2px solid var(--navy);
+      box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.3);
     }
     .tab-content { display: none; }
     .tab-content.active {
@@ -104,11 +154,11 @@
       border-radius: 8px;
       padding: 20px;
       margin-bottom: 20px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-      transition: box-shadow 0.3s ease;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      transition: box-shadow 0.3s ease, background 0.3s ease, border-color 0.3s ease;
     }
     .card:hover {
-      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+      box-shadow: 0 4px 18px rgba(0,0,0,0.25);
     }
     .card-title {
       font-size: 1.15rem;
@@ -118,7 +168,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-bottom: 2px solid #F0F4F8;
+      border-bottom: 2px solid var(--border);
       padding-bottom: 8px;
       flex-wrap: wrap;
       gap: 10px;
@@ -134,17 +184,19 @@
     textarea, select, input[type="text"], input[type="number"] {
       width: 100%;
       padding: 10px 12px;
-      border: 1px solid #CED4DA;
+      background: var(--input-bg);
+      color: var(--text);
+      border: 1px solid var(--input-border);
       border-radius: 6px;
       font-family: monospace;
       font-size: 0.9rem;
       margin-top: 6px;
       margin-bottom: 12px;
-      transition: border 0.2s ease, box-shadow 0.2s ease;
+      transition: border 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
     }
     textarea:focus, select:focus, input[type="text"]:focus, input[type="number"]:focus {
-      border-color: var(--blue);
-      box-shadow: 0 0 0 3px rgba(31, 78, 120, 0.15);
+      border-color: var(--navy);
+      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
       outline: none;
     }
     .btn {
@@ -161,31 +213,33 @@
       font-size: 0.9rem;
       transition: all 0.25s ease;
     }
-    .btn:hover { background: var(--navy); transform: translateY(-1px); }
+    .btn:hover { background: #1D4ED8; transform: translateY(-1px); }
     .btn:active { transform: translateY(1px); }
     .btn-green {
-      background: var(--green);
-      box-shadow: 0 3px 8px rgba(46, 125, 50, 0.3);
+      background: #059669;
+      box-shadow: 0 3px 8px rgba(16, 185, 129, 0.3);
     }
     .btn-green:hover {
-      background: #1B5E20;
-      box-shadow: 0 5px 12px rgba(46, 125, 50, 0.45);
+      background: #047857;
+      box-shadow: 0 5px 14px rgba(16, 185, 129, 0.45);
     }
     .btn-eth {
       background: var(--eth);
-      box-shadow: 0 3px 8px rgba(98, 126, 234, 0.35);
+      box-shadow: 0 3px 8px rgba(99, 102, 241, 0.35);
     }
     .btn-eth:hover {
-      background: #4A65C7;
-      box-shadow: 0 5px 12px rgba(98, 126, 234, 0.5);
+      background: #4F46E5;
+      box-shadow: 0 5px 12px rgba(99, 102, 241, 0.5);
     }
     .btn-outline {
       background: transparent;
-      border: 1px solid var(--blue);
-      color: var(--blue);
+      border: 1px solid var(--border);
+      color: var(--text);
     }
     .btn-outline:hover {
-      background: #EAEFF5;
+      background: var(--card-sub);
+      border-color: var(--navy);
+      color: var(--navy);
     }
     .btn-sm {
       padding: 6px 11px;
@@ -201,32 +255,35 @@
       .metrics-grid { grid-template-columns: 1fr 1fr; }
     }
     .metric-box {
-      background: #F8F9FA;
-      border-left: 4px solid var(--blue);
+      background: var(--card-sub);
+      border-left: 4px solid var(--navy);
       padding: 12px 14px;
       border-radius: 6px;
       transition: all 0.3s ease;
+      border: 1px solid var(--border);
+      border-left-width: 4px;
     }
     .metric-box.metric-highlight {
-      background: #E8F5E9;
+      background: #064E3B;
       border-left-color: var(--green);
       transform: scale(1.02);
     }
     .metric-label {
       font-size: 0.78rem;
-      color: #666;
+      color: var(--text-muted);
       text-transform: uppercase;
       font-weight: 600;
+      letter-spacing: 0.5px;
     }
     .metric-val {
       font-size: 1.45rem;
       font-weight: 700;
-      color: var(--navy);
+      color: var(--text);
       font-variant-numeric: tabular-nums;
     }
     .metric-sub {
       font-size: 0.75rem;
-      color: #555;
+      color: var(--text-muted);
     }
     table {
       width: 100%;
@@ -240,11 +297,12 @@
       text-align: center;
     }
     th {
-      background: #EAEFF5;
+      background: var(--table-header);
       color: var(--navy);
       font-weight: 600;
     }
-    tr:nth-child(even) { background: #FBFCFE; }
+    tr:nth-child(even) { background: var(--table-row-even); }
+    tr:nth-child(odd) { background: var(--table-row-odd); }
     
     /* Tree Canvas & Controls */
     .tree-toolbar {
@@ -254,7 +312,7 @@
       margin-bottom: 12px;
       flex-wrap: wrap;
       gap: 12px;
-      background: #F4F7FA;
+      background: var(--card-sub);
       padding: 10px 14px;
       border-radius: 6px;
       border: 1px solid var(--border);
@@ -264,12 +322,13 @@
       height: 640px;
       border: 1px solid var(--border);
       border-radius: 8px;
-      background: #FAFBFD;
+      background: var(--svg-bg);
       overflow: auto;
       position: relative;
       cursor: grab;
       user-select: none;
-      box-shadow: inset 0 2px 6px rgba(0,0,0,0.03);
+      box-shadow: inset 0 2px 8px rgba(0,0,0,0.4);
+      transition: background 0.3s ease;
     }
     .svg-container:active {
       cursor: grabbing;
@@ -294,12 +353,12 @@
       font-weight: 600;
       transition: all 0.3s ease;
     }
-    .badge-pass { background: #D4EDDA; color: #155724; }
-    .badge-warn { background: #FFF3CD; color: #856404; }
-    .badge-ready { background: #E2E3E5; color: #383D41; }
-    .badge-eth { background: #E8EBFB; color: #2C4299; border: 1px solid #C3CBF5; }
+    .badge-pass { background: #064E3B; color: #6EE7B7; border: 1px solid #059669; }
+    .badge-warn { background: #451A03; color: #FCD34D; border: 1px solid #D97706; }
+    .badge-ready { background: #1E293B; color: #94A3B8; border: 1px solid #334155; }
+    .badge-eth { background: #1E1B4B; color: #A5B4FC; border: 1px solid #4F46E5; }
     pre {
-      background: #272822;
+      background: #090D16;
       color: #F8F8F2;
       padding: 14px;
       border-radius: 6px;
@@ -307,29 +366,31 @@
       font-family: Consolas, monospace;
       font-size: 0.85rem;
       max-height: 480px;
+      border: 1px solid var(--border);
     }
     .queue-chip {
       display: inline-flex;
       align-items: center;
-      background: #E9ECEF;
-      border: 1px solid #CED4DA;
+      background: var(--chip-bg);
+      border: 1px solid var(--chip-border);
       border-radius: 20px;
       padding: 4px 10px;
       margin: 3px;
       font-size: 0.82rem;
       font-family: monospace;
       font-weight: 600;
+      color: var(--text);
       transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
     .chip-leaf {
-      background: #E8F5E9;
-      border-color: #A5D6A7;
-      color: #1B5E20;
+      background: #064E3B;
+      border-color: #059669;
+      color: #A7F3D0;
     }
     .chip-internal {
-      background: #E3F2FD;
-      border-color: #90CAF9;
-      color: #0D47A1;
+      background: #1E3A8A;
+      border-color: #38BDF8;
+      color: #BAE6FD;
     }
     .bit-token {
       display: inline-block;
@@ -339,25 +400,30 @@
       font-weight: bold;
       border-radius: 4px;
       font-size: 0.9rem;
+      background: var(--card-sub);
+      color: var(--text);
+      border: 1px solid var(--border);
       transition: all 0.2s ease;
     }
     .bit-active {
       background: #FF5722;
       color: white;
       transform: scale(1.22);
-      box-shadow: 0 0 8px #FF5722;
+      box-shadow: 0 0 10px #FF5722;
+      border-color: #FF7043;
     }
     .bit-done {
-      background: #C8E6C9;
-      color: #1B5E20;
+      background: #064E3B;
+      color: #6EE7B7;
+      border-color: #059669;
     }
     .pulse-glow {
       animation: pulseGlowBtn 1.8s infinite;
     }
     @keyframes pulseGlowBtn {
-      0% { box-shadow: 0 0 0 0 rgba(46, 125, 50, 0.5); }
-      70% { box-shadow: 0 0 0 12px rgba(46, 125, 50, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(46, 125, 50, 0); }
+      0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5); }
+      70% { box-shadow: 0 0 0 12px rgba(16, 185, 129, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
     }
 
     /* SVG Keyframe Animations for Tree Unfurling */
@@ -396,53 +462,55 @@
     }
     .tree-node-group:hover circle {
       fill: #0288D1 !important;
-      stroke: #81D4FA !important;
+      stroke: #00E5FF !important;
       stroke-width: 3.5px !important;
-      filter: drop-shadow(0 0 10px #0288D1) !important;
+      filter: drop-shadow(0 0 12px #00E5FF) !important;
     }
     .tree-node-group:hover rect {
-      fill: #1B5E20 !important;
-      stroke: #A5D6A7 !important;
+      fill: #047857 !important;
+      stroke: #34D399 !important;
       stroke-width: 3.2px !important;
-      filter: drop-shadow(0 0 12px #2E7D32) !important;
+      filter: drop-shadow(0 0 14px #10B981) !important;
     }
     .highlight-edge {
       stroke: #FF9100 !important;
       stroke-width: 3.8px !important;
-      filter: drop-shadow(0 0 8px #FF9100) !important;
+      filter: drop-shadow(0 0 10px #FF9100) !important;
     }
     .highlight-node circle {
       fill: #FF6D00 !important;
       stroke: #FFE082 !important;
       stroke-width: 4px !important;
-      filter: drop-shadow(0 0 14px #FF6D00) !important;
+      filter: drop-shadow(0 0 16px #FF6D00) !important;
     }
     .highlight-node rect {
       fill: #FF6D00 !important;
       stroke: #FFE082 !important;
       stroke-width: 4px !important;
-      filter: drop-shadow(0 0 14px #FF6D00) !important;
+      filter: drop-shadow(0 0 16px #FF6D00) !important;
     }
     
     #tree-hud {
       position: absolute;
       bottom: 16px;
       left: 16px;
-      background: rgba(16, 44, 87, 0.92);
-      color: white;
-      padding: 8px 14px;
+      background: rgba(14, 20, 34, 0.95);
+      border: 1px solid var(--border);
+      color: #F1F5F9;
+      padding: 9px 15px;
       border-radius: 6px;
       font-size: 0.85rem;
       pointer-events: none;
       display: none;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.5);
       z-index: 100;
-      backdrop-filter: blur(4px);
+      backdrop-filter: blur(6px);
     }
 
     /* Race Bar Styling */
     .race-track {
-      background: #E9ECEF;
+      background: var(--card-sub);
+      border: 1px solid var(--border);
       border-radius: 8px;
       height: 28px;
       overflow: hidden;
@@ -475,9 +543,14 @@
         <h1>Optimal Prefix Codes, Blockchain Gas & Algorithm Race Model</h1>
         <p>DMGT Topic 14 • CSE - BLOCKCHAIN • Faculty Evaluator: Dr. Priya Satish</p>
       </div>
-      <div class="header-badge">
-        <strong>Team Topic 14:</strong><br>
-        Nikhil • Piyush • Sakshi • Arushi • Harsh • Khyathi
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <button class="btn btn-sm btn-outline" id="theme-toggle-btn" onclick="toggleTheme()" style="color: #F0AD4E; border-color: #F0AD4E;">
+          🌙 Dark Mode
+        </button>
+        <div class="header-badge">
+          <strong>Team Topic 14:</strong><br>
+          Nikhil • Piyush • Sakshi • Arushi • Harsh • Khyathi
+        </div>
       </div>
     </div>
   </header>
@@ -527,7 +600,7 @@
               ⚡ Compress & Generate Model
             </button>
             <button class="btn btn-outline" onclick="resetDefault()">Reset Default</button>
-            <span id="compress-status-text" style="font-size: 0.88rem; color: #555; margin-left: 5px;">
+            <span id="compress-status-text" style="font-size: 0.88rem; color: var(--text-muted); margin-left: 5px;">
               👈 Click Compress to generate animated tree
             </span>
           </div>
@@ -584,7 +657,7 @@
                 <td id="sz-sf">-- bits</td>
                 <td>Top-down Heuristic</td>
               </tr>
-              <tr style="background: #E8F5E9;">
+              <tr style="background: rgba(16, 185, 129, 0.15);">
                 <td><strong>Huffman Optimal Tree</strong></td>
                 <td id="sz-huff-len" style="font-weight: bold; color: var(--green);">-- bits/sym</td>
                 <td id="sz-huff" style="font-weight: bold; color: var(--green);">-- bits</td>
@@ -612,10 +685,10 @@
         </div>
 
         <!-- Initial Placeholder: Shown until Compress is clicked -->
-        <div id="tree-placeholder" style="text-align: center; padding: 75px 20px; background: #FAFBFD; border: 2px dashed #DDE2E5; border-radius: 8px;">
+        <div id="tree-placeholder" style="text-align: center; padding: 75px 20px; background: var(--card-sub); border: 2px dashed var(--border); border-radius: 8px;">
           <div style="font-size: 3.5rem; margin-bottom: 12px; animation: pulseGlowBtn 2s infinite;">🌳</div>
           <h3 style="color: var(--navy); margin-bottom: 8px; font-size: 1.3rem;">Rooted Binary Prefix Code Tree</h3>
-          <p id="placeholder-desc" style="font-size: 0.95rem; color: #555; max-width: 540px; margin: 0 auto 20px auto; line-height: 1.6;">
+          <p id="placeholder-desc" style="font-size: 0.95rem; color: var(--text-muted); max-width: 540px; margin: 0 auto 20px auto; line-height: 1.6;">
             Data source loaded (<strong>8,769 characters</strong>). Click the <strong>"⚡ Compress & Generate Model"</strong> button below to assemble the animated tree and calculate metrics.
           </p>
           <button class="btn btn-green" style="font-size: 1rem; padding: 12px 26px;" onclick="runCompression()">
@@ -639,15 +712,15 @@
             <div id="depth-slider-container" style="display: flex; align-items: center; gap: 8px;">
               <label style="font-weight: 600; font-size: 0.88rem; margin: 0;">Max Depth:</label>
               <input type="range" id="tree-depth-slider" min="3" max="14" value="5" style="width: 140px; margin: 0;" oninput="onDepthSliderChange(this.value)">
-              <span id="depth-slider-val" style="font-weight: bold; font-size: 0.88rem; min-width: 25px;">5</span>
+              <span id="depth-slider-val" style="font-weight: bold; font-size: 0.88rem; min-width: 25px; color: var(--navy);">5</span>
             </div>
 
-            <div style="font-size: 0.82rem; color: #555;">
-              <span style="display: inline-block; width: 12px; height: 12px; background: #1F4E78; border-radius: 50%; vertical-align: middle; margin-right: 4px;"></span> Blue Circle = Internal (Weight)
+            <div style="font-size: 0.82rem; color: var(--text-muted);">
+              <span style="display: inline-block; width: 12px; height: 12px; background: #1E3A8A; border: 1.5px solid #38BDF8; border-radius: 50%; vertical-align: middle; margin-right: 4px;"></span> Blue Circle = Internal (Weight)
               &nbsp;&bull;&nbsp;
-              <span style="display: inline-block; width: 12px; height: 12px; background: #2E7D32; border-radius: 2px; vertical-align: middle; margin-right: 4px;"></span> Green Square = Leaf (Char : Weight)
+              <span style="display: inline-block; width: 12px; height: 12px; background: #065F46; border: 1.5px solid #34D399; border-radius: 2px; vertical-align: middle; margin-right: 4px;"></span> Green Square = Leaf (Char : Weight)
               &nbsp;&bull;&nbsp;
-              <span style="color: #D32F2F; font-weight: bold;">0</span> / <span style="color: #D32F2F; font-weight: bold;">1</span> = Path Bits
+              <span style="color: #F87171; font-weight: bold;">0</span> / <span style="color: #F87171; font-weight: bold;">1</span> = Path Bits
             </div>
           </div>
 
@@ -668,7 +741,7 @@
           <span>🔄 Step-by-Step Min-Heap Priority Queue Merging Simulation</span>
           <span class="badge badge-pass" id="step-badge">Step 0 / 0</span>
         </div>
-        <p style="font-size: 0.95rem; color: #555; margin-bottom: 15px;">
+        <p style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 15px;">
           This interactive model demonstrates Huffman's greedy choice property: at each step, the two subtrees with the lowest frequency weights are extracted from the min-heap, merged under a new internal parent node with summed weight, and re-inserted.
         </p>
 
@@ -680,13 +753,13 @@
           <input type="range" id="step-slider" min="0" max="10" value="0" style="width: 250px;" oninput="onSliderMove(this.value)">
         </div>
 
-        <div style="background: #F4F6F9; border-left: 4px solid var(--navy); padding: 12px 18px; border-radius: 6px; margin: 15px 0;">
+        <div style="background: var(--card-sub); border-left: 4px solid var(--navy); padding: 12px 18px; border-radius: 6px; margin: 15px 0; border: 1px solid var(--border); border-left-width: 4px;">
           <h4 id="step-action-title" style="color: var(--navy); margin-bottom: 4px;">Initial State</h4>
-          <p id="step-action-desc" style="font-size: 0.9rem; color: #333;">Click "Compress & Generate Model" in Tab 1 to populate simulation.</p>
+          <p id="step-action-desc" style="font-size: 0.9rem; color: var(--text);">Click "Compress & Generate Model" in Tab 1 to populate simulation.</p>
         </div>
 
-        <h4 style="margin: 10px 0 6px 0; color: var(--blue);">Current Min-Priority Queue Array State:</h4>
-        <div id="queue-display" style="padding: 10px; background: white; border: 1px solid var(--border); border-radius: 6px; min-height: 50px;"></div>
+        <h4 style="margin: 10px 0 6px 0; color: var(--navy);">Current Min-Priority Queue Array State:</h4>
+        <div id="queue-display" style="padding: 10px; background: var(--input-bg); border: 1px solid var(--border); border-radius: 6px; min-height: 50px;"></div>
       </div>
     </div>
 
@@ -697,7 +770,7 @@
           <span>⚡ Live Bit-by-Bit Tree-Walk Decoder Tracer</span>
           <span class="badge badge-pass">Instantaneous Prefix Decoding</span>
         </div>
-        <p style="font-size: 0.95rem; color: #555; margin-bottom: 12px;">
+        <p style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 12px;">
           Watch how prefix codes are decoded without delimiters. Each bit in the serialized bitstream navigates the tree: 
           <strong>'0' = Branch Left</strong>, <strong>'1' = Branch Right</strong>. When a leaf node is encountered, the character is emitted and pointer resets to the root!
         </p>
@@ -708,7 +781,7 @@
           <button class="btn btn-green" onclick="setupBitTracer()">Initialize Tracer</button>
         </div>
 
-        <div style="background: #FAFAFA; border: 1px solid var(--border); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+        <div style="background: var(--card-sub); border: 1px solid var(--border); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
           <h4 style="color: var(--navy); margin-bottom: 6px;">Encoded Binary Bitstream:</h4>
           <div id="trace-bits" style="word-break: break-all; margin-bottom: 10px;"></div>
           
@@ -726,7 +799,7 @@
           </div>
           <div class="card" style="margin-bottom: 0;">
             <h4 style="color: var(--navy); margin-bottom: 8px;">Active Tree Path Navigation:</h4>
-            <div id="trace-path-desc" style="font-size: 0.95rem; color: #333;">Click "Step 1 Bit" to watch navigation.</div>
+            <div id="trace-path-desc" style="font-size: 0.95rem; color: var(--text);">Click "Step 1 Bit" to watch navigation.</div>
           </div>
         </div>
       </div>
@@ -739,14 +812,14 @@
           <span>⛓️ Blockchain EVM Calldata Gas & P2P Network Propagation Simulator</span>
           <span class="badge badge-eth">CSE - BLOCKCHAIN TECHNOLOGY</span>
         </div>
-        <p style="font-size: 0.92rem; color: #555; margin-bottom: 15px;">
+        <p style="font-size: 0.92rem; color: var(--text-muted); margin-bottom: 15px;">
           In Layer-1 and Layer-2 rollups (e.g. Arbitrum, Optimism, zkSync), transaction batches are committed to Ethereum as calldata.
           Under <strong>EIP-2028</strong>, every non-zero byte costs <strong>16 gas</strong> and every zero byte costs <strong>4 gas</strong>.
           Huffman lossless compression drastically shrinks payload footprint, lowering gas costs and mitigating P2P block propagation latency (orphan/uncle rates).
         </p>
 
         <!-- Interactive Sliders -->
-        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; background: #F8F9FA; padding: 14px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 18px;">
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; background: var(--card-sub); padding: 14px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 18px;">
           <div>
             <label style="font-weight: 600; font-size: 0.85rem;">Gas Price (Gwei): <span id="val-gas-price" style="color: var(--navy); font-weight: bold;">25</span></label>
             <input type="range" id="slider-gas-price" min="5" max="150" value="25" oninput="updateBlockchainSimulation()">
@@ -773,12 +846,12 @@
             <div class="metric-val" id="bc-usd-saved">--</div>
             <div class="metric-sub" id="bc-eth-saved">In Ethereum L1 Gas</div>
           </div>
-          <div class="metric-box" style="border-left-color: #E65100;">
+          <div class="metric-box" style="border-left-color: #F59E0B;">
             <div class="metric-label">Annual L2 Rollup Savings</div>
             <div class="metric-val" id="bc-annual-saved">--</div>
             <div class="metric-sub">Assuming 100,000 Batches/Yr</div>
           </div>
-          <div class="metric-box" style="border-left-color: #512DA8;">
+          <div class="metric-box" style="border-left-color: #A855F7;">
             <div class="metric-label">P2P Latency Reduction</div>
             <div class="metric-val" id="bc-latency-reduction">--</div>
             <div class="metric-sub">Decker & Wattenhofer Model</div>
@@ -786,7 +859,7 @@
         </div>
 
         <!-- Calldata Breakdown Table -->
-        <h4 style="color: var(--navy); margin: 20px 0 8px 0;">Ethereum EIP-2028 Calldata Gas Analysis Table</h4>
+        <h4 style="color: var(--navy); margin: 20px 0 8px 0;">Ethereum EIP-2028 Calldata Gas Cost Breakdown</h4>
         <table>
           <thead>
             <tr>
@@ -805,11 +878,11 @@
               <td id="tbl-raw-bytes">8,769</td>
               <td id="tbl-raw-nonzero">8,769</td>
               <td>0</td>
-              <td id="tbl-raw-gas" style="color: #C62828; font-weight: bold;">140,304 gas</td>
+              <td id="tbl-raw-gas" style="color: #F87171; font-weight: bold;">140,304 gas</td>
               <td id="tbl-raw-eth">0.00351 ETH</td>
               <td id="tbl-raw-usd">$10.52</td>
             </tr>
-            <tr style="background: #E8F5E9;">
+            <tr style="background: rgba(16, 185, 129, 0.12);">
               <td><strong>Huffman Compressed Payload</strong></td>
               <td id="tbl-comp-bytes" style="color: var(--green); font-weight: bold;">4,981</td>
               <td id="tbl-comp-nonzero">4,962</td>
@@ -818,7 +891,7 @@
               <td id="tbl-comp-eth" style="color: var(--green);">0.00199 ETH</td>
               <td id="tbl-comp-usd" style="color: var(--green); font-weight: bold;">$5.96</td>
             </tr>
-            <tr style="background: #FFF8E1; font-weight: bold;">
+            <tr style="background: rgba(245, 158, 11, 0.12); font-weight: bold;">
               <td><strong>Net Improvement / Savings</strong></td>
               <td id="tbl-diff-bytes">-3,788 B (-43.2%)</td>
               <td>-</td>
@@ -831,12 +904,12 @@
         </table>
 
         <!-- Cryptographic Consensus Hash Verification -->
-        <div style="background: #FAFBFD; border: 1px solid var(--border); border-left: 4px solid var(--green); padding: 14px 18px; border-radius: 6px; margin-top: 20px;">
+        <div style="background: var(--card-sub); border: 1px solid var(--border); border-left: 4px solid var(--green); padding: 14px 18px; border-radius: 6px; margin-top: 20px;">
           <h4 style="color: var(--navy); margin-bottom: 6px;">🔐 Cryptographic Integrity & Consensus Verification (SHA-256)</h4>
-          <p style="font-size: 0.88rem; color: #444; margin-bottom: 10px;">
+          <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 10px;">
             A compression scheme can only be trusted in decentralized ledgers if decoding guarantees 100% mathematical fidelity. Any 1-bit drift corrupts the block hash and triggers a consensus fork!
           </p>
-          <div style="font-family: monospace; font-size: 0.82rem; word-break: break-all; background: white; padding: 10px; border-radius: 6px; border: 1px solid var(--border); margin-bottom: 6px;">
+          <div style="font-family: monospace; font-size: 0.82rem; word-break: break-all; background: var(--input-bg); padding: 10px; border-radius: 6px; border: 1px solid var(--border); margin-bottom: 6px;">
             <div><strong>Original Payload SHA-256:</strong> <span id="sha-orig" style="color: var(--navy);">Click "Compress" to compute hash</span></div>
             <div><strong>Decoded Payload SHA-256:</strong> <span id="sha-deco" style="color: var(--green);">Click "Compress" to compute hash</span></div>
           </div>
@@ -854,13 +927,13 @@
           <span>⚔️ Direct Head-to-Head Race: Huffman (Bottom-Up) vs. Shannon-Fano (Top-Down)</span>
           <span class="badge badge-pass" id="race-winner-badge">🏆 Huffman Provably Optimal</span>
         </div>
-        <p style="font-size: 0.92rem; color: #555; margin-bottom: 15px;">
+        <p style="font-size: 0.92rem; color: var(--text-muted); margin-bottom: 15px;">
           While both algorithms construct prefix-free binary trees, <strong>Shannon-Fano is a top-down greedy heuristic</strong> that partitions frequencies into equal halves, which can lock the tree into suboptimal splits. 
           <strong>Huffman is bottom-up</strong>, proven mathematically by David Huffman in 1952 to achieve minimum expected length: \( L(C)_{Huffman} \le L(C)_{SF} \).
         </p>
 
         <!-- Live Encoding Race Simulation -->
-        <div style="background: #F4F7FA; border: 1px solid var(--border); padding: 16px; border-radius: 8px; margin-bottom: 20px;">
+        <div style="background: var(--card-sub); border: 1px solid var(--border); padding: 16px; border-radius: 8px; margin-bottom: 20px;">
           <h4 style="color: var(--navy); margin-bottom: 8px;">Interactive Bit Consumption Race</h4>
           <div style="display: flex; gap: 10px; margin-bottom: 14px;">
             <input type="text" id="race-test-input" value="BLOCKCHAIN AND GRAPH THEORY OPTIMIZATION" style="flex: 1; margin: 0;">
@@ -873,7 +946,7 @@
             <span id="race-huff-bits">0 bits</span>
           </div>
           <div class="race-track">
-            <div class="race-fill" id="race-huff-bar" style="background: linear-gradient(90deg, #43A047, #2E7D32);">0%</div>
+            <div class="race-fill" id="race-huff-bar" style="background: linear-gradient(90deg, #10B981, #059669);">0%</div>
           </div>
 
           <!-- Shannon-Fano Race Bar -->
@@ -882,7 +955,7 @@
             <span id="race-sf-bits">0 bits</span>
           </div>
           <div class="race-track">
-            <div class="race-fill" id="race-sf-bar" style="background: linear-gradient(90deg, #FB8C00, #E65100);">0%</div>
+            <div class="race-fill" id="race-sf-bar" style="background: linear-gradient(90deg, #F59E0B, #D97706);">0%</div>
           </div>
 
           <div id="race-outcome-desc" style="font-size: 0.88rem; font-weight: 600; color: var(--navy); margin-top: 8px;">
@@ -895,7 +968,7 @@
           <span>🔍 Symbol Divergence Table (Where Huffman Outperforms Shannon-Fano)</span>
           <span class="badge badge-pass" id="divergence-count-badge">Divergence Detected</span>
         </div>
-        <p style="font-size: 0.88rem; color: #555; margin-bottom: 10px;">
+        <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 10px;">
           Rows with green highlights denote symbols where Huffman assigned a <strong>shorter binary codeword</strong> than Shannon-Fano (\( l_{Huff} < l_{SF} \)), proving superiority in information density:
         </p>
 
@@ -928,7 +1001,7 @@
           <span>💻 Feed All Project Source Codes into the Compression Model</span>
           <span class="badge badge-pass">Modular Python Engine</span>
         </div>
-        <p style="font-size: 0.95rem; color: #555; margin-bottom: 15px;">
+        <p style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 15px;">
           Select any of the core project Python files below. You can inspect its full implementation and click <strong>"⚡ Feed This Code into Compression Engine"</strong> to analyze its code entropy, prefix tree structure, and compression efficiency!
         </p>
 
@@ -996,7 +1069,7 @@
               <td>1.81 : 1</td>
               <td>44.87%</td>
             </tr>
-            <tr style="background: #E8F5E9;">
+            <tr style="background: rgba(16, 185, 129, 0.12);">
               <td><strong>Genomic DNA (Dataset C)</strong></td>
               <td>1,031</td>
               <td>29</td>
@@ -1026,6 +1099,26 @@
   </div>
 
   <script>
+    // Theme Switcher Logic
+    let isDark = true;
+    function toggleTheme() {
+      isDark = !isDark;
+      if (isDark) {
+        document.body.classList.remove('light-theme');
+        document.getElementById('theme-toggle-btn').innerHTML = '🌙 Dark Mode';
+        document.getElementById('theme-toggle-btn').style.color = '#F0AD4E';
+        document.getElementById('theme-toggle-btn').style.borderColor = '#F0AD4E';
+      } else {
+        document.body.classList.add('light-theme');
+        document.getElementById('theme-toggle-btn').innerHTML = '☀️ Light Mode';
+        document.getElementById('theme-toggle-btn').style.color = '#102C57';
+        document.getElementById('theme-toggle-btn').style.borderColor = '#102C57';
+      }
+      if (currentTreeRoot) {
+        renderTreeSVG(currentTreeRoot, false);
+      }
+    }
+
     // Tab switching
     function switchTab(tabId) {
       document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -1288,7 +1381,7 @@
       // Cryptographic SHA-256 Hashes
       const shaOrig = await computeSHA256(text);
       document.getElementById('sha-orig').innerText = shaOrig;
-      document.getElementById('sha-deco').innerText = shaOrig; // lossless mathematical certainty
+      document.getElementById('sha-deco').innerText = shaOrig;
       document.getElementById('sha-status').innerText = "✅ Lossless Cryptographic Idempotency: Verified D(E(M)) == M (SHA-256 Bit-for-Bit Identical)";
 
       // 6. Update Feature 4: Algorithm Divergence Table
@@ -1322,15 +1415,12 @@
       document.getElementById('val-p2p-nodes').innerText = p2pNodes.toLocaleString();
 
       const rawBytes = text.length;
-      // Calculate compressed bytes
       let compBits = 0;
       for (let ch of text) {
         compBits += (currentCodes[ch] || "").length;
       }
       const compBytes = Math.ceil(compBits / 8) || Math.round(rawBytes * 0.56);
 
-      // EIP-2028: 16 gas non-zero, 4 gas zero
-      // In ASCII text, ~100% are non-zero. In packed binary, ~1/256 are zero
       const rawGas = rawBytes * 16;
       const compZeroBytes = Math.round(compBytes / 256);
       const compNonZeroBytes = compBytes - compZeroBytes;
@@ -1342,11 +1432,8 @@
       const ethSavedPerTx = (gasSaved * gasPriceGwei * 1e-9);
       const usdSavedPerTx = (ethSavedPerTx * ethPriceUSD);
       const annualRollupSaved = (usdSavedPerTx * 100000);
-
-      // Latency reduction (Decker & Wattenhofer Model)
       const latencyReductionPct = gasSavedPct;
 
-      // Update UI Cards
       document.getElementById('bc-gas-saved').innerText = gasSaved.toLocaleString() + " Gas";
       document.getElementById('bc-gas-saved-pct').innerText = gasSavedPct + "% Calldata Gas Reduction";
       document.getElementById('bc-usd-saved').innerText = "$" + usdSavedPerTx.toFixed(2) + " USD";
@@ -1354,7 +1441,6 @@
       document.getElementById('bc-annual-saved').innerText = "$" + Math.round(annualRollupSaved).toLocaleString() + " / Year";
       document.getElementById('bc-latency-reduction').innerText = "-" + latencyReductionPct + "% Latency";
 
-      // Update Breakdown Table
       document.getElementById('tbl-raw-bytes').innerText = rawBytes.toLocaleString() + " B";
       document.getElementById('tbl-raw-nonzero').innerText = rawBytes.toLocaleString();
       document.getElementById('tbl-raw-gas').innerText = rawGas.toLocaleString() + " gas";
@@ -1392,10 +1478,10 @@
         let rowStyle = "";
         if (hCode.length < sfCode.length) {
           divergenceCount++;
-          rowStyle = "background: #E8F5E9; font-weight: bold;";
+          rowStyle = "background: rgba(16, 185, 129, 0.18); font-weight: bold;";
           advStatus = "<span class='badge badge-pass'>🏆 Huffman Shorter (+" + (sfCode.length - hCode.length) + "b)</span>";
         } else if (hCode.length === sfCode.length) {
-          advStatus = "<span style='color: #666;'>Optimal Match</span>";
+          advStatus = "<span style='color: var(--text-muted);'>Optimal Match</span>";
         } else {
           advStatus = "<span>Match</span>";
         }
@@ -1500,7 +1586,7 @@
       }
     }
 
-    // Zero-Overlap In-Order SVG Tree Renderer with Level-by-Level Animated Reveal
+    // Zero-Overlap In-Order SVG Tree Renderer (Theme-Aware)
     function renderTreeSVG(root, animate = true) {
       const svg = document.getElementById('tree-svg');
       const viewport = document.getElementById('tree-viewport');
@@ -1599,6 +1685,17 @@
       packetGroup.setAttribute("id", "packet-layer");
       viewport.appendChild(packetGroup);
 
+      // Theme Colors
+      const isDarkTheme = !document.body.classList.contains('light-theme');
+      const edgeStroke = isDarkTheme ? "#475569" : "#7F8C8D";
+      const intFill = isDarkTheme ? "#1E3A8A" : "#1F4E78";
+      const intStroke = isDarkTheme ? "#38BDF8" : "#102C57";
+      const leafFill = isDarkTheme ? "#065F46" : "#2E7D32";
+      const leafStroke = isDarkTheme ? "#34D399" : "#1B5E20";
+      const pillFill = isDarkTheme ? "#0F172A" : "#FFFFFF";
+      const pillStroke = isDarkTheme ? "#EF4444" : "#D32F2F";
+      const pillText = isDarkTheme ? "#F87171" : "#D32F2F";
+
       function drawEdges(node) {
         if (!node) return;
         if (node.left && node.left._x !== undefined) {
@@ -1646,10 +1743,10 @@
           rect.setAttribute("width", 52);
           rect.setAttribute("height", 36);
           rect.setAttribute("rx", 6);
-          rect.setAttribute("fill", "#2E7D32");
-          rect.setAttribute("stroke", "#1B5E20");
-          rect.setAttribute("stroke-width", "2");
-          rect.style.filter = "drop-shadow(0 2px 4px rgba(0,0,0,0.18))";
+          rect.setAttribute("fill", leafFill);
+          rect.setAttribute("stroke", leafStroke);
+          rect.setAttribute("stroke-width", "2.2");
+          rect.style.filter = isDarkTheme ? "drop-shadow(0 0 10px rgba(52, 211, 153, 0.4))" : "drop-shadow(0 2px 4px rgba(0,0,0,0.18))";
 
           let title = document.createElementNS("http://www.w3.org/2000/svg", "title");
           title.textContent = "Leaf Node: '" + node.char + "' (ASCII " + (node.char ? node.char.charCodeAt(0) : '?') + ")\nWeight: " + node.freq + "\nPrefix Code: " + (currentCodes[node.char] || '') + "\n👉 Click to animate bitstream path!";
@@ -1660,7 +1757,7 @@
           text.setAttribute("x", node._x);
           text.setAttribute("y", node._y + 4);
           text.setAttribute("text-anchor", "middle");
-          text.setAttribute("fill", "white");
+          text.setAttribute("fill", "#FFFFFF");
           text.setAttribute("font-size", "11px");
           text.setAttribute("font-family", "Consolas, monospace");
           text.setAttribute("font-weight", "bold");
@@ -1673,10 +1770,10 @@
           circle.setAttribute("cx", node._x);
           circle.setAttribute("cy", node._y);
           circle.setAttribute("r", 20);
-          circle.setAttribute("fill", "#1F4E78");
-          circle.setAttribute("stroke", "#102C57");
-          circle.setAttribute("stroke-width", "2.2");
-          circle.style.filter = "drop-shadow(0 2px 4px rgba(0,0,0,0.18))";
+          circle.setAttribute("fill", intFill);
+          circle.setAttribute("stroke", intStroke);
+          circle.setAttribute("stroke-width", "2.4");
+          circle.style.filter = isDarkTheme ? "drop-shadow(0 0 10px rgba(56, 189, 248, 0.45))" : "drop-shadow(0 2px 4px rgba(0,0,0,0.18))";
 
           let title = document.createElementNS("http://www.w3.org/2000/svg", "title");
           title.textContent = "Internal Vertex (Weight: " + node.freq + ")" + (node._isTruncated ? "\n[Subtree continues below - increase Max Depth]" : "") + "\n👉 Click to trace path from root!";
@@ -1687,7 +1784,7 @@
           text.setAttribute("x", node._x);
           text.setAttribute("y", node._y + 4);
           text.setAttribute("text-anchor", "middle");
-          text.setAttribute("fill", "white");
+          text.setAttribute("fill", "#FFFFFF");
           text.setAttribute("font-size", "10px");
           text.setAttribute("font-weight", "bold");
           text.setAttribute("font-family", "sans-serif");
@@ -1701,14 +1798,14 @@
             pill.setAttribute("width", 36);
             pill.setAttribute("height", 14);
             pill.setAttribute("rx", 7);
-            pill.setAttribute("fill", "#E6550D");
+            pill.setAttribute("fill", "#D97706");
             g.appendChild(pill);
 
             let pillText = document.createElementNS("http://www.w3.org/2000/svg", "text");
             pillText.setAttribute("x", node._x);
             pillText.setAttribute("y", node._y + 32);
             pillText.setAttribute("text-anchor", "middle");
-            pillText.setAttribute("fill", "white");
+            pillText.setAttribute("fill", "#FEF3C7");
             pillText.setAttribute("font-size", "8.5px");
             pillText.setAttribute("font-weight", "bold");
             pillText.textContent = "+sub";
@@ -1739,8 +1836,8 @@
         line.setAttribute("x2", x2);
         line.setAttribute("y2", y2);
         line.setAttribute("id", edgeId);
-        line.setAttribute("stroke", "#7F8C8D");
-        line.setAttribute("stroke-width", "1.7");
+        line.setAttribute("stroke", edgeStroke);
+        line.setAttribute("stroke-width", "1.8");
         line.setAttribute("class", "edge-path" + (animate ? " anim-edge" : ""));
 
         if (animate) {
@@ -1766,8 +1863,8 @@
         bg.setAttribute("width", 13);
         bg.setAttribute("height", 13);
         bg.setAttribute("rx", 3);
-        bg.setAttribute("fill", "#FFFFFF");
-        bg.setAttribute("stroke", "#D32F2F");
+        bg.setAttribute("fill", pillFill);
+        bg.setAttribute("stroke", pillStroke);
         bg.setAttribute("stroke-width", "1");
         labelG.appendChild(bg);
 
@@ -1775,7 +1872,7 @@
         text.setAttribute("x", midX + (label === "0" ? -7.5 : 10.5));
         text.setAttribute("y", midY + 2);
         text.setAttribute("text-anchor", "middle");
-        text.setAttribute("fill", "#D32F2F");
+        text.setAttribute("fill", pillText);
         text.setAttribute("font-size", "10px");
         text.setAttribute("font-weight", "bold");
         text.textContent = label;
@@ -1858,10 +1955,10 @@
 
       let packet = document.createElementNS("http://www.w3.org/2000/svg", "circle");
       packet.setAttribute("r", "7");
-      packet.setAttribute("fill", "#00E5FF");
+      packet.setAttribute("fill", "#00FFFF");
       packet.setAttribute("stroke", "#FFFFFF");
       packet.setAttribute("stroke-width", "2");
-      packet.style.filter = "drop-shadow(0 0 10px #00E5FF)";
+      packet.style.filter = "drop-shadow(0 0 12px #00FFFF)";
       packetLayer.appendChild(packet);
 
       let step = 0;
@@ -1873,7 +1970,7 @@
           shockwave.setAttribute("cy", dest._y);
           shockwave.setAttribute("r", "20");
           shockwave.setAttribute("fill", "none");
-          shockwave.setAttribute("stroke", "#00E5FF");
+          shockwave.setAttribute("stroke", "#00FFFF");
           shockwave.setAttribute("stroke-width", "3");
           packetLayer.appendChild(shockwave);
 
@@ -2121,7 +2218,7 @@
       document.getElementById('code-display').textContent = SOURCE_CODES[filename] || "# Code not found";
       
       document.querySelectorAll('#tab-feeder .btn-outline').forEach(b => {
-        b.style.borderColor = 'var(--blue)';
+        b.style.borderColor = 'var(--border)';
         b.style.fontWeight = 'normal';
       });
       const activeBtn = document.getElementById('btn-' + filename);
